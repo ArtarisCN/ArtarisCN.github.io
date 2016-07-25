@@ -3,9 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
+# 博客名称
 title: Artaris's Blog
-subtitle:
-description:
+subtitle: 
+# 描述
+description: 一失足成千古风流人物
 author: Artaris
 language: zh-Hans
 timezone:
@@ -63,7 +65,28 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
+Plugins:
+- hexo-generator-feed
+- hexo-generator-sitemap
 theme: next
+
+#Duoshuo 
+duoshuo_shortname: artaris
+
+#Feed Atom
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+
+#Search
+search:
+  path: search.xml
+  field: post
+
+#sitemap
+sitemap:
+  path: sitemap.xml
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html

@@ -1,7 +1,10 @@
+---
 layout: post
 title: Hello World
 date: 2016-07-22 18:47:44
-tags:
+tags: [戏说]
+categories: 
+- MicroBlog
 ---
 `sudo apt-get install GirlFriend`
 正在读取软件包列表... 
