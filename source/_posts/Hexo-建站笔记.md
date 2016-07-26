@@ -4,20 +4,18 @@ date: 2016-07-25 13:38:30
 tags: [Hexo]
 categories:
 - Hexo
-- NexT
 ---
 ### 建站流程
 `//todo`
 
 ### 站点配置
 - Permalink
-- GitHub
 - 多说
-- GitHub 挂饰
+- GitHub
 `//todo`
 
 ### 主题配置
-- Next
+#### Next
 - 多说
 - 不蒜子
 - Avatar
@@ -25,7 +23,3 @@ categories:
 - Social
 - Sidebar
 `//todo`
-
-### 写文章
-- Atom
-- 七牛
