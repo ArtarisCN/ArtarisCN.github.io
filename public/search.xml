@@ -4,22 +4,91 @@
   
     
     <entry>
+      <title><![CDATA[MarkDown 语法学习笔记]]></title>
+      <url>http://yoursite.com/%E5%B8%B8%E8%AE%B0%E5%B8%B8%E6%96%B0/MarkDown/MarkDown-%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+      <content type="html"><![CDATA[<h5 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h5><h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"># 一级标题</div><div class="line">## 二级标题</div><div class="line">### 三级标题</div><div class="line">#### 四级标题</div><div class="line">##### 五级标题</div><div class="line">###### 六级标题</div></pre></td></tr></table></figure>
+<h5 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h5><ul>
+<li>选项1</li>
+<li>选项2</li>
+<li>选项3</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">- 选项1</div><div class="line">- 选项2</div><div class="line">- 选项3</div></pre></td></tr></table></figure>
+<ol>
+<li>选项1</li>
+<li>选项2</li>
+<li>选项3</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1. 选项1</div><div class="line">2. 选项2</div><div class="line">3. 选项3</div></pre></td></tr></table></figure>
+<ul>
+<li>[ ] 支持以 PDF 格式导出文稿</li>
+<li>[ ] 改进 Cmd 渲染算法，使用局部渲染技术提高渲染效率</li>
+<li>[x] 新增 Todo 列表功能</li>
+<li>[x] 修复 LaTex 公式渲染问题</li>
+<li>[x] 新增 LaTex 公式编号功能</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">- [ ] 支持以 PDF 格式导出文稿</div><div class="line">- [ ] 改进 Cmd 渲染算法，使用局部渲染技术提高渲染效率</div><div class="line">- [x] 新增 Todo 列表功能</div><div class="line">- [x] 修复 LaTex 公式渲染问题</div><div class="line">- [x] 新增 LaTex 公式编号功能</div></pre></td></tr></table></figure>
+<h5 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h5><p><a href="http://artaris.cn" target="_blank" rel="external">Aratis.CN</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[Aratis.CN](http://artaris.cn)</div></pre></td></tr></table></figure>
+<h5 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h5><p><img src="http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">![示例图片](http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg)</div></pre></td></tr></table></figure>
+<h5 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h5><blockquote>
+<p>一失足成千古风流人物。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&gt; 一失足成千古风流人物。</div></pre></td></tr></table></figure>
+<h5 id="斜体和粗体"><a href="#斜体和粗体" class="headerlink" title="斜体和粗体"></a>斜体和粗体</h5><p><em>直到相思了无益</em>，<strong>未妨惆怅是轻狂</strong>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">*直到相思了无益*，**未妨惆怅是轻狂**。</div></pre></td></tr></table></figure></p>
+<h5 id="表格"><a href="#表格" class="headerlink" title="表格"></a>表格</h5><table>
+<thead>
+<tr>
+<th style="text-align:left">Tables</th>
+<th style="text-align:center">Row  1 is</th>
+<th style="text-align:right">Row  2 is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">col 3 is</td>
+<td style="text-align:center">A</td>
+<td style="text-align:right">D</td>
+</tr>
+<tr>
+<td style="text-align:left">col 2 is</td>
+<td style="text-align:center">B</td>
+<td style="text-align:right">E</td>
+</tr>
+<tr>
+<td style="text-align:left">col 1 is</td>
+<td style="text-align:center">C</td>
+<td style="text-align:right">F</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">| Tables        | Row  1 is     |  Row  2 is  |</div><div class="line">|:------------- |:-------------:| -----------:|</div><div class="line">| col 3 is      | A             | D           |</div><div class="line">| col 2 is      | B             | E           |</div><div class="line">| col 1 is      | C             | F           |</div></pre></td></tr></table></figure>
+]]></content>
+    </entry>
+    
+    <entry>
       <title><![CDATA[Hexo 建站笔记]]></title>
-      <url>http://yoursite.com/Hexo/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/</url>
+      <url>http://yoursite.com/Hexo/NexT/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/</url>
       <content type="html"><![CDATA[<h3 id="建站流程"><a href="#建站流程" class="headerlink" title="建站流程"></a>建站流程</h3><p><code>//todo</code></p>
 <h3 id="站点配置"><a href="#站点配置" class="headerlink" title="站点配置"></a>站点配置</h3><ul>
 <li>Permalink</li>
+<li>GitHub</li>
 <li>多说</li>
-<li>GitHub<br><code>//todo</code></li>
+<li>GitHub 挂饰</li>
 </ul>
-<h3 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h3><p>####Next</p>
-<ul>
+<p><code>//todo</code></p>
+<h3 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h3><h4 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h4><ul>
 <li>多说</li>
 <li>不蒜子</li>
 <li>Avatar</li>
 <li>Menu</li>
 <li>Social</li>
-<li>Sidebar<br><code>//todo</code></li>
+<li>Sidebar</li>
+</ul>
+<p><code>//todo</code></p>
+<h3 id="写文章"><a href="#写文章" class="headerlink" title="写文章"></a>写文章</h3><ul>
+<li>Atom</li>
+<li>七牛</li>
 </ul>
 ]]></content>
     </entry>
