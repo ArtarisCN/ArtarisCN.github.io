@@ -92,5 +92,5 @@ sitemap:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy: 
 	type: git
-	repository: git@github.com:ArtarisCN/ArtarisCN.github.io.git
+	repository: https://github.com/ArtarisCN/ArtarisCN.github.io.git
 	branch: master
