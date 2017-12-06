@@ -4,7 +4,6 @@ date: 2016-07-25 13:38:30
 tags: [Hexo]
 categories:
 - Hexo
-- NexT
 ---
 ### 建站流程
 `//todo`
