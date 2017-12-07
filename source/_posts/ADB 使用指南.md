@@ -1,12 +1,14 @@
 ---
-title: ADB-使用指南
+layout: post
+title: ADB 使用指南
 date: 2017-12-03 21:49:22
 tags: [Android]
 categories:
 - Android
 ---
-# ADB 使用笔记
 ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能
+
+<!-- more -->
 
 * [语法及连接](#语法及连接)
 	* [语法](#语法)
@@ -53,7 +55,7 @@ ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、
 	* [过滤日志输出](#过滤日志输出)
 		* [按级别过滤日志](#按级别过滤日志)
 		* [按 Tag 过滤日志](#按-Tag-过滤日志)
-* [ADB Shell 相关命令](#ADB-Shell-相关命令)
+* [ADB Shell 相关命令](#adb-shell-相关命令)
 	* [查看进程](#查看进程)
 
 ## 语法及连接
@@ -295,9 +297,11 @@ adb push ~/Desktop/demo.mp4 /sdcard/
 ```
 adb shell pm list packages [-f]/[-d]/[-e]/[-s]/[-3]/[-i]/[-u]/[--user USER_ID]/[FILTER]
 ```
+
 这些参数的含义如下所示
+
 | 参数       | 显示列表                   |
-|------------|----------------------------|
+|-------- |----------------------------|
 | 无         | 所有应用                   |
 | -f         | 显示应用关联的 apk 文件    |
 | -d         | 只显示 disabled 的应用     |
@@ -307,6 +311,7 @@ adb shell pm list packages [-f]/[-d]/[-e]/[-s]/[-3]/[-i]/[-u]/[--user USER_ID]/[
 | -i         | 显示应用的 installer       |
 | -u         | 包含已卸载应用             |
 | `<FILTER>` | 包名包含 `<FILTER>` 字符串 |
+
 下面是具体例子：
 #### 所用应用
 命令：
@@ -366,6 +371,7 @@ package:com.tencent.mobileqq
 adb install [-l]/[-r]/[-t]/[-s]/[-d]/[-g] <path_to_apk>
 ```
 这些参数的含义如下所示
+
 | 参数 | 含义                                                                              |
 |------|-----------------------------------------------------------------------------------|
 | -l   | 将应用安装到保护目录 /mnt/asec                                                    |
@@ -374,8 +380,10 @@ adb install [-l]/[-r]/[-t]/[-s]/[-d]/[-g] <path_to_apk>
 | -s   | 将应用安装到 sdcard                                                               |
 | -d   | 允许降级覆盖安装                                                                  |
 | -g   | 授予所有运行时权限                                                                |
+
 运行命令后见到输出状态为 `Success`代表安装成功。
 如果失败则会输出`Failure`及错误码，常见错误码含义如下：
+
 | 输出                                                                | 含义                                                                     | 解决办法                                                                       |
 |---------------------------------------------------------------------|--------------------------------------------------------------------------|--------------------------------------------------------------------------------|
 | INSTALL\_FAILED\_ALREADY\_EXISTS                                    | 应用已经存在，或卸载了但没卸载干净                                       | `adb install` 时使用 `-r` 参数，或者先 `adb uninstall <packagename>` 再安装    |
@@ -517,6 +525,7 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 ```
 其中`KeyEvent`类中定义了一系列常量，例如返回键的值为`KeyEvent.KEYCODE_BACK`，其常量值为4。按键模拟操作的值与此一致。
 下表为常用按键值：
+
 | keycode | 含义                           |
 |---------|--------------------------------|
 | 3       | HOME 键                        |
@@ -553,6 +562,7 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 
 ### 应用交互
 应用交互主要是通过`adb shell am <command>`来实现的,常用的`<command>`指令有以下几种：
+
 | command                           | 用途                            |
 |-----------------------------------|---------------------------------|
 | `start [options] <INTENT>`        | 启动 `<INTENT>` 指定的 Activity |
@@ -561,6 +571,7 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 | `force-stop <packagename>`        | 停止 `<packagename>` 相关的进程 |
 
 `<INTENT>` 即与 Android 程序时代码里的 Intent 相对应。
+
 | 参数             | 含义                                                                                        |
 |------------------|---------------------------------------------------------------------------------------------|
 | `-a <ACTION>`    | 指定 action，比如 `android.intent.action.VIEW`                                              |
@@ -568,10 +579,11 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 | `-n <COMPONENT>` | 指定完整 component 名，用于明确指定启动哪个 Activity，如 `cn.artaris.demo/.MainActivity` |
 
 `<INTENT>` 里还能带参数，与程序中的 Bundle 含义一致：
+
 | 参数                                                          | 含义                                   |
 |---------------------------------------------------------------|----------------------------------------|
 | `--esn <EXTRA_KEY>`                                           | null 值（只有 key 名）                 |
-| `-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE>`                    | string 值                              |
+| `-e/--es <EXTRA_KEY> <EXTRA_STRING_VALUE>`                    | string 值                              |
 | `--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE>`                      | boolean 值                             |
 | `--ei <EXTRA_KEY> <EXTRA_INT_VALUE>`                          | integer 值                             |
 | `--el <EXTRA_KEY> <EXTRA_LONG_VALUE>`                         | long 值                                |
@@ -628,6 +640,7 @@ adb shell am broadcast -a android.intent.action.BOOT_COMPLETED -n cn.artaris.dem
 ```
 只向`cn.artaris.demo/.BootReceiver`发送开机广播；
 以下是常用系统广播，可以模拟一些特殊场景：
+
 | action                                          | 触发时机                                      |
 |-------------------------------------------------|-----------------------------------------------|
 | android.net.conn.CONNECTIVITY_CHANGE            | 网络连接发生变化                              |
@@ -688,6 +701,7 @@ adb shell screenrecord /sdcard/screenrecord.mp4
 需要停止时按 <kbd>Ctrl+C</kbd>，默认录制时间和最长录制时间都是 180 秒。
 再使用`adb pull`导出到电脑。
 可以附加以下参数，确定录屏的参数：
+
 | 参数                | 含义                                            |
 |---------------------|-------------------------------------------------|
 | --size WIDTHxHEIGHT | 视频的尺寸，比如 `1280x720`，默认是屏幕分辨率。 |
@@ -767,7 +781,7 @@ adb logcat MainActivity:I DemoApp:D *:S
 
 表示输出 tag `MainActivity` 的 Info 以上级别日志，输出 tag `DemoApp` 的 Debug 以上级别日志，及其它 tag 的 Silent 级别日志（即屏蔽其它 tag 日志）。
 
-## ADB-Shell-相关命令
+## ADB Shell 相关命令
 ### 查看进程
 命令：
 ```
@@ -785,6 +799,7 @@ u0_a58    7963  5926  1561916 59568 ffffffff 00000000 S cn.artaris.demo
 shell     8750  217   10640  740   00000000 b6f28340 R ps
 ```
 各列含义如下：
+
 | 列名 | 含义      |
 |------|-----------|
 | USER | 所属用户  |

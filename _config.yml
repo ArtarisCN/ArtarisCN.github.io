@@ -5,7 +5,7 @@
 # Site
 # 博客名称
 title: Artaris's Blog
-subtitle: 
+subtitle:
 # 描述
 description: 一失足成千古风流人物
 author: Artaris
@@ -14,7 +14,7 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: http://artaris.cn
 root: /
 permalink: :category/:title/
 permalink_defaults:
@@ -70,7 +70,7 @@ Plugins:
 - hexo-generator-sitemap
 theme: next
 
-#Duoshuo 
+#Duoshuo
 duoshuo_shortname: artaris
 
 #Feed Atom
@@ -78,11 +78,17 @@ feed:
   type: atom
   path: atom.xml
   limit: 20
+  hub:
+  content:
+
+avatar: /images/avatar.png
 
 #Search
 search:
   path: search.xml
   field: post
+  format: html
+  limit: 10000
 
 #sitemap
 sitemap:
@@ -90,7 +96,7 @@ sitemap:
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
-deploy: 
+deploy:
 	type: git
 	repository: https://github.com/ArtarisCN/ArtarisCN.github.io.git
 	branch: master
