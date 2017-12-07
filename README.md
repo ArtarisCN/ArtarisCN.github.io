@@ -1,2 +1,2 @@
 # ArtarisCN.github.io
-[ArtarisCN's Blog]{http://artaris.cn}
+[ArtarisCN's Blog](http://artaris.cn)
