@@ -31,6 +31,10 @@
   <span class="post-meta-divider">|</span>
 {% endif %}
 
+<div>
+ <a href="http://www.miitbeian.gov.cn/">京 ICP 备 16006915 号</a>
+</div>
+
 {% if theme.footer.theme.enable %}
   <div class="theme-info">{#
   #}{{ __('footer.theme') }} &mdash; {#
