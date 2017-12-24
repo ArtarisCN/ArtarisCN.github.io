@@ -493,6 +493,12 @@ mFocusedActivity: ActivityRecord{8079d7e u0 com.cyanogenmod.trebuchet/com.androi
 ```
 
 其中的 `com.cyanogenmod.trebuchet/com.android.launcher3.Launcher` 就是当前处于前台的 Activity。
+
+当然，输入以下命令就可以查看所有 Activity 栈了
+```
+adb shell dumpsys activity activities
+```
+
 ### 查看正在运行的 Services
 命令：
 
@@ -559,6 +565,31 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 | 224     | 点亮屏幕                       |
 | 231     | 打开语音助手                   |
 | 276     | 如果没有 wakelock 则让系统休眠 |
+
+使用方法如下
+```
+adb shell input keyevent <KeyCode>
+```
+只要输入对应按键的按键号，则能实现对应功能。
+
+有两个操作需要特别说明一下：
+#### 模拟屏幕滑动：
+
+```
+adb shell input swipe 300 1000 300 500
+```
+参数 `300 1000 300 500` 分别表示`起始点x坐标 起始点y坐标 结束点x坐标 结束点y坐标`。
+
+#### 输入文本：
+在焦点处于某文本框时，可以通过 `input` 命令来输入文本。
+
+命令：
+
+```
+adb shell input text artaris
+```
+
+现在 `artaris` 出现在文本框了。
 
 ### 应用交互
 应用交互主要是通过`adb shell am <command>`来实现的,常用的`<command>`指令有以下几种：
