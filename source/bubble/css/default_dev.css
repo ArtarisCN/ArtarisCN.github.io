@@ -45,7 +45,7 @@ body {
 	font-size: 36px;
 }
 
-#loveu{
+#love-u {
 	padding: 5px;
 	font-size: 22px;
 	margin-top: 80px;
@@ -54,7 +54,7 @@ body {
 	display: none;
 }
 
-#loveu .signature{
+#love-u .signature{
 	margin-top: 10px;
 	font-size: 20px;
 	font-style: italic;
@@ -64,7 +64,7 @@ body {
 	display:none;
 }
 
-#code {
+#note {
 	float: left;
 	width: 440px;
 	height: 400px;
@@ -73,24 +73,24 @@ body {
 	font-size: 12px;
 }
 
-#code .string{
+#note .string{
 	color: #2a36ff;
 }
 
-#code .keyword{
+#note .keyword{
 	color: #7f0055;
 	font-weight:bold;
 }
 
-#code .placeholder{
+#note .placeholder{
 	margin-left:15px;
 }
 
-#code .space{
+#note .space{
 	margin-left:7px;
 }
 
-#code .comments{
+#note .comments{
 	color: #3f7f5f;
 }
 
