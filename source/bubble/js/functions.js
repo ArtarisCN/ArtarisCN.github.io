@@ -41,7 +41,7 @@ function getHeartPoint(c) {
 
 }
 function startHeartAnimation() {
-    var c = 50;
+    var c = 80;
     var d = 10;
     var b = [];
     var a = setInterval(function () {
@@ -83,7 +83,7 @@ function startHeartAnimation() {
                 if (b >= c.length) {
                     clearInterval(e)
                 }
-            }, 75)
+            },100)
         });
         return this
     }
@@ -110,7 +110,7 @@ function timeElapse(c) {
     $("#elapseClock").html(a)
 }
 function showMessages() {
-    $("#messages").fadeIn(5000, function () {
+    $("#messages").fadeIn(5555, function () {
         showLoveU()
     })
 }
@@ -119,5 +119,5 @@ function showMessages() {
     $("#note").css("margin-top", ($("#garden").height() - $("#note").height()) / 2)
 }*/
 function showLoveU() {
-    $("#love-u").fadeIn(3000)
+    $("#love-u").fadeIn(3333)
 }
