@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Artaris&#39;s Blog</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://artaris.cn/"/>
+  <updated>2018-02-26T15:13:53.255Z</updated>
+  <id>http://artaris.cn/</id>
+  
+  <author>
+    <name>Artaris</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Android  7.1 新特性——Shortcuts</title>
+    <link href="http://artaris.cn/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/"/>
+    <id>http://artaris.cn/Android/Android  7.1 新特性——Shortcuts/</id>
+    <published>2018-01-27T08:26:35.000Z</published>
+    <updated>2018-02-26T15:13:53.255Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h4 id=&quot;简介&quot;&gt;&lt;a href=&quot;#简介&quot; class=&quot;headerlink&quot; title=&quot;简介&quot;&gt;&lt;/a&gt;简介&lt;/h4&gt;&lt;p&gt;Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://img.artaris.cn/shortcuts/ShortcutsDemo.apk&quot;&gt;吐泡泡 Shortcuts Demo 下载&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Android" scheme="http://artaris.cn/categories/Android/"/>
+    
+    
+      <category term="Android" scheme="http://artaris.cn/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java 容器篇：容器总结</title>
+    <link href="http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/"/>
+    <id>http://artaris.cn/Java/Java 容器篇：容器总结/</id>
+    <published>2018-01-06T05:38:30.000Z</published>
+    <updated>2018-02-26T15:08:43.600Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Java 中使用的容器从大的方面上来粉可以分为两种：&lt;strong&gt;Collection&lt;/strong&gt;和&lt;strong&gt;Map&lt;/strong&gt;,区别也很简单，Collection存储的是单个值，Map存储的是键值对。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Collection 的划分分为 List，Set，Queue&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;List:常见接口有ArrayList，LinkedList，AbstractList， CopyOnWriteArrayList， Vector，Stack；&lt;/li&gt;
+&lt;li&gt;Set：常见接口有HashSet，TreeSet，LinkedHashSet，AbstractSet，CopyOnWriteArraySet，EnumSet；&lt;/li&gt;
+&lt;li&gt;Queue：常见接口有（阻塞队列）ArrayBlockQueue、PriorityBlockingQueue、LinkedBlockingQueue（双端队列）ArrayDeque、LinkedBlockingDeque、LinkedList&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Map 的常见接口有&lt;strong&gt;Hashmap&lt;/strong&gt;、Treemap、Hashtable、AbstractMap、ConcurrentHashMap、 LinkedHashMap、WeakHashMap&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+    
+    </summary>
+    
+      <category term="Java" scheme="http://artaris.cn/categories/Java/"/>
+    
+    
+      <category term="Android" scheme="http://artaris.cn/tags/Android/"/>
+    
+      <category term="Java" scheme="http://artaris.cn/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Activity 的加载模式</title>
+    <link href="http://artaris.cn/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/"/>
+    <id>http://artaris.cn/Android/Activity 的加载模式/</id>
+    <published>2017-12-16T06:26:35.000Z</published>
+    <updated>2018-02-26T15:08:43.563Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走&lt;code&gt;onCreate()&lt;/code&gt;方法，而是会走&lt;code&gt;onNewIntent()&lt;/code&gt;方法，在&lt;code&gt;onCreate()&lt;/code&gt;做过的操作也会一并走一遍，在此也对这种情况做一个说明。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Android" scheme="http://artaris.cn/categories/Android/"/>
+    
+    
+      <category term="Android" scheme="http://artaris.cn/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ADB 使用指南</title>
+    <link href="http://artaris.cn/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/"/>
+    <id>http://artaris.cn/Android/ADB 使用指南/</id>
+    <published>2017-12-03T13:49:22.000Z</published>
+    <updated>2018-02-26T15:08:43.559Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Android" scheme="http://artaris.cn/categories/Android/"/>
+    
+    
+      <category term="Android" scheme="http://artaris.cn/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MarkDown 语法学习笔记</title>
+    <link href="http://artaris.cn/MarkDown/MarkDown-%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    <id>http://artaris.cn/MarkDown/MarkDown-语法学习笔记/</id>
+    <published>2016-07-26T06:01:59.000Z</published>
+    <updated>2018-02-26T15:08:43.603Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h5 id=&quot;标题&quot;&gt;&lt;a href=&quot;#标题&quot; class=&quot;headerlink&quot; title=&quot;标题&quot;&gt;&lt;/a&gt;标题&lt;/h5&gt;
+    
+    </summary>
+    
+      <category term="MarkDown" scheme="http://artaris.cn/categories/MarkDown/"/>
+    
+    
+      <category term="MarkDown" scheme="http://artaris.cn/tags/MarkDown/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hexo 建站笔记</title>
+    <link href="http://artaris.cn/Hexo/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/"/>
+    <id>http://artaris.cn/Hexo/Hexo-建站笔记/</id>
+    <published>2016-07-25T05:38:30.000Z</published>
+    <updated>2018-02-26T15:08:43.593Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;建站流程&quot;&gt;&lt;a href=&quot;#建站流程&quot; class=&quot;headerlink&quot; title=&quot;建站流程&quot;&gt;&lt;/a&gt;建站流程&lt;/h3&gt;
+    
+    </summary>
+    
+      <category term="Hexo" scheme="http://artaris.cn/categories/Hexo/"/>
+    
+    
+      <category term="Hexo" scheme="http://artaris.cn/tags/Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://artaris.cn/MicroBlog/Hello%20World/"/>
+    <id>http://artaris.cn/MicroBlog/Hello World/</id>
+    <published>2016-07-22T10:47:44.000Z</published>
+    <updated>2018-02-26T15:08:43.576Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;code&gt;sudo apt-get install GirlFriend&lt;/code&gt;&lt;br&gt;正在读取软件包列表…&lt;br&gt;完成正在分析软件包的依赖关系树…&lt;br&gt;完成有一些软件包无法被安装。&lt;br&gt;下列的信息可能会对解决问题有所帮助：&lt;br&gt;下列的软件包有不能满足的依赖关
+    
+    </summary>
+    
+      <category term="MicroBlog" scheme="http://artaris.cn/categories/MicroBlog/"/>
+    
+    
+      <category term="戏说" scheme="http://artaris.cn/tags/%E6%88%8F%E8%AF%B4/"/>
+    
+  </entry>
+  
+</feed>
