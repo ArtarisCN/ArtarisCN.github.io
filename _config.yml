@@ -100,4 +100,5 @@ sitemap:
 deploy:
 	type: git
 	repository: https://github.com/ArtarisCN/ArtarisCN.github.io.git
+#	repository: git@github.com:ArtarisCN/ArtarisCN.github.io.git
 	branch: master
