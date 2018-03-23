@@ -1,11 +1,13 @@
 ---
-title: Activity 线程池的使用
-date: 2018-03-120 11:24:35
+title: Android 线程池的使用
+date: 2018-03-12 11:24:35
 tags: [Android]
 categories:
 - Android
 ---
+
 当我在 Android Studio 中使用如下方式
+
 ```
 new Thread(new Runnable() {
     @Override
@@ -14,8 +16,9 @@ new Thread(new Runnable() {
     }
 }).start();
 ```
+
 创造线程时，编译器会报告如下警告：
-![](http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p)
+![](http://img.artaris.cn/android_thread/thread_warning.png)
 带着这些疑问，让我去学习了一下直接创造线程有什么缺点，及线程池的优点和使用。
 
 <!-- more -->
@@ -32,7 +35,9 @@ new Thread(new Runnable() {
 Android中常用的线程池都是通过对 ThreadPoolExecutor 进行不同配置来实现的，那么我们今天就从这这个 ThreadPoolExecutor 来开始吧！
 
 #### ThreadPoolExecutor
+
 ThreadPoolExecutor 的构造方法中各个参数如下：
+
 ```
 public ThreadPoolExecutor(int corePoolSize,
                           int maximumPoolSize,
@@ -42,6 +47,7 @@ public ThreadPoolExecutor(int corePoolSize,
                           ThreadFactory threadFactory,
                           RejectedExecutionHandler handler)
 ```
+
 - `corePoolSize`:线程池中核心线程的数量;
 - `maximumPoolSize`:线程池中最大线程数量;
 - `keepAliveTime`:非核心线程的超时时长。当系统中非核心线程闲置时间超过keepAliveTime之后，则会被回收。如果ThreadPoolExecutor的allowCoreThreadTimeOut属性设置为true，则该参数也表示核心线程的超时时长;
@@ -76,15 +82,16 @@ public LinkedBlockingQueue(int capacity) {
     last = head = new Node<E>(null);
 }
 ```
+
 3. `PriorityBlockingQueue`:这个队列和LinkedBlockingQueue类似，不同的是PriorityBlockingQueue中的元素不是按照FIFO来排序的，而是按照元素的Comparator来决定存取顺序的（这个功能也反映了存入PriorityBlockingQueue中的数据必须实现了Comparator接口）。
 
 4. `SynchronousQueue`:这个是同步Queue，属于线程安全的BlockingQueue的一种，在SynchronousQueue中，生产者线程的插入操作必须要等待消费者线程的移除操作，Synchronous内部没有数据缓存空间，因此我们无法对SynchronousQueue进行读取或者遍历其中的数据，元素只有在你试图取走的时候才有可能存在。我们可以理解为生产者和消费者互相等待，等到对方之后然后再一起离开。
-
 
 - `threadFactory`:为线程池提供创建新线程的功能，这个我们一般使用默认即可
 
 - `handler`:拒绝策略。当线程无法执行新任务时（一般是由于线程池中的线程数量已经达到最大数或者线程池关闭导致的），默认情况下，当线程池无法处理新线程时，会抛出一个RejectedExecutionException。
 默认如下:
+
 ```
 public static class AbortPolicy implements RejectedExecutionHandler {
     /**
@@ -110,6 +117,7 @@ public static class AbortPolicy implements RejectedExecutionHandler {
 以上则是线程池的构造参数的解释。
 
 那么对于核心线程数和最大线程数，可以参考`AsyncTask`，如下所示：
+
 ```
 public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
@@ -146,6 +154,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
 #### ThreadPoolExecutor 的执行规则
 
 当任务提交到线程池中以后，则会按照一下规则进行处理：
+
 1. execute 一个线程之后，如果线程池中的线程数未达到核心线程数，则会立马启用一个核心线程去执行；
 
 2. execute 一个线程之后，如果线程池中的线程数已经达到核心线程数，且 workQueue 未满，则将新线程放入 workQueue 中等待执行；
@@ -184,7 +193,9 @@ public static ExecutorService newFixedThreadPool(int nThreads) {
 ```
 
 使用 SingleThreadExecutor 的一个最大好处就是可以避免我们去处理线程同步问题，其实如果我们把 FixedThreadPool 的参数传个1，效果就和SingleThreadExecutor一致了.
+
 - CachedThreadPool
+
 CachedTreadPool一个最大的优势是它可以根据程序的运行情况自动来调整线程池中的线程数量。
 
 ```
@@ -198,6 +209,7 @@ public static ExecutorService newCachedThreadPool() {
 我们看到， CachedThreadPool 中是没有核心线程的，但是它的最大线程数却为 Integer.MAX_VALUE ，另外，它是有线程超时机制的，超时时间为60秒，这里它使用了 SynchronousQueue 作为线程队列， SynchronousQueue 的特点上文已经说过了，这里不再赘述。那么我们提交到 CachedThreadPool 消息队列中的任务在执行的过程中有什么特点呢？由于最大线程数为无限大，所以每当我们添加一个新任务进来的时候，如果线程池中有空闲的线程，则由该空闲的线程执行新任务，如果没有空闲线程，则创建新线程来执行任务。根据 CachedThreadPool 的特点，我们可以在有大量任务请求的时候使用 CachedThreadPool ，因为当 CachedThreadPool 中没有新任务的时候，它里边所有的线程都会因为超时而被终止。
 
 - ScheduledThreadPool
+
 ScheduledThreadPool是一个具有定时定期执行任务功能的线程池，源码如下：
 
 ```
@@ -211,6 +223,7 @@ public ScheduledThreadPoolExecutor(int corePoolSize) {
 我们可以看到，它的核心线程数量是固定的（我们在构造的时候传入的），但是非核心线程是无穷大，当非核心线程闲置时，则会被立即回收。
 
 使用ScheduledThreadPool时，我们可以通过如下几个方法来添加任务：
+
 1. 延迟启动任务
 
 ```
@@ -224,9 +237,11 @@ public ScheduledFuture<?> schedule(Runnable command,long delay, TimeUnit unit);
 ```
 public ScheduledFuture<?> schedule(Runnable command,long delay, TimeUnit unit);
 ```
+
 延迟 initialDelay 秒后每个 period 秒执行一次任务。
 
 3. 延迟执行任务
+
 ```
 public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
                                                  long initialDelay,
