@@ -1,0 +1,1634 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+    
+    <entry>
+      <title><![CDATA[Android 线程池的使用]]></title>
+      <url>http://artaris.cn/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
+      <content type="html"><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        // do sth.</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br></pre></td></tr></table></figure>
+<p>创造线程时，编译器会报告如下警告：<br><img src="http://img.artaris.cn/android_thread/thread_warning.png" alt=""><br>带着这些疑问，让我去学习了一下直接创造线程有什么缺点，及线程池的优点和使用。</p>
+<a id="more"></a>
+<h3 id="使用new-Thread-创造显式线程的缺点"><a href="#使用new-Thread-创造显式线程的缺点" class="headerlink" title="使用new Thread()创造显式线程的缺点"></a>使用<code>new Thread()</code>创造显式线程的缺点</h3><ul>
+<li>在大量任务都在创建线程时，会频繁创建线程，而后这些线程使用完成之后又会被收回，导致频繁的GC，这种情况在多个列表 item 异步加载时极为常见;</li>
+<li>多个线程之间互相竞争，缺乏统一的管理，降低了程序的运行效率，甚至卡顿；</li>
+<li>当显式线程需要停止时，必须要保留每个线程的实例对象，在多个列表 item 异步加载时管理不便；</li>
+</ul>
+<h3 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h3><p>使用线程池可以给我们带来很多好处，首先通过线程池中线程的重用，减少创建和销毁线程的性能开销。其次，能控制线程池中的并发数，否则会因为大量的线程争夺 CPU 资源造成阻塞。最后，线程池能够对线程进行管理，比如使用 ScheduledThreadPool 来设置延迟N秒后执行任务，并且每隔 M 秒循环执行一次。</p>
+<p>Android中常用的线程池都是通过对 ThreadPoolExecutor 进行不同配置来实现的，那么我们今天就从这这个 ThreadPoolExecutor 来开始吧！</p>
+<h4 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h4><p>ThreadPoolExecutor 的构造方法中各个参数如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public ThreadPoolExecutor(int corePoolSize,</span><br><span class="line">                          int maximumPoolSize,</span><br><span class="line">                          long keepAliveTime,</span><br><span class="line">                          TimeUnit unit,</span><br><span class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                          ThreadFactory threadFactory,</span><br><span class="line">                          RejectedExecutionHandler handler)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>corePoolSize</code>:线程池中核心线程的数量;</li>
+<li><code>maximumPoolSize</code>:线程池中最大线程数量;</li>
+<li><code>keepAliveTime</code>:非核心线程的超时时长。当系统中非核心线程闲置时间超过keepAliveTime之后，则会被回收。如果ThreadPoolExecutor的allowCoreThreadTimeOut属性设置为true，则该参数也表示核心线程的超时时长;</li>
+<li><code>unit</code>:非核心线程的超时时长参数的单位。有纳秒、微秒、毫秒、秒、分、时、天等.eg.<code>TimeUnit.SECONDS</code>、<code>TimeUnit.MILLISECONDS</code>;</li>
+<li><code>workQueue</code>:线程池中的任务队列。该队列主要用来存储已经被提交但是尚未执行的任务。存储在这里的任务是由ThreadPoolExecutor的execute方法提交来的。workQueue 是一个 BlockingQueue 类型，BlockingQueue 是一个特殊的队列，当我们从 BlockingQueue 中取数据时，如果 BlockingQueue 是空的，则取数据的操作会进入到阻塞状态，当 BlockingQueue 中有了新数据时，这个取数据的操作又会被重新唤醒。同理，如果 BlockingQueue 中的数据已经满了，往 BlockingQueue 中存数据的操作又会进入阻塞状态，直到 BlockingQueue 中又有新的空间，存数据的操作又会被冲洗唤醒。<br>BlockingQueue 常用的实现类如下几种：</li>
+</ul>
+<ol>
+<li><p><code>ArrayBlockingQueue</code>:这个表示一个规定了大小的 BlockingQueue ， ArrayBlockingQueue 的构造函数接受一个 int 类型的数据，该数据表示 BlockingQueue 的大小，存储在 ArrayBlockingQueue 中的元素按照 FIFO （先进先出）的方式来进行存取。</p>
+</li>
+<li><p><code>LinkedBlockingQueue</code>:这个表示一个大小不确定的 BlockingQueue ，在 LinkedBlockingQueue 的构造方法中可以传一个int类型的数据，这样创建出来的 LinkedBlockingQueue 是有大小的，也可以不传，不传的话， LinkedBlockingQueue 的大小就为 Integer.MAX_VALUE，源码如下：</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with a capacity of</span><br><span class="line"> * &#123;@link Integer#MAX_VALUE&#125;.</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue() &#123;</span><br><span class="line">    this(Integer.MAX_VALUE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with the given (fixed) capacity.</span><br><span class="line"> *</span><br><span class="line"> * @param capacity the capacity of this queue</span><br><span class="line"> * @throws IllegalArgumentException if &#123;@code capacity&#125; is not greater</span><br><span class="line"> *         than zero</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue(int capacity) &#123;</span><br><span class="line">    if (capacity &lt;= 0) throw new IllegalArgumentException();</span><br><span class="line">    this.capacity = capacity;</span><br><span class="line">    last = head = new Node&lt;E&gt;(null);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><p><code>PriorityBlockingQueue</code>:这个队列和LinkedBlockingQueue类似，不同的是PriorityBlockingQueue中的元素不是按照FIFO来排序的，而是按照元素的Comparator来决定存取顺序的（这个功能也反映了存入PriorityBlockingQueue中的数据必须实现了Comparator接口）。</p>
+</li>
+<li><p><code>SynchronousQueue</code>:这个是同步Queue，属于线程安全的BlockingQueue的一种，在SynchronousQueue中，生产者线程的插入操作必须要等待消费者线程的移除操作，Synchronous内部没有数据缓存空间，因此我们无法对SynchronousQueue进行读取或者遍历其中的数据，元素只有在你试图取走的时候才有可能存在。我们可以理解为生产者和消费者互相等待，等到对方之后然后再一起离开。</p>
+</li>
+</ol>
+<ul>
+<li><p><code>threadFactory</code>:为线程池提供创建新线程的功能，这个我们一般使用默认即可</p>
+</li>
+<li><p><code>handler</code>:拒绝策略。当线程无法执行新任务时（一般是由于线程池中的线程数量已经达到最大数或者线程池关闭导致的），默认情况下，当线程池无法处理新线程时，会抛出一个RejectedExecutionException。<br>默认如下:</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public static class AbortPolicy implements RejectedExecutionHandler &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Creates an &#123;@code AbortPolicy&#125;.</span><br><span class="line">     */</span><br><span class="line">    public AbortPolicy() &#123; &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Always throws RejectedExecutionException.</span><br><span class="line">     *</span><br><span class="line">     * @param r the runnable task requested to be executed</span><br><span class="line">     * @param e the executor attempting to execute this task</span><br><span class="line">     * @throws RejectedExecutionException always</span><br><span class="line">     */</span><br><span class="line">    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) &#123;</span><br><span class="line">        throw new RejectedExecutionException(&quot;Task &quot; + r.toString() +</span><br><span class="line">                                             &quot; rejected from &quot; +</span><br><span class="line">                                             e.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上则是线程池的构造参数的解释。</p>
+<p>那么对于核心线程数和最大线程数，可以参考<code>AsyncTask</code>，如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">public abstract class AsyncTask&lt;Params, Progress, Result&gt; &#123;</span><br><span class="line">    private static final String LOG_TAG = &quot;AsyncTask&quot;;</span><br><span class="line"></span><br><span class="line">    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();</span><br><span class="line">    // We want at least 2 threads and at most 4 threads in the core pool,</span><br><span class="line">    // preferring to have 1 less than the CPU count to avoid saturating</span><br><span class="line">    // the CPU with background work</span><br><span class="line">    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));</span><br><span class="line">    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;</span><br><span class="line">    private static final int KEEP_ALIVE_SECONDS = 30;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private static final BlockingQueue&lt;Runnable&gt; sPoolWorkQueue =</span><br><span class="line">            new LinkedBlockingQueue&lt;Runnable&gt;(128);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * An &#123;@link Executor&#125; that can be used to execute tasks in parallel.</span><br><span class="line">     */</span><br><span class="line">    public static final Executor THREAD_POOL_EXECUTOR;</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(</span><br><span class="line">                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,</span><br><span class="line">                sPoolWorkQueue, sThreadFactory);</span><br><span class="line">        threadPoolExecutor.allowCoreThreadTimeOut(true);</span><br><span class="line">        THREAD_POOL_EXECUTOR = threadPoolExecutor;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>核心线程数为手机 CPU 数 +1（ CPU 数量获取方式<code>Runtime.getRuntime().availableProcessors()</code>），最大线程数为手机 CPU 数 × 2 + 1，线程队列的大小为 128</p>
+<h4 id="ThreadPoolExecutor-的执行规则"><a href="#ThreadPoolExecutor-的执行规则" class="headerlink" title="ThreadPoolExecutor 的执行规则"></a>ThreadPoolExecutor 的执行规则</h4><p>当任务提交到线程池中以后，则会按照一下规则进行处理：</p>
+<ol>
+<li><p>execute 一个线程之后，如果线程池中的线程数未达到核心线程数，则会立马启用一个核心线程去执行；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数，且 workQueue 未满，则将新线程放入 workQueue 中等待执行；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数但未超过非核心线程数，且workQueue已满，则开启一个非核心线程来执行任务；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经超过非核心线程数，则拒绝执行该任务；</p>
+</li>
+</ol>
+<h4 id="系统配置的-ThreadPoolExecutor"><a href="#系统配置的-ThreadPoolExecutor" class="headerlink" title="系统配置的 ThreadPoolExecutor"></a>系统配置的 ThreadPoolExecutor</h4><ul>
+<li>FixedThreadPool<br>FixedThreadPool是一个核心线程数量固定的线程池，创建方式如下：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);  </span><br><span class="line"></span><br><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到核心线程数和最大线程数一样，说明在 FixedThreadPool 中没有非核心线程，所有的线程都是核心线程，且线程的超时时间为0，说明核心线程即使在没有任务可执行的时候也不会被销毁（这样可让 FixedThreadPool 更快速的响应请求），最后的线程队列是一个 LinkedBlockingQueue ，但是 LinkedBlockingQueue 却没有参数，这说明线程队列的大小为 Integer.MAX_VALUE（2的31次方减1），OK，看完参数，我们大概也就知道了 FixedThreadPool 的工作特点了，当所有的核心线程都在执行任务的时候，新的任务只能进入线程队列中进行等待，直到有线程被空闲出来.</p>
+<ul>
+<li>SingleThreadExecutor</li>
+</ul>
+<p>SingleThreadExecutor 和 FixedThreadPool 很像，不同的就是 SingleThreadExecutor 的核心线程数只有 1。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用 SingleThreadExecutor 的一个最大好处就是可以避免我们去处理线程同步问题，其实如果我们把 FixedThreadPool 的参数传个1，效果就和SingleThreadExecutor一致了.</p>
+<ul>
+<li>CachedThreadPool</li>
+</ul>
+<p>CachedTreadPool一个最大的优势是它可以根据程序的运行情况自动来调整线程池中的线程数量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static ExecutorService newCachedThreadPool() &#123;</span><br><span class="line">    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,</span><br><span class="line">                                  60L, TimeUnit.SECONDS,</span><br><span class="line">                                  new SynchronousQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到， CachedThreadPool 中是没有核心线程的，但是它的最大线程数却为 Integer.MAX_VALUE ，另外，它是有线程超时机制的，超时时间为60秒，这里它使用了 SynchronousQueue 作为线程队列， SynchronousQueue 的特点上文已经说过了，这里不再赘述。那么我们提交到 CachedThreadPool 消息队列中的任务在执行的过程中有什么特点呢？由于最大线程数为无限大，所以每当我们添加一个新任务进来的时候，如果线程池中有空闲的线程，则由该空闲的线程执行新任务，如果没有空闲线程，则创建新线程来执行任务。根据 CachedThreadPool 的特点，我们可以在有大量任务请求的时候使用 CachedThreadPool ，因为当 CachedThreadPool 中没有新任务的时候，它里边所有的线程都会因为超时而被终止。</p>
+<ul>
+<li>ScheduledThreadPool</li>
+</ul>
+<p>ScheduledThreadPool是一个具有定时定期执行任务功能的线程池，源码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public ScheduledThreadPoolExecutor(int corePoolSize) &#123;</span><br><span class="line">    super(corePoolSize, Integer.MAX_VALUE,</span><br><span class="line">          DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,</span><br><span class="line">          new DelayedWorkQueue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以看到，它的核心线程数量是固定的（我们在构造的时候传入的），但是非核心线程是无穷大，当非核心线程闲置时，则会被立即回收。</p>
+<p>使用ScheduledThreadPool时，我们可以通过如下几个方法来添加任务：</p>
+<ol>
+<li>延迟启动任务</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>延迟定时执行循环任务</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
+<p>延迟 initialDelay 秒后每个 period 秒执行一次任务。</p>
+<ol start="3">
+<li>延迟执行任务</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command,</span><br><span class="line">                                                 long initialDelay,</span><br><span class="line">                                                 long delay,</span><br><span class="line">                                                 TimeUnit unit)</span><br></pre></td></tr></table></figure>
+<p>第一次延迟 initialDelay 秒，以后每次延迟 delay 秒执行一个任务。</p>
+<h4 id="ThreadPoolExecutor-其他常用功能"><a href="#ThreadPoolExecutor-其他常用功能" class="headerlink" title="ThreadPoolExecutor 其他常用功能"></a>ThreadPoolExecutor 其他常用功能</h4><ul>
+<li><code>shutDown()</code> 关闭线程池，不影响已经提交的任务;</li>
+<li><code>shutDownNow()</code> 关闭线程池，并尝试去终止正在执行的线程;</li>
+<li><code>allowCoreThreadTimeOut(boolean value)</code> 允许核心线程闲置超时时被回收</li>
+<li><code>submit()</code></li>
+<li>ThreadPoolExecutor 执行任务回调：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void beforeExecute(Thread t, Runnable r) &#123;</span><br><span class="line">    super.beforeExecute(t, r);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 开始执行任务！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void afterExecute(Runnable r, Throwable t) &#123;</span><br><span class="line">    super.afterExecute(r, t);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 任务执行结束！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void terminated() &#123;</span><br><span class="line">    super.terminated();</span><br><span class="line">    //当调用shutDown()或者shutDownNow()时会触发该方法  </span><br><span class="line">    Log.d(TAG, &quot;terminated: 线程池关闭！&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当线程池中的任务被执行的时候会回调此方法。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> Android </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Android  7.1 新特性——Shortcuts]]></title>
+      <url>http://artaris.cn/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
+      <content type="html"><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
+<p><a href="http://img.artaris.cn/shortcuts/ShortcutsDemo.apk" target="_blank" rel="noopener">吐泡泡 Shortcuts Demo 下载</a></p>
+<a id="more"></a>
+<p>如下图所示：</p>
+<p><img src="http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p" alt=""></p>
+<h4 id="分类及作用"><a href="#分类及作用" class="headerlink" title="分类及作用"></a>分类及作用</h4><p>Shortcuts 也可以通过静态和动态方式添加。静态的方式可以作为 APP 的一个快捷入口来使用，动态的方式可以作为可变换的选项来使用。</p>
+<ul>
+<li><p><strong>Static shortcuts</strong>：静态shortcuts是在资源文件中定义的，所以你只能通过升级你的app来更新静态shortcuts的相关信息。</p>
+</li>
+<li><p><strong>Dynamic shortcuts</strong>：动态shortcuts是通过ShortcutManager相关的API来实现运行时新增、修改、移除shortcuts的。</p>
+</li>
+</ul>
+<h4 id="静态-Shorcuts-Static-shortcuts"><a href="#静态-Shorcuts-Static-shortcuts" class="headerlink" title="静态 Shorcuts(Static shortcuts)"></a>静态 Shorcuts(Static shortcuts)</h4><p>静态 ShortcutsStatic Shortcuts通过在 Manifest 中声明添加。缺点是不可以修改，只能通过应用升级来添加新的静态 Shortcuts。添加主要分为两步：</p>
+<p>1 . AndroidManifest.xml 的 Main Launcher 对应的 Activity 内添加 <code>meta-data meta-data name</code> 为<code>android.app.shortcuts</code>，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.MainActivity&quot;&gt;</span><br><span class="line">	&lt;intent-filter&gt;</span><br><span class="line">		&lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br><span class="line">		&lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br><span class="line">	&lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">	&lt;meta-data</span><br><span class="line">		android:name=&quot;android.app.shortcuts&quot;</span><br><span class="line">		android:resource=&quot;@xml/shortcuts&quot;/&gt;   </span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
+<p>必须在启动界面对应的 Activity 定义 shortcuts ，<code>android:resource</code>指向了 shortcuts 的资源文件。</p>
+<ol start="2">
+<li>资源文件中定义具体的 shortcuts<br>res 目录下新建 xml 文件夹，并新建 shortcuts.xml 文件，内容如下：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;shortcuts xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    &lt;shortcut</span><br><span class="line">        android:shortcutId=&quot;settings&quot;</span><br><span class="line">        android:enabled=&quot;true&quot;</span><br><span class="line">        android:icon=&quot;@mipmap/ic_star_border_black_24dp&quot;</span><br><span class="line">        android:shortcutShortLabel=&quot;@string/settings_short_name&quot;</span><br><span class="line">        android:shortcutLongLabel=&quot;@string/settings_long_name&quot;</span><br><span class="line">        android:shortcutDisabledMessage=&quot;@string/settings_disable_msg&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;intent</span><br><span class="line">            android:action=&quot;android.intent.action.VIEW&quot;</span><br><span class="line">            android:targetPackage=&quot;cn.artaris.shortcutsdemo&quot;</span><br><span class="line">            android:targetClass=&quot;cn.artaris.shortcutsdemo.MainActivity&quot; /&gt;</span><br><span class="line">        &lt;categories android:name=&quot;android.shortcut.conversation&quot;/&gt;</span><br><span class="line">    &lt;/shortcut&gt;</span><br><span class="line">&lt;/shortcuts&gt;</span><br></pre></td></tr></table></figure>
+<p>以 <code>&lt;shortcuts&gt;</code>元素为根，可以包含多个 shortcut 元素，每个 shortcut 元素表示一个 shortcut。其中不同字段的含义为：</p>
+<ul>
+<li>shortcutId表示 shortcut 唯一标识符，相同的 shortcutId 会被覆盖。必须字段。</li>
+<li>shortcutShortLabel为将 shortcut 拖动到桌面时显示的名字，官方建议不超过 10 个字符，必须字段。</li>
+<li>shortcutLongLabel为 shortcut 列表中每个 shortcut 的名字，不宜过长，如果过长或未设置默认会显示 ShortLabel，官方建议不超过 25 个字符。可选字段。</li>
+<li>icon为 shortcut 的 icon，在列表展示和拖动到桌面时显示需要，可选字段。</li>
+<li>enabled表示 shortcut 是否可用，false 表示禁用。xml 中这个属性几乎没有被设置为 false 的实际场景，具体原因可见<strong>6.7 如何更好的删除(废弃)老的 Shortcut</strong>中介绍。</li>
+<li>shortcutDisabledMessage为已固定在桌面的 shortcut 被 Disabled 后点击时的 Toast 提示内容。可选字段。</li>
+<li>intent为点击 shortcut 时响应的 Intent，必须字段。这里可以添加多个 Intent，成为一个 Intent 栈，点击会启动最后一个 Intent，在这个 Intent 回退时会启动它前面一个 Intent，相当于自动将所有 Intent 添加到了堆栈。对于先跳转到某个页面，Back 键希望退回主页而不是结束 App 这类场景，多个 Intents 挺实用的。</li>
+</ul>
+<blockquote>
+<p><strong>intent可设置属性包括：</strong><br><code>android:action</code>、<code>android:data</code>、<code>android:mimeType</code>、<code>android:targetClass</code>、<code>android:targetPackage</code>。其中<code>android:action</code>为必须属性。</p>
+</blockquote>
+<h4 id="动态-Shorcuts-Dynamic-shortcuts"><a href="#动态-Shorcuts-Dynamic-shortcuts" class="headerlink" title="动态 Shorcuts(Dynamic shortcuts)"></a>动态 Shorcuts(Dynamic shortcuts)</h4><p>动态 ShortcutsDynamic Shortcuts 通过 ShortcutManager API 进行操作。可以动态添加、修改、删除。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N_MR1) &#123;</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 管理 shortcuts</span><br><span class="line">    */</span><br><span class="line">    mShortcutManager = getSystemService(ShortcutManager.class);</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 支持的最多 shortcuts 个数</span><br><span class="line">    */</span><br><span class="line">    mMaxShortcutCount = mShortcutManager.getMaxShortcutCountPerActivity();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    new AlertDialog.Builder(mContext)</span><br><span class="line">            .setTitle(getString(R.string.main_dialog_simple_title))</span><br><span class="line">            .setMessage(getString(R.string.main_dialog_simple_message))</span><br><span class="line">            .setNeutralButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void onClick(DialogInterface dialog, int which) &#123;</span><br><span class="line">                    finish();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            .show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建新的 shortcut 的方法为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Icon icon = Icon.createWithResource(mContext, R.mipmap.ic_favorite_black_24dp);   Intent intent = new Intent(mContext, ShowShortcutsActivity.class); intent.setAction(Intent.ACTION_VIEW); intent.putExtra(&quot;msg&quot;, singleChoiceItems[itemSelected]);</span><br><span class="line"></span><br><span class="line">ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, String.valueOf(itemSelected))</span><br><span class="line">        .setShortLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setLongLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setIcon(icon)</span><br><span class="line">        .setIntent(intent)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+<p>添加的方法有：</p>
+<ul>
+<li><code>setDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以替换并添加所有 shortcut 列表；</li>
+<li><code>addDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以添加新的 shortcut 到列表，超过最大个数会报异常；</li>
+<li><code>updateShortcuts(List&lt;ShortcutInfo&gt;)</code>可以更新一组 shortcuts；</li>
+<li><code>removeDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>和removeAllDynamicShortcuts() 可以删除部分或所有 shortcuts。</li>
+</ul>
+<p>ShortcutInfo 的属性与 xml 中定义字段含义一致，shortcutId shortcutShortLabel intent 是必须设置的字段，并且intent必须设置Action。</p>
+<h4 id="固定的-Shortcuts-Pinned-Shortcuts"><a href="#固定的-Shortcuts-Pinned-Shortcuts" class="headerlink" title="固定的 Shortcuts(Pinned Shortcuts)"></a>固定的 Shortcuts(Pinned Shortcuts)</h4><p>Pinned Shortcuts 是指将 Shortcut 固定到桌面的功能，如下图所示：<br><img src="http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p" alt=""><br>由于固定到了桌面，APP 不能再添加、修改、删除这些这些 Shortcut ，只能禁用这些 Shortcut 。即便 App 内删除了某个 Shorcut，对应的已固定到桌面的 Shortcuts 也不会被删除。</p>
+<p>可以通过：</p>
+<ol>
+<li><code>getPinnedShortcuts()</code>得到所有固定的 Shortcuts 的信息。</li>
+<li><code>disableShortcuts(List)</code>或<code>disableShortcuts(List, CharSequence)</code>禁用动态的 Shortcuts。</li>
+</ol>
+<p>对于静态的 Shortcuts 需要在资源文件中设置<code>android:enabled=&quot;false&quot;</code>进行禁用，不过静态 Shortcuts 可直接通过删除达到禁用的效果.</p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ul>
+<li>动态 Shortcuts 与静态 Shortcuts 区别</li>
+</ul>
+<ol>
+<li>静态 Shortcuts 只能通过升级应用修改，动态 Shortcuts 随时可以修改；</li>
+<li>静态 Shortcuts 的 Intent 无法设置 Flag，默认为<code>FLAG_ACTIVITY_NEW_TASK</code>和<code>FLAG_ACTIVITY_CLEAR_TASK Flag</code>，即若应用运行中会清除所有已存在的 Activity。动态 Shortcuts 的 Intent 可以设置 Flag；</li>
+<li>静态 Shortcuts 的rank系统默认根据声明顺序设置，动态 Shortcuts 的rank可以通过setRank(int rank)接口主动设置，rank 不能小于 0，值越大表示在 shortcut 列表展示时离 App Icon 越远。静态 Shortcuts 默认比动态 Shortcuts 离 App Icon 更近。</li>
+<li>静态 Shortcuts 删除可以直接删除，动态 Shortcuts 建议通过禁用删除；</li>
+</ol>
+]]></content>
+      
+        <categories>
+            
+            <category> Android </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Java 容器篇：容器总结]]></title>
+      <url>http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/</url>
+      <content type="html"><![CDATA[<p>Java 中使用的容器从大的方面上来粉可以分为两种：<strong>Collection</strong>和<strong>Map</strong>,区别也很简单，Collection存储的是单个值，Map存储的是键值对。</p>
+<ul>
+<li><p>Collection 的划分分为 List，Set，Queue</p>
+<ul>
+<li>List:常见接口有ArrayList，LinkedList，AbstractList， CopyOnWriteArrayList， Vector，Stack；</li>
+<li>Set：常见接口有HashSet，TreeSet，LinkedHashSet，AbstractSet，CopyOnWriteArraySet，EnumSet；</li>
+<li>Queue：常见接口有（阻塞队列）ArrayBlockQueue、PriorityBlockingQueue、LinkedBlockingQueue（双端队列）ArrayDeque、LinkedBlockingDeque、LinkedList</li>
+</ul>
+</li>
+<li><p>Map 的常见接口有<strong>Hashmap</strong>、Treemap、Hashtable、AbstractMap、ConcurrentHashMap、 LinkedHashMap、WeakHashMap</p>
+</li>
+</ul>
+<a id="more"></a>
+<h1 id="一、Collection接口"><a href="#一、Collection接口" class="headerlink" title="一、Collection接口"></a><strong>一、Collection接口</strong></h1><p>　　Collection接口是最基本的集合接口，它不提供直接的实现，Java SDK提供的类都是继承自Collection的“子接口”如List和Set。Collection所代表的是一种规则，它所包含的元素都必须遵循一条或者多条规则。如有些允许重复而有些则不能重复、有些必须要按照顺序插入而有些则是散列，有些支持排序但是有些则不支持。他包含了最基础的一些接口，如 <code>isEmpty()</code>,<code>add(Object o)</code>,<code>remove(Object o)</code>.<code>clear()</code>等<br>　　<strong>在Java中所有实现了Collection接口的类都必须提供两套标准的构造函数</strong>，一个是无参，用于创建一个空的Collection，一个是带有Collection参数的有参构造函数，用于创建一个新的Collection，这个新的Collection与传入进来的Collection具备相同的元素。</p>
+<h1 id="二、List接口"><a href="#二、List接口" class="headerlink" title="二、List接口"></a><strong>二、List接口</strong></h1><p>　　 List接口为Collection直接接口。List所代表的是有序的Collection，即它用某种特定的插入顺序来维护元素顺序。用户可以对列表中每个元素的插入位置进行精确地控制，同时可以根据元素的整数索引（在列表中的位置）访问元素，并搜索列表中的元素。实现List接口的集合主要有：ArrayList、LinkedList、Vector、Stack。</p>
+<h3 id="2-1、ArrayList"><a href="#2-1、ArrayList" class="headerlink" title="2.1、ArrayList"></a><strong>2.1、ArrayList</strong></h3><p>　　ArrayList是一个动态数组，也是我们最常用的集合。它允许任何符合规则的元素插入甚至包括null。每一个ArrayList都有一个初始容量（10），该容量代表了数组的大小。随着容器中的元素不断增加，容器的大小也会随着增加。在每次向容器中增加元素的同时都会进行容量检查，当快溢出时，就会进行扩容操作。所以如果我们明确所插入元素的多少，最好指定一个初始容量值，避免过多的进行扩容操作而浪费时间、效率。<br>　　size、isEmpty、get、set、iterator 和 listIterator 操作都以固定时间运行。add 操作以分摊的固定时间运行，也就是说，添加 n 个元素需要 O(n) 时间（由于要考虑到扩容，所以这不只是添加元素会带来分摊固定时间开销那样简单）。<br><strong>ArrayList擅长于随机访问</strong>。同时ArrayList是非同步的。</p>
+<h3 id="2-2、LinkedList"><a href="#2-2、LinkedList" class="headerlink" title="2.2、LinkedList"></a><strong>2.2、LinkedList</strong></h3><p>　　同样实现List接口的LinkedList与ArrayList不同，ArrayList是一个动态数组，而LinkedList是一个双向链表。所以它除了有ArrayList的基本操作方法外还额外提供了get，remove，insert方法在LinkedList的首部或尾部。<br>　　由于实现的方式不同，LinkedList不能随机访问，它所有的操作都是要按照双重链表的需要执行。在列表中索引的操作将从开头或结尾遍历列表（从靠近指定索引的一端）。这样做的好处就是可以通过较低的代价在List中进行插入和删除操作。</p>
+<p>　　与ArrayList一样，LinkedList也是非同步的。如果多个线程同时访问一个List，则必须自己实现访问同步。一种解决方法是在创建List时构造一个同步的List：</p>
+<blockquote>
+<p>List list = Collections.synchronizedList(new LinkedList(…));</p>
+</blockquote>
+<h3 id="2-3、Vector（已过时）"><a href="#2-3、Vector（已过时）" class="headerlink" title="2.3、Vector（已过时）"></a><strong>2.3、Vector（已过时）</strong></h3><p>　　与ArrayList相似，但是Vector是同步的。所以说Vector是线程安全的动态数组。它的操作与ArrayList几乎一样。</p>
+<h3 id="2-4、Stack（已过时）"><a href="#2-4、Stack（已过时）" class="headerlink" title="2.4、Stack（已过时）"></a><strong>2.4、Stack（已过时）</strong></h3><p>　　Stack继承自Vector，实现一个后进先出的堆栈。Stack提供5个额外的方法使得Vector得以被当作堆栈使用。基本的push和pop 方法，还有peek方法得到栈顶的元素，empty方法测试堆栈是否为空，search方法检测一个元素在堆栈中的位置。Stack刚创建后是空栈。<br>　　详细：<a href="http://www.cnblogs.com/chenpi/p/5258450.html" target="_blank" rel="noopener">Vector和Stack(已过时，不建议使用)</a></p>
+<h3 id="Vector和ArrayList的比较"><a href="#Vector和ArrayList的比较" class="headerlink" title="Vector和ArrayList的比较"></a><strong>Vector和ArrayList的比较</strong></h3><p>　　1，vector是线程同步的，所以它也是线程安全的，而arraylist是线程异步的，是不安全的。如果不考虑到线程的安全因素，一般用arraylist效率比较高。<br>　　2，如果集合中的元素的数目大于目前集合数组的长度时，vector增长率为目前数组长度的100%,而arraylist增长率为目前数组长度的50%.如过在集合中使用数据量比较大的数据，用vector有一定的优势。<br>　　3，如果查找一个指定位置的数据，vector和arraylist使用的时间是相同的，都是0(1),这个时候使用vector和arraylist都可以。而如果移动一个指定位置的数据花费的时间为0(n-i)n为总长度，这个时候就应该考虑到使用linklist,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。<br>　　ArrayList 和Vector是采用数组方式存储数据，此数组元素数大于实际存储的数据以便增加和插入元素，都允许直接序号索引元素，但是插入数据要设计到数组元素移动等内存操作，所以索引数据快插入数据慢，Vector由于使用了synchronized方法（线程安全）所以性能上比ArrayList要差，LinkedList使用双向链表实现存储，按序号索引数据需要进行向前或向后遍历，但是插入数据时只需要记录本项的前后项即可，所以插入数度较快！</p>
+<h3 id="Aarraylist和Linkedlist的比较"><a href="#Aarraylist和Linkedlist的比较" class="headerlink" title="Aarraylist和Linkedlist的比较"></a><strong>Aarraylist和Linkedlist的比较</strong></h3><p>　　1.ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。<br>　　2.对于随机访问get和set，ArrayList绝对优于LinkedList，因为LinkedList要移动指针。<br>　　3.对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。<br>　　这一点要看实际情况的。若只对单条数据插入或删除，ArrayList的速度反而优于LinkedList。但若是批量随机的插入删除数据，LinkedList的速度大大优于ArrayList. 因为ArrayList每插入一条数据，要移动插入点及之后的所有数据。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a><strong>分类</strong></h3><table>
+<thead>
+<tr>
+<th>类</th>
+<th style="text-align:center">是否线程安全</th>
+<th style="text-align:right">是否有序</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ArrayList</td>
+<td style="text-align:center">否</td>
+<td style="text-align:right">是</td>
+</tr>
+<tr>
+<td>LinkedList</td>
+<td style="text-align:center">否</td>
+<td style="text-align:right">是</td>
+</tr>
+<tr>
+<td>Vector</td>
+<td style="text-align:center">是</td>
+<td style="text-align:right">是</td>
+</tr>
+<tr>
+<td>Stack</td>
+<td style="text-align:center">是</td>
+<td style="text-align:right">是</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>可以通过Collections.synchronizedList包装成线程安全的List</strong></p>
+</blockquote>
+<h1 id="三、Set接口"><a href="#三、Set接口" class="headerlink" title="三、Set接口"></a><strong>三、Set接口</strong></h1><p>　　Set是一种不包括重复元素的Collection。它维持它自己的内部排序，所以随机访问没有任何意义。与List一样，它同样运行null的存在但是仅有一个。由于Set接口的特殊性，所有传入Set集合中的元素都必须不同，同时要注意任何可变对象，如果在对集合中元素进行操作时，导致e1.equals(e2)==true，则必定会产生某些问题。实现了Set接口的集合有：EnumSet、HashSet、TreeSet。</p>
+<h3 id="3-1、AbstractSet"><a href="#3-1、AbstractSet" class="headerlink" title="3.1、AbstractSet"></a><strong>3.1、AbstractSet</strong></h3><p>　　EnumSet、HashSet、TreeSet的父类</p>
+<h3 id="3-2、EnumSet"><a href="#3-2、EnumSet" class="headerlink" title="3.2、EnumSet"></a><strong>3.2、EnumSet</strong></h3><p>　　是枚举的专用Set。所有的元素都是枚举类型。</p>
+<h3 id="3-3、HashSet"><a href="#3-3、HashSet" class="headerlink" title="3.3、HashSet"></a><strong>3.3、HashSet</strong></h3><p>　　HashSet堪称查询速度最快的集合，因为其内部是以HashMap来实现的。<strong>它内部元素的顺序是由哈希码来决定的</strong>，所以它不保证set 的迭代顺序；特别是它不保证该顺序恒久不变。</p>
+<h3 id="3-4、LinkedHashSet"><a href="#3-4、LinkedHashSet" class="headerlink" title="3.4、LinkedHashSet"></a><strong>3.4、LinkedHashSet</strong></h3><p>　　LinkedHashSet是HashSet的子类，此实现与 HashSet 的不同之外在于，后者维护着一个运行于所有条目的<strong>双链表</strong>。此链接列表定义了迭代顺序，即按照将元素插入到 set 中的顺序（插入顺序）进行迭代。注意，插入顺序不 受在 set 中重新插入的 元素的影响。<br>　　<strong>也就是说，LinkedHashSet是迭代有序的HashSet</strong></p>
+<h3 id="3-5、TreeSet"><a href="#3-5、TreeSet" class="headerlink" title="3.5、TreeSet"></a><strong>3.5、TreeSet</strong></h3><p>　　基于TreeMap，生成一个总是处于排序状态的set，内部以TreeMap来实现。它是使用元素的<strong>自然顺序</strong>（例如1,2,3）对元素进行排序，或者根据创建Set 时提供的 Comparator 进行排序，具体取决于使用的构造方法。<strong>（实现了SortSet）</strong></p>
+<h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a><strong>分类</strong></h3><table>
+<thead>
+<tr>
+<th>类</th>
+<th style="text-align:center">是否线程安全</th>
+<th style="text-align:right">是否有序</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AbstractSet</td>
+<td style="text-align:center">否</td>
+<td style="text-align:right">否</td>
+</tr>
+<tr>
+<td>EnumSet</td>
+<td style="text-align:center">否</td>
+<td style="text-align:right">否</td>
+</tr>
+<tr>
+<td>HashSet</td>
+<td style="text-align:center">否</td>
+<td style="text-align:right">否</td>
+</tr>
+<tr>
+<td>LinkedHashSet</td>
+<td style="text-align:center">否</td>
+<td style="text-align:right">是</td>
+</tr>
+<tr>
+<td>TreeSet</td>
+<td style="text-align:center">否</td>
+<td style="text-align:right">是</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>可以通过Collections.synchronizedSet来包装线程安全的Set</strong></p>
+</blockquote>
+<h1 id="四、Map接口"><a href="#四、Map接口" class="headerlink" title="四、Map接口"></a><strong>四、Map接口</strong></h1><p>　　Map与List、Set接口不同，它是由一系列键值对组成的集合，提供了key到Value的映射。同时它也没有继承Collection。在Map中它保证了key与value之间的一一对应关系。也就是说一个key对应一个value，所以它不能存在相同的key值，当然value值可以相同。实现map的有：HashMap、TreeMap、HashTable、Properties、EnumMap。</p>
+<h3 id="4-1、AbstractMap"><a href="#4-1、AbstractMap" class="headerlink" title="4.1、AbstractMap"></a><strong>4.1、AbstractMap</strong></h3><p>　　HashMap， TreeMap，WeakHashMap ，ConcurrentHash的父类</p>
+<h3 id="4-2、HashMap"><a href="#4-2、HashMap" class="headerlink" title="4.2、HashMap"></a><strong>4.2、HashMap</strong></h3><p>　　以哈希表数据结构实现，查找对象时通过哈希函数计算其位置，它是为快速查询而设计的，其内部定义了一个hash表数组（Entry[] table），元素会通过哈希转换函数将元素的哈希地址转换成数组中存放的索引，如果有冲突，则使用散列链表的形式将所有相同哈希地址的元素串起来，可能通过查看HashMap.Entry的源码它是一个单链表结构。<br>　　<strong>HashMap可以用null作为key和value</strong></p>
+<h3 id="4-3、LinkedHashMap"><a href="#4-3、LinkedHashMap" class="headerlink" title="4.3、LinkedHashMap"></a><strong>4.3、LinkedHashMap</strong></h3><p>　　此实现与 HashMap 的不同之处在于，后者维护着一个运行于所有条目的双重链接列表。此链接列表定义了迭代顺序，该迭代顺序通常就是将键插入到映射中的顺序（插入顺序）。注意，如果在映射中重新插入 键，则插入顺序不受影响<br>　　<strong>也就是说，LinkedHashMap是迭代有序的HashMap</strong></p>
+<h3 id="4-4、HashTable"><a href="#4-4、HashTable" class="headerlink" title="4.4、HashTable"></a><strong>4.4、HashTable</strong></h3><p>　　也是以哈希表数据结构实现的，解决冲突时与HashMap也一样也是采用了散列链表的形式，不过性能比HashMap要低<br>　　<strong>HashTable不支持用null作为key或者value</strong></p>
+<h3 id="4-5、TreeMap"><a href="#4-5、TreeMap" class="headerlink" title="4.5、TreeMap"></a><strong>4.5、TreeMap</strong></h3><p>　　键以某种排序规则排序，内部以red-black（红-黑）树数据结构实现，实现了SortedMap接口，所以是有序的</p>
+<h3 id="4-6、WeakHashMap"><a href="#4-6、WeakHashMap" class="headerlink" title="4.6、WeakHashMap"></a><strong>4.6、WeakHashMap</strong></h3><p>　　以弱键 实现的基于哈希表的 Map。在 WeakHashMap 中，当某个键不再正常使用时，将自动移除其条目。更精确地说，对于一个给定的键，其映射的存在并不阻止垃圾回收器对该键的丢弃，这就使该键成为可终止的，被终止，然后被回收。丢弃某个键时，其条目从映射中有效地移除，因此，该类的行为与其他的 Map 实现有所不同<br>　　<strong>该map的键类似于弱引用</strong></p>
+<h3 id="HashMap与TreeMap的比较"><a href="#HashMap与TreeMap的比较" class="headerlink" title="HashMap与TreeMap的比较"></a><strong>HashMap与TreeMap的比较</strong></h3><p>　　1、HashMap通过hashcode对其内容进行快速查找，而TreeMap中所有的元素都保持着某种固定的顺序，如果你需要得到一个有序的结果你就应该使用TreeMap（HashMap中元素的排列顺序是不固定的）。HashMap中元素的排列顺序是不固定的）。<br>　　2、在Map 中插入、删除和定位元素，HashMap 是最好的选择。但如果您要按自然顺序或自定义顺序遍历键，那么TreeMap会更好。使用HashMap要求添加的键类明确定义了hashCode()和 equals()的实现。 这个TreeMap没有调优选项，因为该树总处于平衡状态。</p>
+<h3 id="Hashtable与Hashmap的比较"><a href="#Hashtable与Hashmap的比较" class="headerlink" title="Hashtable与Hashmap的比较"></a><strong>Hashtable与Hashmap的比较</strong></h3><p>　　1、历史原因:Hashtable是基于陈旧的Dictionary类的，HashMap是Java 1.2引进的Map接口的一个实现 。<br>　　2、同步性:Hashtable是线程安全的，也就是说是同步的，而HashMap是线程不安全的，不是同步的 。<br>　　3、值：只有HashMap可以让你将空值作为一个表的条目的key或value 。</p>
+<h3 id="分类-2"><a href="#分类-2" class="headerlink" title="分类"></a><strong>分类</strong></h3><table>
+<thead>
+<tr>
+<th>类</th>
+<th style="text-align:center">是否线程安全</th>
+<th>是否有序</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AbstractMap</td>
+<td style="text-align:center">否</td>
+<td>否</td>
+</tr>
+<tr>
+<td>HashMap</td>
+<td style="text-align:center">否</td>
+<td>否</td>
+</tr>
+<tr>
+<td>LinkedHashMap</td>
+<td style="text-align:center">否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>HashTable</td>
+<td style="text-align:center">是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>TreeMap</td>
+<td style="text-align:center">否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>WeakHashMap</td>
+<td style="text-align:center">否</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>可以通过 Collections.synchronizedMap包装成线程安全的map</strong></p>
+</blockquote>
+<h1 id="五、Queue"><a href="#五、Queue" class="headerlink" title="五、Queue"></a><strong>五、Queue</strong></h1><p>　　队列，它主要分为两大类，一类是阻塞式队列，队列满了以后再插入元素则会抛出异常，主要包括ArrayBlockQueue、PriorityBlockingQueue、LinkedBlockingQueue。另一种队列则是双端队列，支持在头、尾两端插入和移除元素，主要包括：ArrayDeque、LinkedBlockingDeque、LinkedList。</p>
+<h1 id="六、集合工具"><a href="#六、集合工具" class="headerlink" title="六、集合工具"></a><strong>六、集合工具</strong></h1><p>集合工具包括Arrays 和 Collection，其中Arrays用于操作数组，Collection用于操作Collection的子类集合</p>
+<h1 id="七、对集合的选择"><a href="#七、对集合的选择" class="headerlink" title="七、对集合的选择"></a><strong>七、对集合的选择</strong></h1><h3 id="7-1、对List的选择"><a href="#7-1、对List的选择" class="headerlink" title="7.1、对List的选择"></a><strong>7.1、对List的选择</strong></h3><p>　　1、对于随机查询与迭代遍历操作，数组比所有的容器都要快。所以在随机访问中一般使用ArrayList<br>　　2、LinkedList使用双向链表对元素的增加和删除提供了非常好的支持，而ArrayList执行增加和删除元素需要进行元素位移。<br>　　3、对于Vector而已，我们一般都是避免使用。<br>　　4、将ArrayList当做首选，毕竟对于集合元素而已我们都是进行遍历，只有当程序的性能因为List的频繁插入和删除而降低时，再考虑LinkedList。</p>
+<h3 id="7-2、对Set的选择"><a href="#7-2、对Set的选择" class="headerlink" title="7.2、对Set的选择"></a><strong>7.2、对Set的选择</strong></h3><p>　　1、HashSet由于使用HashCode实现，所以在某种程度上来说它的性能永远比TreeSet要好，尤其是进行增加和查找操作。<br>　　２、虽然TreeSet没有HashSet性能好，但是由于它可以维持元素的排序，所以它还是存在用武之地的。</p>
+<h3 id="7-3、对Map的选择"><a href="#7-3、对Map的选择" class="headerlink" title="7.3、对Map的选择"></a><strong>7.3、对Map的选择</strong></h3><p>　　1、HashMap与HashSet同样，支持快速查询。虽然HashTable速度的速度也不慢，但是在HashMap面前还是稍微慢了些，所以HashMap在查询方面可以取代HashTable。<br>　　2、由于TreeMap需要维持内部元素的顺序，所以它通常要比HashMap和HashTable慢。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> Java </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
+            
+            <tag> Java </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[容器-HashMap 实现原理]]></title>
+      <url>http://artaris.cn/uncategorized/Java%20%E5%AE%B9%E5%99%A8%20HashMap%20%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</url>
+      <content type="html"></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Activity 的加载模式]]></title>
+      <url>http://artaris.cn/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
+      <content type="html"><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
+<a id="more"></a>
+<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo" target="_blank" rel="noopener">ActivityLaunchModeDemo</a></p>
+<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure></p>
+<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></p>
+<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure></p>
+<p>新开的页面继续重复其生命周期<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></p>
+<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></p>
+<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p" alt=""></p>
+<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
+<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
+<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
+<li><p>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p" alt=""><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p" alt=""><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>不同程序之间</p>
+</li>
+</ul>
+<ol>
+<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
+<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
+<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
+</ol>
+<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
+<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> Android </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[ADB 使用指南]]></title>
+      <url>http://artaris.cn/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
+      <content type="html"><![CDATA[<p>ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能</p>
+<a id="more"></a>
+<ul>
+<li><a href="#语法及连接">语法及连接</a><ul>
+<li><a href="#语法">语法</a></li>
+<li><a href="#连接">连接</a><ul>
+<li><a href="#usb-连接">USB 连接</a></li>
+<li><a href="#无线连接">无线连接</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#获取设备信息">获取设备信息</a><ul>
+<li><a href="#型号">型号</a></li>
+<li><a href="#屏幕分辨率">屏幕分辨率</a></li>
+<li><a href="#屏幕密度">屏幕密度</a></li>
+<li><a href="#ip-地址">IP 地址</a></li>
+<li><a href="#IMEI">IMEI</a></li>
+<li><a href="#android-系统版本">Android 系统版本</a></li>
+<li><a href="#cpu-信息">CPU 信息</a></li>
+</ul>
+</li>
+<li><a href="#文件管理">文件管理</a><ul>
+<li><a href="#拉取">拉取</a></li>
+<li><a href="#推送">推送</a></li>
+</ul>
+</li>
+<li><a href="#应用管理">应用管理</a><ul>
+<li><a href="#查看设备安装应用">查看设备安装应用</a><ul>
+<li><a href="#所用应用">所有应用</a></li>
+<li><a href="#系统级应用">系统级应用</a></li>
+<li><a href="#用户安装应用">用户安装应用</a></li>
+<li><a href="#过滤显示">过滤显示</a></li>
+</ul>
+</li>
+<li><a href="#应用安装">应用安装</a></li>
+<li><a href="#应用卸载">应用卸载</a></li>
+<li><a href="#清除应用数据与缓存">清除应用数据与缓存</a></li>
+<li><a href="#查看前台-activity">查看前台 Activity</a></li>
+<li><a href="#查看正在运行的-services">查看正在运行的 Services</a></li>
+<li><a href="#查看应用详细信息">查看应用详细信息</a></li>
+</ul>
+</li>
+<li><a href="#操作模拟">操作模拟</a><ul>
+<li><a href="#按键模拟">按键模拟</a></li>
+<li><a href="#应用交互">应用交互</a><ul>
+<li><a href="#调起-activity">调起 Activity</a></li>
+<li><a href="#调起-service">调起 Service</a></li>
+<li><a href="#发送广播">发送广播</a></li>
+<li><a href="#强制停止应用">强制停止应用</a></li>
+</ul>
+</li>
+<li><a href="#设备操作">设备操作</a><ul>
+<li><a href="#截屏">截屏</a></li>
+<li><a href="#录屏">录屏</a></li>
+<li><a href="#重启">重启</a></li>
+<li><a href="#压力测试-monkey">压力测试（Monkey）</a></li>
+<li><a href="#修改分辨率">修改分辨率</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#Log-日志查看">Log 日志查看</a><ul>
+<li><a href="#过滤日志输出">过滤日志输出</a><ul>
+<li><a href="#按级别过滤日志">按级别过滤日志</a></li>
+<li><a href="#按-Tag-过滤日志">按 Tag 过滤日志</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#adb-shell-相关命令">ADB Shell 相关命令</a><ul>
+<li><a href="#查看进程">查看进程</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="语法及连接"><a href="#语法及连接" class="headerlink" title="语法及连接"></a>语法及连接</h2><h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><p>ADB 的基本命令语法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb [-d|-e|-s &lt;serialNumber&gt;] &lt;command&gt;</span><br></pre></td></tr></table></figure></p>
+<p>同一台电脑可以连接多个 Android 设备，当时用 adb 命令操作设备的时候，可以指定设备下发命令。具体如下</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-d</td>
+<td>指定当前唯一通过 USB 连接的 Android 设备为命令目标</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>指定当前唯一运行的模拟器为命令目标</td>
+</tr>
+<tr>
+<td><code>-s &lt;Serial Number&gt;</code></td>
+<td>指定相应 Serial Number 号的设备/模拟器为命令目标</td>
+</tr>
+</tbody>
+</table>
+<p>可以使用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb devices</span><br></pre></td></tr></table></figure></p>
+<p>来查看当前连接的所有设备，如下所示<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List of devices attached</span><br><span class="line">emulator-5554   device</span><br><span class="line">e8c63296        device</span><br></pre></td></tr></table></figure></p>
+<p><code>emulator-5554</code>是一个模拟器，<code>e8c63296</code> 是一台真机，这些均为他们的 Serial Number。可以指定设备发送命令，当只连接一台设备的时候，Serial Number 可以忽略不写。</p>
+<h3 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h3><p>上文中介绍使用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb devices</span><br></pre></td></tr></table></figure></p>
+<p>可以查看所有连接到的设备。</p>
+<h4 id="USB-连接"><a href="#USB-连接" class="headerlink" title="USB 连接"></a>USB 连接</h4><p>使用USB 连接设备时。需要将设备<br>的开发者选项和 USB 调试模式开启。<br>可以到「设置」-「开发者选项」-「Android 调试」查看。<br>如果在设置里找不到开发者选项，那需要通过一个彩蛋来让它显示出来：在「设置」-「关于手机」连续点击「版本号」7 次。</p>
+<h4 id="无线连接"><a href="#无线连接" class="headerlink" title="无线连接"></a>无线连接</h4><p>无线连接可以在提前设置的情况下，免去数据线连接的烦恼，不过每次打包的时候，将 APK 发送到设备上都需要一会，数据传输自然是没有使用数据线快了，受网络干扰因素影响。<br>无线连接必须保证将 Android 设备与要运行 ADB 的电脑连接到同一个局域网，比如连到同一个 WiFi 即可。<br>具体步骤如下：</p>
+<ol>
+<li>将设备与电脑通过 USB 线连接并确保能够连接成功（<code>adb devices</code>指令能够看见设备）；</li>
+<li><p>让设备在 5555 端口监听 TCP/IP 连接；</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb connect &lt;device-ip-address&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>拔掉数据线；</p>
+</li>
+<li>查找设备的 IP 地址，一般能在「设置」-「关于手机」-「状态信息」-「IP地址」找到；</li>
+<li>通过 IP 地址连接设备   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb connect &lt;Device IP Address&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><code>&lt;Device IP Address&gt;</code>即是刚才获取的 IP 地址<br>此时再使用<code>adb devices</code>命令，如果在下面能看见设备说明连接成功。</p>
+<h2 id="获取设备信息"><a href="#获取设备信息" class="headerlink" title="获取设备信息"></a>获取设备信息</h2><h3 id="型号"><a href="#型号" class="headerlink" title="型号"></a>型号</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell getprop ro.product.model</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ONEPLUS A3010</span><br></pre></td></tr></table></figure></p>
+<p>我手中的这台是一加 3T，型号为A3010</p>
+<h3 id="屏幕分辨率"><a href="#屏幕分辨率" class="headerlink" title="屏幕分辨率"></a>屏幕分辨率</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm size</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Physical size: 1080x1920</span><br></pre></td></tr></table></figure></p>
+<p>我手中的这台一加 3T 的分辨率为 1080P</p>
+<h3 id="屏幕密度"><a href="#屏幕密度" class="headerlink" title="屏幕密度"></a>屏幕密度</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm density</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Physical density: 420</span><br></pre></td></tr></table></figure></p>
+<p>一加 3T 的 DPI 为 420DPI</p>
+<h3 id="IP-地址"><a href="#IP-地址" class="headerlink" title="IP 地址"></a>IP 地址</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell ifconfig</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">lo        Link encap:UNSPEC</span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          inet6 addr: ::1/128 Scope: Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:475045 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:475045 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:692847495 TX bytes:692847495</span><br><span class="line"></span><br><span class="line">dummy0    Link encap:UNSPEC</span><br><span class="line">          inet6 addr: fe80::4c8a:30ff:fec6:13fc/64 Scope: Link</span><br><span class="line">          UP BROADCAST RUNNING NOARP  MTU:1500  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:115 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:0 TX bytes:8050</span><br><span class="line"></span><br><span class="line">wlan0     Link encap:UNSPEC    Driver cnss_wlan_pci</span><br><span class="line">          inet addr:192.168.31.86  Bcast:192.168.31.255  Mask:255.255.255.0</span><br><span class="line">          inet6 addr: fe80::9665:2dff:fe25:12f5/64 Scope: Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:2465828 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:138772 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:3000</span><br><span class="line">          RX bytes:475187452 TX bytes:49284101</span><br><span class="line"></span><br><span class="line">rmnet_ipa0 Link encap:UNSPEC</span><br><span class="line">          UP RUNNING  MTU:2000  Metric:1</span><br><span class="line">          RX packets:1897 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:3233 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:2042241 TX bytes:490601</span><br><span class="line"></span><br><span class="line">p2p0      Link encap:UNSPEC    Driver cnss_wlan_pci</span><br><span class="line">          UP BROADCAST MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:3000</span><br><span class="line">          RX bytes:0 TX bytes:0</span><br></pre></td></tr></table></figure></p>
+<p>我现在正使用局域网，<code>wlan0 inet addr:192.168.31.86</code>即是我的 IP 地址</p>
+<h3 id="IMEI"><a href="#IMEI" class="headerlink" title="IMEI"></a>IMEI</h3><p>在 Android 4.4 及以下版本可通过如下命令获取 IMEI：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys iphonesubinfo</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Phone Subscriber Info:</span><br><span class="line">  Phone Type = GSM</span><br><span class="line">  Device ID = 860955027785041</span><br></pre></td></tr></table></figure></p>
+<p> Android 5.0 上需要 ROOT 权限才能看到</p>
+<h3 id="Android-系统版本"><a href="#Android-系统版本" class="headerlink" title="Android 系统版本"></a>Android 系统版本</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell getprop ro.build.version.release</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">8.0.0</span><br></pre></td></tr></table></figure></p>
+<p>我手中的这台一加 3T 的 Android 版本为奥利奥</p>
+<h3 id="CPU-信息"><a href="#CPU-信息" class="headerlink" title="CPU 信息"></a>CPU 信息</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell cat /proc/cpuinfo</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">processor       : 0</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x201</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">processor       : 1</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x201</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">processor       : 2</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x205</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">processor       : 3</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x205</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">Hardware        : Qualcomm Technologies, Inc MSM8996pro</span><br></pre></td></tr></table></figure></p>
+<p>看到使用的硬件是 <code>Qualcomm MSM8996pro</code>，即高通 821，processor 的编号是 0 到 3，所以它是四核的。</p>
+<h2 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h2><h3 id="拉取"><a href="#拉取" class="headerlink" title="拉取"></a>拉取</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb pull &lt;设备里的文件路径&gt; [电脑上的目录]</span><br></pre></td></tr></table></figure></p>
+<p>如果省略<code>[电脑上的目录]</code>选项，则默认复制在当前目录下；<br>一般使用未 ROOT 的机器均是复制或拉取 <code>/sdcard/</code>目录下的文件。<br>eg.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb pull /sdcard/demo.mp4 ~/Desktop</span><br></pre></td></tr></table></figure></p>
+<h3 id="推送"><a href="#推送" class="headerlink" title="推送"></a>推送</h3><p>命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb push &lt;电脑上的文件路径&gt; &lt;设备里的目录&gt;</span><br></pre></td></tr></table></figure></p>
+<p>eg.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb push ~/Desktop/demo.mp4 /sdcard/</span><br></pre></td></tr></table></figure></p>
+<h2 id="应用管理"><a href="#应用管理" class="headerlink" title="应用管理"></a>应用管理</h2><h3 id="查看设备安装应用"><a href="#查看设备安装应用" class="headerlink" title="查看设备安装应用"></a>查看设备安装应用</h3><p>查看应用列表的基本命令格式是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages [-f]/[-d]/[-e]/[-s]/[-3]/[-i]/[-u]/[--user USER_ID]/[FILTER]</span><br></pre></td></tr></table></figure>
+<p>这些参数的含义如下所示</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>显示列表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无</td>
+<td>所有应用</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>显示应用关联的 apk 文件</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>只显示 disabled 的应用</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>只显示 enabled 的应用</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>只显示系统应用</td>
+</tr>
+<tr>
+<td>-3</td>
+<td>只显示第三方应用</td>
+</tr>
+<tr>
+<td>-i</td>
+<td>显示应用的 installer</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>包含已卸载应用</td>
+</tr>
+<tr>
+<td><code>&lt;FILTER&gt;</code></td>
+<td>包名包含 <code>&lt;FILTER&gt;</code> 字符串</td>
+</tr>
+</tbody>
+</table>
+<p>下面是具体例子：</p>
+<h4 id="所用应用"><a href="#所用应用" class="headerlink" title="所用应用"></a>所用应用</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages</span><br></pre></td></tr></table></figure>
+<p>输出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package:com.oneplus.calculator</span><br><span class="line">package:net.oneplus.weather</span><br><span class="line">package:com.android.cts.priv.ctsshim</span><br><span class="line">package:com.oneplus.market</span><br><span class="line">package:com.yulore.framework</span><br><span class="line">package:com.android.providers.telephony</span><br><span class="line">package:com.sony.playmemories.mobile</span><br><span class="line">package:com.android.engineeringmode</span><br><span class="line">package:com.android.providers.calendar</span><br><span class="line">package:com.oneplus.opbugreport</span><br><span class="line">package:com.oneplus.card</span><br><span class="line">package:com.oneplus.note</span><br><span class="line">package:com.oneplus.skin</span><br><span class="line">package:com.android.providers.media</span><br><span class="line">package:com.sohu.inputmethod.sogou</span><br><span class="line">package:com.android.wallpapercropper</span><br><span class="line">package:com.oneplus.account</span><br><span class="line">package:com.quicinc.cne.CNEService</span><br><span class="line">package:com.oneplus.soundrecorder</span><br><span class="line">package:com.qualcomm.qti.autoregistration</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<h4 id="系统级应用"><a href="#系统级应用" class="headerlink" title="系统级应用"></a>系统级应用</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages -s</span><br></pre></td></tr></table></figure>
+<h4 id="用户安装应用"><a href="#用户安装应用" class="headerlink" title="用户安装应用"></a>用户安装应用</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages -3</span><br></pre></td></tr></table></figure>
+<h4 id="过滤显示"><a href="#过滤显示" class="headerlink" title="过滤显示"></a>过滤显示</h4><p>比如要查看包名包含字符串 <code>tencent</code> 的应用列表，命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages tencent</span><br></pre></td></tr></table></figure></p>
+<p>则只会输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">package:com.tencent.mm</span><br><span class="line">package:com.tencent.mobileqq</span><br></pre></td></tr></table></figure></p>
+<h3 id="应用安装"><a href="#应用安装" class="headerlink" title="应用安装"></a>应用安装</h3><p>命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb install [-l]/[-r]/[-t]/[-s]/[-d]/[-g] &lt;path_to_apk&gt;</span><br></pre></td></tr></table></figure></p>
+<p>这些参数的含义如下所示</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-l</td>
+<td>将应用安装到保护目录 /mnt/asec</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>允许覆盖安装</td>
+</tr>
+<tr>
+<td>-t</td>
+<td>允许安装 AndroidManifest.xml 里 application 指定 <code>android:testOnly=&quot;true&quot;</code> 的应用</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>将应用安装到 sdcard</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>允许降级覆盖安装</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>授予所有运行时权限</td>
+</tr>
+</tbody>
+</table>
+<p>运行命令后见到输出状态为 <code>Success</code>代表安装成功。<br>如果失败则会输出<code>Failure</code>及错误码，常见错误码含义如下：</p>
+<table>
+<thead>
+<tr>
+<th>输出</th>
+<th>含义</th>
+<th>解决办法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INSTALL_FAILED_ALREADY_EXISTS</td>
+<td>应用已经存在，或卸载了但没卸载干净</td>
+<td><code>adb install</code> 时使用 <code>-r</code> 参数，或者先 <code>adb uninstall &lt;packagename&gt;</code> 再安装</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INVALID_APK</td>
+<td>无效的 APK 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INVALID_URI</td>
+<td>无效的 APK 文件名</td>
+<td>确保 APK 文件名里无中文</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INSUFFICIENT_STORAGE</td>
+<td>空间不足</td>
+<td>清理空间</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_DUPLICATE_PACKAGE</td>
+<td>已经存在同名程序</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_NO_SHARED_USER</td>
+<td>请求的共享用户不存在</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_UPDATE_INCOMPATIBLE</td>
+<td>以前安装过同名应用，但卸载时数据没有移除；或者已安装该应用，但签名不一致</td>
+<td>先 <code>adb uninstall &lt;packagename&gt;</code> 再安装</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_SHARED_USER_INCOMPATIBLE</td>
+<td>请求的共享用户存在但签名不一致</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_MISSING_SHARED_LIBRARY</td>
+<td>安装包使用了设备上不可用的共享库</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_REPLACE_COULDNT_DELETE</td>
+<td>替换时无法删除</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_DEXOPT</td>
+<td>dex 优化验证失败或空间不足</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_OLDER_SDK</td>
+<td>设备系统版本低于应用要求</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_CONFLICTING_PROVIDER</td>
+<td>设备里已经存在与应用里同名的 content provider</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_NEWER_SDK</td>
+<td>设备系统版本高于应用要求</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_TEST_ONLY</td>
+<td>应用是 test-only 的，但安装时没有指定 <code>-t</code> 参数</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_CPU_ABI_INCOMPATIBLE</td>
+<td>包含不兼容设备 CPU 应用程序二进制接口的 native code</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_MISSING_FEATURE</td>
+<td>应用使用了设备不可用的功能</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_CONTAINER_ERROR</td>
+<td>1. sdcard 访问失败;<br>2. 应用签名与 ROM 签名一致，被当作内置应用。</td>
+<td>1. 确认 sdcard 可用，或者安装到内置存储;<br>2. 打包时不与 ROM 使用相同签名。</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INVALID_INSTALL_LOCATION</td>
+<td>1. 不能安装到指定位置;<br>2. 应用签名与 ROM 签名一致，被当作内置应用。</td>
+<td>1. 切换安装位置，添加或删除 <code>-s</code> 参数;<br>2. 打包时不与 ROM 使用相同签名。</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_MEDIA_UNAVAILABLE</td>
+<td>安装位置不可用</td>
+<td>一般为 sdcard，确认 sdcard 可用或安装到内置存储</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_VERIFICATION_TIMEOUT</td>
+<td>验证安装包超时</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_VERIFICATION_FAILURE</td>
+<td>验证安装包失败</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_PACKAGE_CHANGED</td>
+<td>应用与调用程序期望的不一致</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_UID_CHANGED</td>
+<td>以前安装过该应用，与本次分配的 UID 不一致</td>
+<td>清除以前安装过的残留文件</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_VERSION_DOWNGRADE</td>
+<td>已经安装了该应用更高版本</td>
+<td>使用 <code>-d</code> 参数</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_PERMISSION_MODEL_DOWNGRADE</td>
+<td>已安装 target SDK 支持运行时权限的同名应用，要安装的版本不支持运行时权限</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_NOT_APK</td>
+<td>指定路径不是文件，或不是以 <code>.apk</code> 结尾</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_BAD_MANIFEST</td>
+<td>无法解析的 AndroidManifest.xml 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION</td>
+<td>解析器遇到异常</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_NO_CERTIFICATES</td>
+<td>安装包没有签名</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES</td>
+<td>已安装该应用，且签名与 APK 文件不一致</td>
+<td>先卸载设备上的该应用，再安装</td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING</td>
+<td>解析 APK 文件时遇到 <code>CertificateEncodingException</code></td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME</td>
+<td>manifest 文件里没有或者使用了无效的包名</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID</td>
+<td>manifest 文件里指定了无效的共享用户 ID</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_MANIFEST_MALFORMED</td>
+<td>解析 manifest 文件时遇到结构性错误</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_MANIFEST_EMPTY</td>
+<td>在 manifest 文件里找不到找可操作标签（instrumentation 或 application）</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INTERNAL_ERROR</td>
+<td>因系统问题安装失败</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_USER_RESTRICTED</td>
+<td>用户被限制安装应用</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_DUPLICATE_PERMISSION</td>
+<td>应用尝试定义一个已经存在的权限名称</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_NO_MATCHING_ABIS</td>
+<td>应用包含设备的应用程序二进制接口不支持的 native code</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_CANCELED_BY_USER</td>
+<td>应用安装需要在设备上确认，但未操作设备或点了取消</td>
+<td>在设备上同意安装</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_ACWF_INCOMPATIBLE</td>
+<td>应用程序与设备不兼容</td>
+<td></td>
+</tr>
+<tr>
+<td>does not contain AndroidManifest.xml</td>
+<td>无效的 APK 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>is not a valid zip file</td>
+<td>无效的 APK 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>Offline</td>
+<td>设备未连接成功</td>
+<td>先将设备与 adb 连接成功</td>
+</tr>
+<tr>
+<td>unauthorized</td>
+<td>设备未授权允许调试</td>
+<td></td>
+</tr>
+<tr>
+<td>error: device not found</td>
+<td>没有连接成功的设备</td>
+<td>先将设备与 adb 连接成功</td>
+</tr>
+<tr>
+<td>protocol failure</td>
+<td>设备已断开连接</td>
+<td>先将设备与 adb 连接成功</td>
+</tr>
+<tr>
+<td>Unknown option: -s</td>
+<td>Android 2.2 以下不支持安装到 sdcard</td>
+<td>不使用 <code>-s</code> 参数</td>
+</tr>
+<tr>
+<td>No space left on device</td>
+<td>空间不足</td>
+<td>清理空间</td>
+</tr>
+<tr>
+<td>Permission denied … sdcard …</td>
+<td>sdcard 不可用</td>
+<td></td>
+</tr>
+<tr>
+<td>signatures do not match the previously installed version; ignoring!</td>
+<td>已安装该应用且签名不一致</td>
+<td>先卸载设备上的该应用，再安装</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>adb install</code> 内部原理简介</strong></p>
+<p><code>adb install</code> 实际是分三步完成：</p>
+<ol>
+<li><p>push apk 文件到 /data/local/tmp。</p>
+</li>
+<li><p>调用 pm install 安装。</p>
+</li>
+<li><p>删除 /data/local/tmp 下的对应 apk 文件。</p>
+</li>
+</ol>
+<p>所以，如果有需要也可以根据这个步骤，手动分步执行安装过程。</p>
+<h3 id="应用卸载"><a href="#应用卸载" class="headerlink" title="应用卸载"></a>应用卸载</h3><p>命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb uninstall [-k] &lt;packagename&gt;</span><br></pre></td></tr></table></figure></p>
+<p><code>&lt;packagename&gt;</code> 表示应用的包名，<code>-k</code> 参数可选，表示卸载应用但保留数据和缓存目录。</p>
+<p>命令示例：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb uninstall com.tencent.mobileqq</span><br></pre></td></tr></table></figure>
+<p>即卸载 QQ</p>
+<h3 id="清除应用数据与缓存"><a href="#清除应用数据与缓存" class="headerlink" title="清除应用数据与缓存"></a>清除应用数据与缓存</h3><p>这条命令的效果相当于在设置里的应用信息界面点击了「清除缓存」和「清除数据」。<br>命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm clear &lt;packagename&gt;</span><br></pre></td></tr></table></figure></p>
+<p>命令示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm clear com.tencent.mobileqq</span><br></pre></td></tr></table></figure>
+<p>即清除 QQ 的缓存和数据</p>
+<h3 id="查看前台-Activity"><a href="#查看前台-Activity" class="headerlink" title="查看前台 Activity"></a>查看前台 Activity</h3><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys activity activities | grep mFocusedActivity</span><br></pre></td></tr></table></figure>
+<p>输出示例：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mFocusedActivity: ActivityRecord&#123;8079d7e u0 com.cyanogenmod.trebuchet/com.android.launcher3.Launcher t42&#125;</span><br></pre></td></tr></table></figure>
+<p>其中的 <code>com.cyanogenmod.trebuchet/com.android.launcher3.Launcher</code> 就是当前处于前台的 Activity。</p>
+<p>当然，输入以下命令就可以查看所有 Activity 栈了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys activity activities</span><br></pre></td></tr></table></figure></p>
+<h3 id="查看正在运行的-Services"><a href="#查看正在运行的-Services" class="headerlink" title="查看正在运行的 Services"></a>查看正在运行的 Services</h3><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys activity services [&lt;packagename&gt;]</span><br></pre></td></tr></table></figure>
+<p><code>&lt;packagename&gt;</code> 参数不是必须的，指定 <code>&lt;packagename&gt;</code> 表示查看与某个包名相关的 Services，不指定表示查看所有 Services。</p>
+<p><code>&lt;packagename&gt;</code> 不一定要给出完整的包名，比如运行 <code>adb shell dumpsys activity services cn.artaris</code>，那么包名 <code>cn.artaris.demo1</code>、<code>cn.artaris.demo2</code> 和 <code>cn.artaris123</code> 等相关的 Services 都会列出来。</p>
+<h3 id="查看应用详细信息"><a href="#查看应用详细信息" class="headerlink" title="查看应用详细信息"></a>查看应用详细信息</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys package &lt;packagename&gt;</span><br></pre></td></tr></table></figure>
+<p>输出中包含很多信息，包括 Activity Resolver Table、Registered ContentProviders、包名、userId、安装后的文件资源代码等路径、版本信息、权限信息和授予状态、签名版本信息等。</p>
+<p><code>&lt;packagename&gt;</code> 表示应用包名。</p>
+<h2 id="操作模拟"><a href="#操作模拟" class="headerlink" title="操作模拟"></a>操作模拟</h2><h3 id="按键模拟"><a href="#按键模拟" class="headerlink" title="按键模拟"></a>按键模拟</h3><p>按键模拟主要是通过<code>adb shell input</code>来实现的，在 Android 开发的时候我们可以拦截按键事件，接受按键的函数如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean onKeyDown(int keyCode, KeyEvent event) &#123;</span><br><span class="line">    return super.onKeyDown(keyCode, event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>KeyEvent</code>类中定义了一系列常量，例如返回键的值为<code>KeyEvent.KEYCODE_BACK</code>，其常量值为4。按键模拟操作的值与此一致。<br>下表为常用按键值：</p>
+<table>
+<thead>
+<tr>
+<th>keycode</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>HOME 键</td>
+</tr>
+<tr>
+<td>4</td>
+<td>返回键</td>
+</tr>
+<tr>
+<td>5</td>
+<td>打开拨号应用</td>
+</tr>
+<tr>
+<td>6</td>
+<td>挂断电话</td>
+</tr>
+<tr>
+<td>24</td>
+<td>增加音量</td>
+</tr>
+<tr>
+<td>25</td>
+<td>降低音量</td>
+</tr>
+<tr>
+<td>26</td>
+<td>电源键</td>
+</tr>
+<tr>
+<td>27</td>
+<td>拍照（需要在相机应用里）</td>
+</tr>
+<tr>
+<td>64</td>
+<td>打开浏览器</td>
+</tr>
+<tr>
+<td>82</td>
+<td>菜单键</td>
+</tr>
+<tr>
+<td>85</td>
+<td>播放/暂停</td>
+</tr>
+<tr>
+<td>86</td>
+<td>停止播放</td>
+</tr>
+<tr>
+<td>87</td>
+<td>播放下一首</td>
+</tr>
+<tr>
+<td>88</td>
+<td>播放上一首</td>
+</tr>
+<tr>
+<td>122</td>
+<td>移动光标到行首或列表顶部</td>
+</tr>
+<tr>
+<td>123</td>
+<td>移动光标到行末或列表底部</td>
+</tr>
+<tr>
+<td>126</td>
+<td>恢复播放</td>
+</tr>
+<tr>
+<td>127</td>
+<td>暂停播放</td>
+</tr>
+<tr>
+<td>164</td>
+<td>静音</td>
+</tr>
+<tr>
+<td>176</td>
+<td>打开系统设置</td>
+</tr>
+<tr>
+<td>187</td>
+<td>切换应用</td>
+</tr>
+<tr>
+<td>207</td>
+<td>打开联系人</td>
+</tr>
+<tr>
+<td>208</td>
+<td>打开日历</td>
+</tr>
+<tr>
+<td>209</td>
+<td>打开音乐</td>
+</tr>
+<tr>
+<td>210</td>
+<td>打开计算器</td>
+</tr>
+<tr>
+<td>220</td>
+<td>降低屏幕亮度</td>
+</tr>
+<tr>
+<td>221</td>
+<td>提高屏幕亮度</td>
+</tr>
+<tr>
+<td>223</td>
+<td>系统休眠</td>
+</tr>
+<tr>
+<td>224</td>
+<td>点亮屏幕</td>
+</tr>
+<tr>
+<td>231</td>
+<td>打开语音助手</td>
+</tr>
+<tr>
+<td>276</td>
+<td>如果没有 wakelock 则让系统休眠</td>
+</tr>
+</tbody>
+</table>
+<p>使用方法如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell input keyevent &lt;KeyCode&gt;</span><br></pre></td></tr></table></figure></p>
+<p>只要输入对应按键的按键号，则能实现对应功能。</p>
+<p>有两个操作需要特别说明一下：</p>
+<h4 id="模拟屏幕滑动："><a href="#模拟屏幕滑动：" class="headerlink" title="模拟屏幕滑动："></a>模拟屏幕滑动：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell input swipe 300 1000 300 500</span><br></pre></td></tr></table></figure>
+<p>参数 <code>300 1000 300 500</code> 分别表示<code>起始点x坐标 起始点y坐标 结束点x坐标 结束点y坐标</code>。</p>
+<h4 id="输入文本："><a href="#输入文本：" class="headerlink" title="输入文本："></a>输入文本：</h4><p>在焦点处于某文本框时，可以通过 <code>input</code> 命令来输入文本。</p>
+<p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell input text artaris</span><br></pre></td></tr></table></figure>
+<p>现在 <code>artaris</code> 出现在文本框了。</p>
+<h3 id="应用交互"><a href="#应用交互" class="headerlink" title="应用交互"></a>应用交互</h3><p>应用交互主要是通过<code>adb shell am &lt;command&gt;</code>来实现的,常用的<code>&lt;command&gt;</code>指令有以下几种：</p>
+<table>
+<thead>
+<tr>
+<th>command</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start [options] &lt;INTENT&gt;</code></td>
+<td>启动 <code>&lt;INTENT&gt;</code> 指定的 Activity</td>
+</tr>
+<tr>
+<td><code>startservice [options] &lt;INTENT&gt;</code></td>
+<td>启动 <code>&lt;INTENT&gt;</code> 指定的 Service</td>
+</tr>
+<tr>
+<td><code>broadcast [options] &lt;INTENT&gt;</code></td>
+<td>发送 <code>&lt;INTENT&gt;</code> 指定的广播</td>
+</tr>
+<tr>
+<td><code>force-stop &lt;packagename&gt;</code></td>
+<td>停止 <code>&lt;packagename&gt;</code> 相关的进程</td>
+</tr>
+</tbody>
+</table>
+<p><code>&lt;INTENT&gt;</code> 即与 Android 程序时代码里的 Intent 相对应。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-a &lt;ACTION&gt;</code></td>
+<td>指定 action，比如 <code>android.intent.action.VIEW</code></td>
+</tr>
+<tr>
+<td><code>-c &lt;CATEGORY&gt;</code></td>
+<td>指定 category，比如 <code>android.intent.category.APP_CONTACTS</code></td>
+</tr>
+<tr>
+<td><code>-n &lt;COMPONENT&gt;</code></td>
+<td>指定完整 component 名，用于明确指定启动哪个 Activity，如 <code>cn.artaris.demo/.MainActivity</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>&lt;INTENT&gt;</code> 里还能带参数，与程序中的 Bundle 含义一致：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--esn &lt;EXTRA_KEY&gt;</code></td>
+<td>null 值（只有 key 名）</td>
+</tr>
+<tr>
+<td><code>-e/--es &lt;EXTRA_KEY&gt; &lt;EXTRA_STRING_VALUE&gt;</code></td>
+<td>string 值</td>
+</tr>
+<tr>
+<td><code>--ez &lt;EXTRA_KEY&gt; &lt;EXTRA_BOOLEAN_VALUE&gt;</code></td>
+<td>boolean 值</td>
+</tr>
+<tr>
+<td><code>--ei &lt;EXTRA_KEY&gt; &lt;EXTRA_INT_VALUE&gt;</code></td>
+<td>integer 值</td>
+</tr>
+<tr>
+<td><code>--el &lt;EXTRA_KEY&gt; &lt;EXTRA_LONG_VALUE&gt;</code></td>
+<td>long 值</td>
+</tr>
+<tr>
+<td><code>--ef &lt;EXTRA_KEY&gt; &lt;EXTRA_FLOAT_VALUE&gt;</code></td>
+<td>float 值</td>
+</tr>
+<tr>
+<td><code>--eu &lt;EXTRA_KEY&gt; &lt;EXTRA_URI_VALUE&gt;</code></td>
+<td>URI</td>
+</tr>
+<tr>
+<td><code>--ecn &lt;EXTRA_KEY&gt; &lt;EXTRA_COMPONENT_NAME_VALUE&gt;</code></td>
+<td>component name</td>
+</tr>
+<tr>
+<td><code>--eia &lt;EXTRA_KEY&gt; &lt;EXTRA_INT_VALUE&gt;[,&lt;EXTRA_INT_VALUE...]</code></td>
+<td>integer 数组</td>
+</tr>
+<tr>
+<td><code>--ela &lt;EXTRA_KEY&gt; &lt;EXTRA_LONG_VALUE&gt;[,&lt;EXTRA_LONG_VALUE...]</code></td>
+<td>long 数组</td>
+</tr>
+</tbody>
+</table>
+<h4 id="调起-Activity"><a href="#调起-Activity" class="headerlink" title="调起 Activity"></a>调起 Activity</h4><p>命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am start [options] &lt;INTENT&gt;</span><br></pre></td></tr></table></figure></p>
+<p>eg.：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am start -n com.tencent.mm/.ui.LauncherUI</span><br></pre></td></tr></table></figure>
+<p>即掉起微信主界面；<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am start -n cn.artaris.demo/.MainActivity --es &quot;toast&quot; &quot;hello, world&quot;</span><br></pre></td></tr></table></figure></p>
+<p>表示调起 <code>cn.artaris.demo/.MainActivity</code> 并传给它 String 数据键值对 <code>toast - hello, world</code>。</p>
+<h4 id="调起-Service"><a href="#调起-Service" class="headerlink" title="调起 Service"></a>调起 Service</h4><p>命令格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am startservice [options] &lt;INTENT&gt;</span><br></pre></td></tr></table></figure>
+<p>例如：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am startservice -n com.tencent.mm/.plugin.accountsync.model.AccountAuthenticatorService</span><br></pre></td></tr></table></figure>
+<p>表示调起微信的 AccountAuthenticatorService。</p>
+<h4 id="发送广播"><a href="#发送广播" class="headerlink" title="发送广播"></a>发送广播</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am broadcast [options] &lt;INTENT&gt;</span><br></pre></td></tr></table></figure>
+<p>使用该命令可以向所有组件广播，也可以只向指定组件广播；<br>eg.:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am broadcast -a android.intent.action.BOOT_COMPLETED</span><br></pre></td></tr></table></figure></p>
+<p>向所有应用发送开机广播。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am broadcast -a android.intent.action.BOOT_COMPLETED -n cn.artaris.demo/.BootReceiver</span><br></pre></td></tr></table></figure></p>
+<p>只向<code>cn.artaris.demo/.BootReceiver</code>发送开机广播；<br>以下是常用系统广播，可以模拟一些特殊场景：</p>
+<table>
+<thead>
+<tr>
+<th>action</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>android.net.conn.CONNECTIVITY_CHANGE</td>
+<td>网络连接发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.SCREEN_ON</td>
+<td>屏幕点亮</td>
+</tr>
+<tr>
+<td>android.intent.action.SCREEN_OFF</td>
+<td>屏幕熄灭</td>
+</tr>
+<tr>
+<td>android.intent.action.BATTERY_LOW</td>
+<td>电量低，会弹出电量低提示框</td>
+</tr>
+<tr>
+<td>android.intent.action.BATTERY_OKAY</td>
+<td>电量恢复了</td>
+</tr>
+<tr>
+<td>android.intent.action.BOOT_COMPLETED</td>
+<td>设备启动完毕</td>
+</tr>
+<tr>
+<td>android.intent.action.DEVICE_STORAGE_LOW</td>
+<td>存储空间过低</td>
+</tr>
+<tr>
+<td>android.intent.action.DEVICE_STORAGE_OK</td>
+<td>存储空间恢复</td>
+</tr>
+<tr>
+<td>android.intent.action.PACKAGE_ADDED</td>
+<td>安装了新的应用</td>
+</tr>
+<tr>
+<td>android.net.wifi.STATE_CHANGE</td>
+<td>WiFi 连接状态发生变化</td>
+</tr>
+<tr>
+<td>android.net.wifi.WIFI_STATE_CHANGED</td>
+<td>WiFi 状态变为启用/关闭/正在启动/正在关闭/未知</td>
+</tr>
+<tr>
+<td>android.intent.action.BATTERY_CHANGED</td>
+<td>电池电量发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.INPUT_METHOD_CHANGED</td>
+<td>系统输入法发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.ACTION_POWER_CONNECTED</td>
+<td>外部电源连接</td>
+</tr>
+<tr>
+<td>android.intent.action.ACTION_POWER_DISCONNECTED</td>
+<td>外部电源断开连接</td>
+</tr>
+<tr>
+<td>android.intent.action.DREAMING_STARTED</td>
+<td>系统开始休眠</td>
+</tr>
+<tr>
+<td>android.intent.action.DREAMING_STOPPED</td>
+<td>系统停止休眠</td>
+</tr>
+<tr>
+<td>android.intent.action.WALLPAPER_CHANGED</td>
+<td>壁纸发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.HEADSET_PLUG</td>
+<td>插入耳机</td>
+</tr>
+<tr>
+<td>android.intent.action.MEDIA_UNMOUNTED</td>
+<td>卸载外部介质</td>
+</tr>
+<tr>
+<td>android.intent.action.MEDIA_MOUNTED</td>
+<td>挂载外部介质</td>
+</tr>
+<tr>
+<td>android.os.action.POWER_SAVE_MODE_CHANGED</td>
+<td>省电模式开启</td>
+</tr>
+</tbody>
+</table>
+<h4 id="强制停止应用"><a href="#强制停止应用" class="headerlink" title="强制停止应用"></a>强制停止应用</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am force-stop &lt;packagename&gt;</span><br></pre></td></tr></table></figure>
+<p>命令示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am force-stop cn.artaris.demo</span><br></pre></td></tr></table></figure>
+<p>表示停止 Demo 的一切进程与服务。</p>
+<h3 id="设备操作"><a href="#设备操作" class="headerlink" title="设备操作"></a>设备操作</h3><h4 id="截屏"><a href="#截屏" class="headerlink" title="截屏"></a>截屏</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb exec-out screencap -p &gt; sc.png</span><br></pre></td></tr></table></figure>
+<p>如果该命令不奏效，可分两步，先使用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell screencap -p /sdcard/screenshoot.png</span><br></pre></td></tr></table></figure></p>
+<p>命令将截图保存到设备中，再使用<code>adb pull</code>导出到电脑。</p>
+<h4 id="录屏"><a href="#录屏" class="headerlink" title="录屏"></a>录屏</h4><p>命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell screenrecord /sdcard/screenrecord.mp4</span><br></pre></td></tr></table></figure></p>
+<p>需要停止时按 <kbd>Ctrl+C</kbd>，默认录制时间和最长录制时间都是 180 秒。<br>再使用<code>adb pull</code>导出到电脑。<br>可以附加以下参数，确定录屏的参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>–size WIDTHxHEIGHT</td>
+<td>视频的尺寸，比如 <code>1280x720</code>，默认是屏幕分辨率。</td>
+</tr>
+<tr>
+<td>–bit-rate RATE</td>
+<td>视频的比特率，默认是 4Mbps。</td>
+</tr>
+<tr>
+<td>–time-limit TIME</td>
+<td>录制时长，单位秒。</td>
+</tr>
+<tr>
+<td>–verbose</td>
+<td>输出更多信息。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb reboot</span><br></pre></td></tr></table></figure>
+<h4 id="压力测试-Monkey"><a href="#压力测试-Monkey" class="headerlink" title="压力测试 Monkey"></a>压力测试 Monkey</h4><p>Monkey 可以生成伪随机用户事件来模拟单击、触摸、手势等操作，可以对正在开发中的程序进行随机压力测试。</p>
+<p>简单用法：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell monkey -p &lt;packagename&gt; -v 500</span><br></pre></td></tr></table></figure>
+<p>表示向 <code>&lt;packagename&gt;</code> 指定的应用程序发送 500 个伪随机事件。</p>
+<p>Monkey 的详细用法参考 <a href="https://developer.android.com/studio/test/monkey.html" target="_blank" rel="noopener">Monkey</a>。</p>
+<h4 id="修改分辨率"><a href="#修改分辨率" class="headerlink" title="修改分辨率"></a>修改分辨率</h4><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm size 960x540</span><br></pre></td></tr></table></figure>
+<p>表示将分辨率修改为 960px * 540px。</p>
+<p>恢复原分辨率命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm size reset</span><br></pre></td></tr></table></figure>
+<h2 id="Log日志查看"><a href="#Log日志查看" class="headerlink" title="Log日志查看"></a>Log日志查看</h2><p>Android 的日志输出到 /dev/log。查看命令为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb logcat [&lt;option&gt;] ... [&lt;filter-spec&gt;] ...</span><br></pre></td></tr></table></figure></p>
+<p>具体用法如下：</p>
+<h3 id="过滤日志输出"><a href="#过滤日志输出" class="headerlink" title="过滤日志输出"></a>过滤日志输出</h3><h3 id="按级别过滤日志"><a href="#按级别过滤日志" class="headerlink" title="按级别过滤日志"></a>按级别过滤日志</h3><p>Android 的日志分为如下几个优先级，我们在 Android Studio 的Logcat 选项卡中也可以过滤查看，含义如下</p>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V</td>
+<td>Verbose</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Debug</td>
+</tr>
+<tr>
+<td>I</td>
+<td>Info</td>
+</tr>
+<tr>
+<td>W</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Error</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Fatal</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Silent（啥也不输出）</td>
+</tr>
+</tbody>
+</table>
+<p>按某级别过滤日志则会将该级别及以上的日志全部输出。<br>eg.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb logcat *:W</span><br></pre></td></tr></table></figure></p>
+<p>会将<code>Warning</code>、<code>Warning</code>、<code>Warning</code>和<code>Silent</code>日志输出。<br>（<strong>注：</strong> 在 macOS 下需要给 <code>*:W</code> 这样以 <code>*</code> 作为 tag 的参数加双引号，如 <code>adb logcat &quot;*:W&quot;</code>，不然会报错 <code>no matches found: *:W</code>。）</p>
+<h3 id="按Tag过滤日志"><a href="#按Tag过滤日志" class="headerlink" title="按Tag过滤日志"></a>按Tag过滤日志</h3><p><code>&lt;filter-spec&gt;</code> 可以由多个 <code>&lt;tag&gt;[:priority]</code> 组成。</p>
+<p>比如，命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb logcat MainActivity:I DemoApp:D *:S</span><br></pre></td></tr></table></figure>
+<p>表示输出 tag <code>MainActivity</code> 的 Info 以上级别日志，输出 tag <code>DemoApp</code> 的 Debug 以上级别日志，及其它 tag 的 Silent 级别日志（即屏蔽其它 tag 日志）。</p>
+<h2 id="ADB-Shell-相关命令"><a href="#ADB-Shell-相关命令" class="headerlink" title="ADB Shell 相关命令"></a>ADB Shell 相关命令</h2><h3 id="查看进程"><a href="#查看进程" class="headerlink" title="查看进程"></a>查看进程</h3><p>命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell ps</span><br></pre></td></tr></table></figure></p>
+<p>输出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">USER     PID   PPID  VSIZE  RSS     WCHAN    PC        NAME</span><br><span class="line">root      1     0     8904   788   ffffffff 00000000 S /init</span><br><span class="line">root      2     0     0      0     ffffffff 00000000 S kthreadd</span><br><span class="line">...</span><br><span class="line">u0_a71    7779  5926  1538748 48896 ffffffff 00000000 S com.sohu.inputmethod.sogou:classic</span><br><span class="line">u0_a58    7963  5926  1561916 59568 ffffffff 00000000 S cn.artaris.demo</span><br><span class="line">...</span><br><span class="line">shell     8750  217   10640  740   00000000 b6f28340 R ps</span><br></pre></td></tr></table></figure></p>
+<p>各列含义如下：</p>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>USER</td>
+<td>所属用户</td>
+</tr>
+<tr>
+<td>PID</td>
+<td>进程 ID</td>
+</tr>
+<tr>
+<td>PPID</td>
+<td>父进程 ID</td>
+</tr>
+<tr>
+<td>NAME</td>
+<td>进程名</td>
+</tr>
+</tbody>
+</table>
+<p>下载地址<br><a href="http://gofile.me/3TjWz/EF4mgGZBZ" target="_blank" rel="noopener">Platform-Tools</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Android </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[MarkDown 语法学习笔记]]></title>
+      <url>http://artaris.cn/MarkDown/MarkDown-%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+      <content type="html"><![CDATA[<h5 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h5><a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br></pre></td></tr></table></figure>
+<h5 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h5><p>无序列表</p>
+<ul>
+<li>选项1</li>
+<li>选项2</li>
+<li>选项3</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- 选项1</span><br><span class="line">- 选项2</span><br><span class="line">- 选项3</span><br></pre></td></tr></table></figure>
+<p>有序列表</p>
+<ol>
+<li>选项1</li>
+<li>选项2</li>
+<li>选项3</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1. 选项1</span><br><span class="line">2. 选项2</span><br><span class="line">3. 选项3</span><br></pre></td></tr></table></figure>
+<h5 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h5><p><a href="http://artaris.cn">Aratis.CN</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[Aratis.CN](http://artaris.cn)</span><br></pre></td></tr></table></figure>
+<h5 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h5><p><img src="http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![示例图片](http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg)</span><br></pre></td></tr></table></figure>
+<h5 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h5><blockquote>
+<p>一失足成千古风流人物。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; 一失足成千古风流人物。</span><br></pre></td></tr></table></figure>
+<h5 id="斜体和粗体"><a href="#斜体和粗体" class="headerlink" title="斜体和粗体"></a>斜体和粗体</h5><p><em>直到相思了无益</em>，<strong>未妨惆怅是轻狂</strong>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*直到相思了无益*，**未妨惆怅是轻狂**。</span><br></pre></td></tr></table></figure></p>
+<h5 id="表格"><a href="#表格" class="headerlink" title="表格"></a>表格</h5><table>
+<thead>
+<tr>
+<th style="text-align:left">Tables</th>
+<th style="text-align:center">Row  1 is</th>
+<th style="text-align:right">Row  2 is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">col 3 is</td>
+<td style="text-align:center">A</td>
+<td style="text-align:right">D</td>
+</tr>
+<tr>
+<td style="text-align:left">col 2 is</td>
+<td style="text-align:center">B</td>
+<td style="text-align:right">E</td>
+</tr>
+<tr>
+<td style="text-align:left">col 1 is</td>
+<td style="text-align:center">C</td>
+<td style="text-align:right">F</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">| Tables        | Row  1 is     |  Row  2 is  |</span><br><span class="line">|:------------- |:-------------:| -----------:|</span><br><span class="line">| col 3 is      | A             | D           |</span><br><span class="line">| col 2 is      | B             | E           |</span><br><span class="line">| col 1 is      | C             | F           |</span><br></pre></td></tr></table></figure>
+]]></content>
+      
+        <categories>
+            
+            <category> MarkDown </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> MarkDown </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Hexo 建站笔记]]></title>
+      <url>http://artaris.cn/Hexo/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/</url>
+      <content type="html"><![CDATA[<h3 id="建站流程"><a href="#建站流程" class="headerlink" title="建站流程"></a>建站流程</h3><a id="more"></a>
+<p><code>//todo</code></p>
+<h3 id="站点配置"><a href="#站点配置" class="headerlink" title="站点配置"></a>站点配置</h3><ul>
+<li>Permalink</li>
+<li>GitHub</li>
+<li>多说</li>
+<li>GitHub 挂饰</li>
+</ul>
+<p><code>//todo</code></p>
+<h3 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h3><h4 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h4><ul>
+<li>多说</li>
+<li>不蒜子</li>
+<li>Avatar</li>
+<li>Menu</li>
+<li>Social</li>
+<li>Sidebar</li>
+</ul>
+<p><code>//todo</code></p>
+<h3 id="写文章"><a href="#写文章" class="headerlink" title="写文章"></a>写文章</h3><ul>
+<li>Atom</li>
+<li>七牛</li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> Hexo </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Hexo </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Hello World]]></title>
+      <url>http://artaris.cn/MicroBlog/Hello%20World/</url>
+      <content type="html"><![CDATA[<p><code>sudo apt-get install GirlFriend</code><br>正在读取软件包列表…<br>完成正在分析软件包的依赖关系树…<br>完成有一些软件包无法被安装。<br>下列的信息可能会对解决问题有所帮助：<br>下列的软件包有不能满足的依赖关系：<br><code>GirlFriend</code>: 依赖: <code>House</code> 但是它将不会被安装<br><code>GirlFriend</code>: 依赖: <code>Car</code> 但是它将不会被安装<br><code>House</code> ,<code>Car</code> : 依赖: <code>Money</code> 但是它将不会被安装<br><code>Error</code>: 无法安装的软件包</p>
+]]></content>
+      
+        <categories>
+            
+            <category> MicroBlog </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 戏说 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+  
+  
+</search>
