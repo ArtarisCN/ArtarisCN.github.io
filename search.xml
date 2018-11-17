@@ -4,6 +4,352 @@
   
     
     <entry>
+      <title></title>
+      <url>http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/</url>
+      <content type="html"><![CDATA[<h1 id="数据结构——栈和队列"><a href="#数据结构——栈和队列" class="headerlink" title="数据结构——栈和队列"></a>数据结构——栈和队列</h1><hr>
+<p>title: 数据结构——栈和队列<br>date: 2018-04-16 10:02:35<br>tags: [数据结构]<br>categroies:</p>
+<ul>
+<li>数据结构</li>
+</ul>
+<hr>
+<p>栈和队列是线性表的一种，只是它们是操作受限的线性表。</p>
+<h1 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h1><p>栈是只能在表尾进行插入或删除操作的线性表，通常我们称表尾端为栈顶，表头端为栈底，它是一种先进后出的线性表，既只能在表尾端插入元素，称为入栈，也只能在表尾端删除元素，称为出栈。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java.lang.Object</span><br><span class="line">↳     java.util.AbstractCollection&lt;E&gt;</span><br><span class="line">   ↳     java.util.AbstractList&lt;E&gt;</span><br><span class="line">       ↳     java.util.Vector&lt;E&gt;</span><br><span class="line">           ↳     java.util.Stack&lt;E&gt;</span><br><span class="line"></span><br><span class="line">public class Stack&lt;E&gt; extends Vector&lt;E&gt; &#123;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Stack的API"><a href="#Stack的API" class="headerlink" title="Stack的API"></a>Stack的API</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">             boolean       empty()              // 栈是否为空</span><br><span class="line">synchronized E             peek()               // 返回栈顶元素，不执行删除操作</span><br><span class="line">synchronized E             pop()                // 返回栈顶元素，并将其从栈中删除</span><br><span class="line">             E             push(E object)       // 将元素存入栈顶</span><br><span class="line">synchronized int           search(Object o)     // 查找“元素o”在栈中的位置：由栈底向栈顶方向数</span><br></pre></td></tr></table></figure>
+<h1 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h1><p>队列刚好和栈相反，它是一种先进先出（FIFO）的线性表，只能在一端插入元素，在另一端删除元素，如下图所示，允许插入元素的一端称为队尾，允许删除元素的一端称为队头。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">java.lang.Iterable&lt;E&gt;</span><br><span class="line">↳     java.util.Collection&lt;E&gt;</span><br><span class="line">   ↳     java.util.Stack&lt;E&gt;</span><br><span class="line"></span><br><span class="line">public interface Queue&lt;E&gt; extends Collection&lt;E&gt;  &#123;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="队列的实现"><a href="#队列的实现" class="headerlink" title="队列的实现"></a>队列的实现</h2><ul>
+<li>没有实现的阻塞接口 LinkedList </li>
+<li>实现阻塞接口的<ul>
+<li>ArrayBlockingQueue ：一个由数组支持的有界队列。</li>
+<li>LinkedBlockingQueue ：一个由链接节点支持的可选有界队列。</li>
+<li>PriorityBlockingQueue ：一个由优先级堆支持的无界优先级队列。</li>
+<li>DelayQueue ：一个由优先级堆支持的、基于时间的调度队列。</li>
+<li>SynchronousQueue ：一个利用 BlockingQueue 接口的简单聚集（rendezvous）机制。</li>
+</ul>
+</li>
+</ul>
+<h3 id="Queue-的-API"><a href="#Queue-的-API" class="headerlink" title="Queue 的 API"></a>Queue 的 API</h3><table>
+<thead>
+<tr>
+<th style="text-align:left">func</th>
+<th style="text-align:left">return</th>
+<th style="text-align:left">explain</th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>add(E e)</strong></td>
+<td style="text-align:left">boolean</td>
+<td style="text-align:left">增加一个元索</td>
+<td style="text-align:left">如果队列已满，则抛出一个 IIIegaISlabEepeplian 异常</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>remove()</strong></td>
+<td style="text-align:left">E</td>
+<td style="text-align:left">移除并返回队列头部的元素</td>
+<td style="text-align:left">如果队列为空，则抛出一个 NoSuchElementException 异常</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>element()</strong></td>
+<td style="text-align:left">E</td>
+<td style="text-align:left">返回队列头部的元素</td>
+<td style="text-align:left">如果队列为空，则抛出一个 NoSuchElementException 异常</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>offer(E e)</strong></td>
+<td style="text-align:left">boolean</td>
+<td style="text-align:left">添加一个元素并返回true</td>
+<td style="text-align:left">如果队列已满，则返回false</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>poll()</strong></td>
+<td style="text-align:left">E</td>
+<td style="text-align:left">移除并返问队列头部的元素</td>
+<td style="text-align:left">如果队列为空，则返回null</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>peek()</strong></td>
+<td style="text-align:left">E</td>
+<td style="text-align:left">返回队列头部的元素</td>
+<td style="text-align:left">如果队列为空，则返回null</td>
+</tr>
+<tr>
+<td style="text-align:left">put(E e)</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">添加一个元素</td>
+<td style="text-align:left">如果队列满，则阻塞</td>
+</tr>
+<tr>
+<td style="text-align:left">take()</td>
+<td style="text-align:left">E e</td>
+<td style="text-align:left">移除并返回队列头部的元素</td>
+<td style="text-align:left">如果队列为空，则阻塞</td>
+</tr>
+</tbody>
+</table>
+]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title></title>
+      <url>http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AF%87%E2%80%94%E2%80%94%E6%8E%92%E5%BA%8F/</url>
+      <content type="html"><![CDATA[<h1 id="数据结构篇——排序"><a href="#数据结构篇——排序" class="headerlink" title="数据结构篇——排序"></a>数据结构篇——排序</h1><hr>
+<p>title: 数据结构篇——排序<br>date: 2018-04-16 10:02:35<br>tags: [数据结构]<br>categroies:</p>
+<ul>
+<li>数据结构</li>
+</ul>
+<hr>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">时间复杂度</th>
+<th style="text-align:center">空间复杂度</th>
+<th style="text-align:center">稳定性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">插入排序</td>
+<td style="text-align:center">O(n2)</td>
+<td style="text-align:center">O(1)</td>
+<td style="text-align:center">稳定</td>
+</tr>
+<tr>
+<td style="text-align:center">选择排序</td>
+<td style="text-align:center">O(n2)</td>
+<td style="text-align:center">O(1)</td>
+<td style="text-align:center">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:center">冒泡排序</td>
+<td style="text-align:center">O(n2)</td>
+<td style="text-align:center">O(1)</td>
+<td style="text-align:center">稳定</td>
+</tr>
+<tr>
+<td style="text-align:center">归并排序</td>
+<td style="text-align:center">O(nLog2n)</td>
+<td style="text-align:center">O(1)</td>
+<td style="text-align:center">稳定</td>
+</tr>
+<tr>
+<td style="text-align:center">快速排序</td>
+<td style="text-align:center">O(nLog2n)</td>
+<td style="text-align:center">O(nLog2n)</td>
+<td style="text-align:center">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:center">堆排序</td>
+<td style="text-align:center">O(nLog2n)</td>
+<td style="text-align:center">(1)</td>
+<td style="text-align:center">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:center">希尔排序</td>
+<td style="text-align:center">O(n1.5)</td>
+<td style="text-align:center">O(1)</td>
+<td style="text-align:center">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:center">桶排序</td>
+<td style="text-align:center">O(n)</td>
+<td style="text-align:center">O(n)</td>
+<td style="text-align:center">不稳定</td>
+</tr>
+</tbody>
+</table>
+<h3 id="插入排序"><a href="#插入排序" class="headerlink" title="插入排序"></a>插入排序</h3><p>直接插入排序的核心思想就是：将数组中的所有元素依次跟前面已经排好的元素相比较，如果选择的元素比已排序的元素小，则交换，直到全部元素都比较过。<br>因此，从上面的描述中我们可以发现，直接插入排序可以用两个循环完成：</p>
+<ol>
+<li>第一层循环：遍历待比较的所有数组元素</li>
+<li>第二层循环：将本轮选择的元素(selected)与已经排好序的元素(ordered)相比较。找到它应该在有序队列的位置之后，将二者交换。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public static void insertSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (int i = 1; i &lt; num.length; i++) &#123;</span><br><span class="line">        int v = num[i], j;</span><br><span class="line">        for (j = i; j &gt; 0 &amp;&amp; v &lt; num[j - 1]; j--) &#123;</span><br><span class="line">            num[j] = num[j - 1];</span><br><span class="line">        &#125;</span><br><span class="line">        num[j] = v;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="选择排序"><a href="#选择排序" class="headerlink" title="选择排序"></a>选择排序</h3><p>选择排序是一直非常直观的选择办法，它每次寻找当前未排序列表中最大（小）的数，放在队列的首（尾），然后从未排序的队列中取出，再找剩下队列的最值。经过<code>n-1</code>次循环排序完成。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public static void selectSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    for (int i = 0; i &lt; num.length - 1; i++) &#123;</span><br><span class="line">        int min = i, temp;</span><br><span class="line">        for (int j = num.length - 1; j &gt; i; j--) &#123;</span><br><span class="line">            if (num[j] &lt; num[min]) &#123;</span><br><span class="line">            min = j;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        temp = num[min];</span><br><span class="line">        num[min] = num[i];</span><br><span class="line">        num[i] = temp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h3><p>冒泡排序是一种简单的排序算法，他依次的检查要排序的数列，每次比较两个数，如果他们顺序有误就把他们调换过来，经过依次走访，有一个最大（最小）的数据就会落座，经过<code>n-1</code>次循环排序完成。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public static void bubbleSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    for (int i = 1; i &lt; num.length; i++) &#123;</span><br><span class="line">        for (int j = 0; j &lt; num.length - i; j++) &#123;</span><br><span class="line">            if (num[j] &gt; num[j + 1]) &#123;</span><br><span class="line">                num[j + 1] = num[j + 1] + num[j];</span><br><span class="line">                num[j] = num[j + 1] - num[j];</span><br><span class="line">                num[j + 1] = num[j + 1] - num[j];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="归并排序"><a href="#归并排序" class="headerlink" title="归并排序"></a>归并排序</h3><p>归并排序是基于归并操作的一种排序算法，即将两个已经排好序的数组合并成一个序列的操作。<br>对于使用时，使用了分治方法，即将数组递归分割成两两等分，比较再进行合并。使用时需要注意边界数据处理。<br>每次合并操作的平均时间复杂度为O(n)，而完全二叉树的深度为|log2n|。总的平均时间复杂度为O(nlogn)。<br>迭代方法即将步长从1增加至 n.length / 2 ,分组排序及合并。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">public static void mergeSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    merge(num, 0, num.length - 1, new int[num.length]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private static void merge(int[] num, int start, int end, int[] temp) &#123;</span><br><span class="line">    if (start &lt; end) &#123;</span><br><span class="line">        int mid = (end + start) / 2;</span><br><span class="line">        merge(num, start, mid, temp);</span><br><span class="line">        merge(num, mid + 1, end, temp);</span><br><span class="line">        mergeArray(num, start, mid, end, temp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private static void mergeArray(int[] num, int start, int mid, int end, int[] temp) &#123;</span><br><span class="line">    int i = start, j = mid + 1;</span><br><span class="line">    int k = 0;</span><br><span class="line"></span><br><span class="line">    while (i &lt;= mid &amp;&amp; j &lt;= end) &#123;</span><br><span class="line">        if (num[i] &lt; num[j])</span><br><span class="line">            temp[k++] = num[i++];</span><br><span class="line">        else if (num[i] == num[j])</span><br><span class="line">            temp[k++] = num[i++];</span><br><span class="line">        else</span><br><span class="line">            temp[k++] = num[j++];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    while (i &lt;= mid)</span><br><span class="line">        temp[k++] = num[i++];</span><br><span class="line"></span><br><span class="line">    while (j &lt;= end)</span><br><span class="line">        temp[k++] = num[j++];</span><br><span class="line">    </span><br><span class="line">    for (i = 0; i &lt; k; i++)</span><br><span class="line">        num[start + i] = temp[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h3><p>快速排序（Quicksort）是对冒泡排序的一种改进。它的基本思想是：通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据变成有序序列。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">public static void quickSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    _quickSort(num, 0, num.length - 1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private static void _quickSort(int[] num, int start, int end) &#123;</span><br><span class="line">    if (start &gt;= end)</span><br><span class="line">        return;</span><br><span class="line"></span><br><span class="line">    int t = num[start]，i = start, j = end;</span><br><span class="line"></span><br><span class="line">    while (j != i) &#123;</span><br><span class="line">        while (j &gt; i &amp;&amp; num[j] &gt;= t) </span><br><span class="line">            j--;</span><br><span class="line"></span><br><span class="line">        while (j &gt; i &amp;&amp; num[i] &lt;= t) </span><br><span class="line">            i++;</span><br><span class="line"></span><br><span class="line">        if (i &lt; j) &#123;</span><br><span class="line">            int temp = num[j];</span><br><span class="line">            num[j] = num[i];</span><br><span class="line">            num[i] = temp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int temp = num[i];</span><br><span class="line">    num[i] = num[start];</span><br><span class="line">    num[start] = temp;</span><br><span class="line"></span><br><span class="line">    _quickSort(num, start, i - 1);</span><br><span class="line">    _quickSort(num, i + 1, end);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h3><p>堆排序是根据堆的原理——堆是一个完全二叉树，切如大顶堆，每个父节点的值都大于他的子节点，当一个已经构造完成的大顶堆，每次将堆顶的数据与最后一个值调换，再将剩余的数据重新排列成一个大顶堆，重复这个过程，就构排序完成了。则问题变成了构造大顶堆及调换数字再构造的过程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">public static void heapSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (int i = num.length / 2 - 1; i &gt;= 0; i--) &#123;</span><br><span class="line">        //构造大顶堆，初始化</span><br><span class="line">        buildMaxHeap(num, i, num.length - 1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (int i = num.length - 1; i &gt; 0; i--) &#123;</span><br><span class="line">        //交换堆顶与最后一位字符的顺序</span><br><span class="line">        num[i] = num[i] + num[0];</span><br><span class="line">        num[0] = num[i] - num[0];</span><br><span class="line">        num[i] = num[i] - num[0];</span><br><span class="line">        </span><br><span class="line">        //对剩下的数据继续构造大顶堆</span><br><span class="line">        buildMaxHeap(num, 0, i - 1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private static void buildMaxHeap(int[] num, int start, int end) &#123;</span><br><span class="line">    //father 为要构造的分支的父节点，son为父节点的左子树</span><br><span class="line">    int father = start, son = start * 2 + 1;</span><br><span class="line">    //son 为寻找最大数值的指针，从左子树的根节点开始，到末尾为止</span><br><span class="line">    while (son &lt;= end) &#123;</span><br><span class="line">        //如果当前指针不如根节点大，则指向右节点</span><br><span class="line">        if (son + 1 &lt; end &amp;&amp; num[son] &lt; num[son + 1]) &#123;</span><br><span class="line">            son++;</span><br><span class="line">        &#125;</span><br><span class="line">        if (num[father] &lt;= num[son]) &#123;</span><br><span class="line">            //若根节点比左右子树都大，直接返回，否则交换根节点与左右子树的值,因为比较时是从最后一个非叶子节点开始的，所以直接比较根节点与左右子树就可以</span><br><span class="line">            num[father] = num[father] + num[son];</span><br><span class="line">            num[son] = num[father] - num[son];</span><br><span class="line">            num[father] = num[father] - num[son];</span><br><span class="line">        &#125;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="希尔排序"><a href="#希尔排序" class="headerlink" title="希尔排序"></a>希尔排序</h3><p>先将整个待排序的记录序列分割成为若干子序列分别进行直接插入排序，待整个序列中的记录”基本有序”时，再对全体记录进行依次直接插入排序。<br>步骤为</p>
+<ul>
+<li>先按照步长为一遍数组的长度，分组，进行插入排序；</li>
+<li>缩小步长为刚才的一半，继续分组排序；</li>
+<li>直到步长为1时经过一遍排序完成；<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public static void shellSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    //步长为初始数组长度的一半，最短为1</span><br><span class="line">    for (int gap = num.length / 2; gap &gt; 0; gap /= 2) &#123;</span><br><span class="line">        for (int i = gap; i &lt; num.length; i++) &#123;</span><br><span class="line">            int j = i;</span><br><span class="line">            //冒泡排序</span><br><span class="line">            while (j - gap &gt; 0 &amp;&amp; num[j] &lt; num[j - gap]) &#123;</span><br><span class="line">                num[j] = num[j] + num[j - gap];</span><br><span class="line">                num[j - gap] = num[j] - num[j - gap];</span><br><span class="line">                num[j] = num[j] - num[j - gap];</span><br><span class="line">                j = j - gap;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="桶排序"><a href="#桶排序" class="headerlink" title="桶排序"></a>桶排序</h3><p>桶排序是一种以空间换时间的排序方法，事先要知道待排序数组的范围，申请一个空间为待排序数组最大值减去最小值的记录数组，然后依次遍历数组，出现某个数则标记相应位置+1，全部遍历完成再从小到大遍历记录数组，输出出现次数即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public static void bucketSort(int[] num) &#123;</span><br><span class="line">    if (num == null || num.length &lt; 2) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;</span><br><span class="line">    for (int i : num) &#123;</span><br><span class="line">        max = Math.max(max, i);</span><br><span class="line">        min = Math.min(min, i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int[] bucket = new int[max - min + 1];</span><br><span class="line"></span><br><span class="line">    for (int i : num) &#123;</span><br><span class="line">        bucket[i - min]++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int index = 0;</span><br><span class="line">    for (int i = 0; i &lt; bucket.length; i++) &#123;</span><br><span class="line">        while (bucket[i]-- &gt; 0) &#123;</span><br><span class="line">            num[index++] = i + 1;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title></title>
+      <url>http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E4%BA%8C%E5%8F%89%E6%A0%91/</url>
+      <content type="html"><![CDATA[<h1 id="数据结构——二叉树"><a href="#数据结构——二叉树" class="headerlink" title="数据结构——二叉树"></a>数据结构——二叉树</h1><hr>
+<p>title: 数据结构——线性表<br>date: 2018-04-18 11:26:35<br>tags: [数据结构]<br>categroies:</p>
+<ul>
+<li>数据结构</li>
+</ul>
+<hr>
+<p>#数据结构#<br>树形结构的基本概念：</p>
+<ul>
+<li><strong>根节点</strong>：</li>
+<li><strong>度</strong>：结点拥有的直接子节点数称为<strong>结点的度</strong></li>
+<li><strong>叶子</strong>：度为0的结点称为<strong>叶子</strong></li>
+<li><strong>树的度</strong>：所有结点的度中的最大值</li>
+<li><strong>孩子</strong>：一个结点的直接子结点称为它的<strong>孩子</strong></li>
+<li><strong>双亲</strong>：一个节点的父节点就是他的双亲节点</li>
+<li><strong>深度</strong>：树中最大的结点层</li>
+</ul>
+<h1 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h1><p>一个结点的直接子节点最多只能有两个，并且有左右之分，次序不能随意颠倒。</p>
+<h4 id="满二叉树"><a href="#满二叉树" class="headerlink" title="满二叉树"></a>满二叉树</h4><ol>
+<li>所有分支结点的度为２；</li>
+<li>所有叶子结点只能分布在最下层上；</li>
+<li>同样深度的二叉树中，满二叉树的结点数最多，叶子结点数最多；</li>
+</ol>
+<ul>
+<li>满二叉树的深度：log2(n+1)；</li>
+</ul>
+<h4 id="完全二叉树（只有最底下一层不满的满二叉树）"><a href="#完全二叉树（只有最底下一层不满的满二叉树）" class="headerlink" title="完全二叉树（只有最底下一层不满的满二叉树）"></a>完全二叉树（只有最底下一层不满的满二叉树）</h4><ol>
+<li>二叉树从根结点出发，按着层次从左到右遍历，第i个结点的位置与满二叉树中对应结点位置完全相同；</li>
+<li>所有叶子结点只能出现在最下两层；</li>
+<li>若结点度为1，则该结点只有左子树，不存在只有右子树的情况；</li>
+<li>结点分配<code>先左后右</code>；</li>
+</ol>
+<h4 id="遍历二叉树"><a href="#遍历二叉树" class="headerlink" title="遍历二叉树"></a>遍历二叉树</h4><ol>
+<li>先序遍历：先访问根节点；先序遍历左子树；先序遍历右子树；</li>
+<li>中序遍历：中序遍历左子树；访问根节点；中序遍历右子树；</li>
+<li>后序遍历：后序遍历左子树；后序遍历右子树；访问根节点；</li>
+</ol>
+<p>先序遍历——前缀表示——波兰式<br>后序遍历——后缀表示——逆波兰式</p>
+<h4 id="线索二叉树"><a href="#线索二叉树" class="headerlink" title="线索二叉树"></a>线索二叉树</h4><p>增加节点的左右指针一个标志位：是否为叶子节点。当为叶子节点的时候，其左右指针指向其某种遍历的前驱、后驱；否则指向其左右子树。</p>
+<ul>
+<li><strong>线索</strong>：指向节点前驱与后驱的指针叫做<strong>线索</strong></li>
+<li><strong>线索化</strong>：以某种次序遍历使其变为线索二叉树的过程</li>
+</ul>
+<h4 id="二叉排序树"><a href="#二叉排序树" class="headerlink" title="二叉排序树"></a>二叉排序树</h4><p>二叉排序树又称二叉查找树，亦称二叉搜索树，它主要用于查找。 它或者是一棵空树；或者是具有下列性质的二叉树：<br>（1）若左子树不空，则左子树上所有结点的值均小于它的根结点的值；<br>（2）若右子树不空，则右子树上所有结点的值均大于它的根结点的值；<br>（3）左、右子树也分别为二叉排序树；</p>
+<p>中序遍历二叉排序树可得到其有序序列，讲一个无序序列变为二叉排序树是一个排序过程。</p>
+<h4 id="平衡二叉树"><a href="#平衡二叉树" class="headerlink" title="平衡二叉树"></a>平衡二叉树</h4><p>平衡二叉树又被称为AVL树，且具有以下性质：它是一棵空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是一棵平衡二叉树，由它可以生成平衡二叉搜索树，查找效率会更高。构造与调整方法平衡二叉树的常用算法有红黑树、AVL、Treap等。最小二叉平衡树的节点的公式如下F(n)=F(n-1)+F(n-2)+1这个类似于一个递归的数列，可以参考Fibonacci数列，1是根节点，F(n-1)是左子树的节点数量，F(n-2)是右子树的节点数量。</p>
+<ul>
+<li><p><strong>平衡因子</strong>：左子树的深度减去右子树的深度<br>平衡二叉树的平衡因子只会是-1，0，1</p>
+</li>
+<li><p>在结点的左子树的左子树插入元素,LL 插入；<br><img src="https://ws4.sinaimg.cn/large/006tNbRwly1fwzn333ggzj30k405gaax.jpg" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> * 右旋（顺时针旋转）</span><br><span class="line"> *</span><br><span class="line"> * @param node 失衡结点 </span><br><span class="line"> * @return 旋转后根节点</span><br><span class="line"> */</span><br><span class="line">private TreeNode&lt;T&gt; rightRotate(TreeNode&lt;T&gt; node) &#123;</span><br><span class="line">    // 将失衡结点的左子树赋给一个临时结点，也就是将A的左子树B 赋给新的结点</span><br><span class="line">    TreeNode&lt;T&gt; newRoot = node.leftChild;</span><br><span class="line">    // 将B 被右子树BR 挂在A 的左子树上</span><br><span class="line">    node.leftChild = newRoot.rightChild;</span><br><span class="line">    // B 的右子树为失衡的结点即A</span><br><span class="line">    newRoot.rightChild = node;</span><br><span class="line">    // 结点A 的高度为左右子树高度最大值加1</span><br><span class="line">    node.height = getMax(height(node.leftChild), height(node.rightChild)) + 1;</span><br><span class="line">    // 结点B 的高度为左右子树高度最大值加1</span><br><span class="line">    newRoot.height = getMax(height(newRoot.leftChild), newRoot.height) + 1;</span><br><span class="line">    // 返回根节点</span><br><span class="line">    return newRoot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在结点的左子树的右子树插入元素,LR 插入；</p>
+</li>
+<li><p>在结点的右子树的左子树插入元素,RL 插入；</p>
+</li>
+<li>在结点的右子树的右子树插入元素,RR 插入。</li>
+</ul>
+<ol>
+<li>如上所述的第3步，当插入元素后导致左边高，右边低，并且为4和3的平衡因子符号相同，则右旋。</li>
+<li>如上所诉的第5步，当插入节点9后，导致以4为根的树右边高，左边低，4和7的平衡因子符号相同，则左旋</li>
+<li>如上所述的第7步，当插入节点10后，导致以9为根的树右边高，左边低，由于9和11的平衡因子符号不同（也就是根和他的右孩子的平衡因子符号不同）不能进行左旋，正确操作：需要先右旋在左旋，要让根和根的右孩子平衡因子符号相同。</li>
+<li>第4种旋转和3相反，当左边高于右边的话，且根和他的左孩子，平衡因子符号不同，需要先左旋再右旋</li>
+</ol>
+<h4 id="哈夫曼树"><a href="#哈夫曼树" class="headerlink" title="哈夫曼树"></a>哈夫曼树</h4><p>哈夫曼树也称最优二叉树，它是带权路径长度最小的二叉树。</p>
+<p>哈夫曼树的构造规则为：<br>(1) 将w1、w2、…、wn看成是有n 棵树的集合(每棵树仅有一个结点)；<br>(2) 在集合中选出两个根结点的权值最小的树合并，作为一棵新树的左、右子树，且新树的根结点权值为其左、右子树根结点权值之和；<br>(3)从集合中删除选取的两棵树，并将新树加入集合；<br>(4)重复(2)、(3)步，直到集合中只剩一棵树为止，该树即为所求得的哈夫曼树。</p>
+<p><strong>为了使得到的哈夫曼树的结构尽量唯一，通常规定生成的哈夫曼树中每个结点的左子树根结点的权小于等于右子树根结点的权。</strong></p>
+<h5 id="哈夫曼编码"><a href="#哈夫曼编码" class="headerlink" title="哈夫曼编码"></a>哈夫曼编码</h5><p>电文是以二进制的0、1序列传送的，每个字符对应一个二进制编码，为了缩短电文的总长度，采用不等长编码方式，构造哈夫曼树，<br>将每个字符的出现频率作为字符结点的权值赋予叶子结点，每个分支结点的左右分支分别用0和1编码，从树根结点到每个叶子结点的路径上</p>
+<h4 id="B-树、B-树"><a href="#B-树、B-树" class="headerlink" title="B 树、B+ 树"></a>B 树、B+ 树</h4><p>这里的B树，也就是英文中的B-Tree，一个 m 阶的B树满足以下条件：</p>
+<ol>
+<li>每个结点至多拥有m棵子树；</li>
+<li>根结点至少拥有两颗子树（存在子树的情况下）；</li>
+<li>除了根结点以外，其余每个分支结点至少拥有 m/2 棵子树；</li>
+<li>所有的叶结点都在同一层上；</li>
+<li>有 k 棵子树的分支结点则存在 k-1 个关键码，关键码按照递增次序进行排列；</li>
+<li>关键字数量需要满足ceil(m/2)-1 &lt;= n &lt;= m-1；</li>
+</ol>
+<h4 id="红黑树RBTree"><a href="#红黑树RBTree" class="headerlink" title="红黑树RBTree"></a>红黑树<em>RBTree</em></h4><ol>
+<li>每个节点要么是黑的，要么是红的</li>
+<li>根节点是黑的</li>
+<li>叶节点是黑的</li>
+<li>如果一个节点是红的，他的两个儿子节点都是黑的</li>
+<li>对于任一节点而言，其到叶节点树尾端NIL指针的每一条路径都包含相同数目的黑节点</li>
+<li>新插入的节点总是设为红色的</li>
+</ol>
+]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title></title>
+      <url>http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E8%A1%A8/</url>
+      <content type="html"><![CDATA[<h1 id="数据结构——线性表"><a href="#数据结构——线性表" class="headerlink" title="数据结构——线性表"></a>数据结构——线性表</h1><hr>
+<p>title: 数据结构——线性表<br>date: 2018-04-13 11:26:35<br>tags: [数据结构]<br>categroies:</p>
+<ul>
+<li>数据结构</li>
+</ul>
+<hr>
+<p><strong>线性表</strong>属于数据结构中的线性结构，<strong>线性结构</strong>具体有以下特征：</p>
+<ul>
+<li>集合中必存在唯一的一个<strong>第一个元素</strong>；</li>
+<li>集合中必存在唯一的一个<strong>最后的元素</strong>；</li>
+<li>除最后元素之外，其它数据元素均有唯一的<strong>后继</strong>；</li>
+<li>除第一元素之外，其它数据元素均有唯一的<strong>前驱</strong>；</li>
+</ul>
+<p><strong>线性表</strong>是一个含有<code>n ≥ 0</code>个结点的有限序列，对于其中的结点，有且仅有一个开始结点没有前驱但有一个后继结点，有且仅有一个终端结点没有后继但有一个前驱结点，其它的结点都有且仅有一个前驱和一个后继结点。一般地，一个线性表可以表示成一个线性序列：<code>k1，k2，…，kn</code>，其中<code>k1</code>是开始结点，<code>kn</code>是终端结点。</p>
+<p>线性表包含下列基本操作：初始化、销毁、重置为空表、判断是否为空、获取长度、根据位置获取对应元素、查找元素、获取指定元素的前驱和后继元素、插入元素、删除元素、遍历元素。</p>
+<h4 id="线性表的顺序表示和实现"><a href="#线性表的顺序表示和实现" class="headerlink" title="线性表的顺序表示和实现"></a>线性表的顺序表示和实现</h4><p>线性表的顺序表示指的是用物理上的一段连续的地址来存储数据元素，如下图所示。如果第一个元素的在内存上的地址为a1，每个元素占用的空间是l，那么第n个元素的地址就是a1+(n-1) x l。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内存中的存储位置</th>
+<th style="text-align:center">Row 1 is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">a1</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:left">a1 + l</td>
+<td style="text-align:center">2</td>
+</tr>
+<tr>
+<td style="text-align:left">a1 + 2l</td>
+<td style="text-align:center">3</td>
+</tr>
+<tr>
+<td style="text-align:left">…</td>
+<td style="text-align:center">…</td>
+</tr>
+<tr>
+<td style="text-align:left">…</td>
+<td style="text-align:center">…</td>
+</tr>
+<tr>
+<td style="text-align:left">…</td>
+<td style="text-align:center">…</td>
+</tr>
+<tr>
+<td style="text-align:left">a1+(n-1) x l</td>
+<td style="text-align:center">n</td>
+</tr>
+</tbody>
+</table>
+<h4 id="线性表的链式表示和实现"><a href="#线性表的链式表示和实现" class="headerlink" title="线性表的链式表示和实现"></a>线性表的链式表示和实现</h4><p>线性表的顺序存储结构是逻辑位置和物理位置都相邻，而链式存储结构是逻辑位置相邻，但物理位置不一定相邻，相比顺序存储结构，它不能随机存取，但在插入和删除操作时不需要移动元素，大大提高了增加和删除元素的效率。</p>
+<p>通常链式存储结构会有一个个结点组成，结点中包含两个域一个是数据域，一个是指针域，数据域中存储数据，指针域中存储下一个后继元素的地址，如下图所示，这一个个结点组成链表，也称<strong>线性链表</strong>或<strong>单链表</strong>。</p>
+<p>除此之外，还有<strong>循环链表</strong>和<strong>双向链表</strong>。</p>
+]]></content>
+      
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Android 线程池的使用]]></title>
       <url>http://artaris.cn/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
       <content type="html"><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
