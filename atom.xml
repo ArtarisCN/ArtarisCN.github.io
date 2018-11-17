@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://artaris.cn/"/>
-  <updated>2018-11-16T12:12:45.866Z</updated>
+  <updated>2018-11-17T10:28:21.118Z</updated>
   <id>http://artaris.cn/</id>
   
   <author>
@@ -17,19 +17,13 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
-    <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/"/>
-    <id>http://artaris.cn/uncategorized/数据结构——栈和队列/</id>
-    <published>2018-11-12T02:20:34.366Z</published>
-    <updated>2018-11-16T12:12:45.866Z</updated>
+    <title>OMAndroid</title>
+    <link href="http://artaris.cn/uncategorized/OMAndroid/"/>
+    <id>http://artaris.cn/uncategorized/OMAndroid/</id>
+    <published>2018-11-17T10:28:21.000Z</published>
+    <updated>2018-11-17T10:28:21.118Z</updated>
     
     <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;数据结构——栈和队列&quot;&gt;&lt;a href=&quot;#数据结构——栈和队列&quot; class=&quot;headerlink&quot; title=&quot;数据结构——栈和队列&quot;&gt;&lt;/a&gt;数据结构——栈和队列&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;title: 数据结构——栈和队列&lt;br&gt;date: 2018-0
-      
     
     </summary>
     
@@ -37,19 +31,16 @@
   </entry>
   
   <entry>
-    <title></title>
-    <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AF%87%E2%80%94%E2%80%94%E6%8E%92%E5%BA%8F/"/>
-    <id>http://artaris.cn/uncategorized/数据结构篇——排序/</id>
-    <published>2018-11-12T02:20:15.123Z</published>
-    <updated>2018-11-16T12:12:45.858Z</updated>
+    <title>[北京]出闲置</title>
+    <link href="http://artaris.cn/uncategorized/%E5%8C%97%E4%BA%AC-%E5%87%BA%E9%97%B2%E7%BD%AE/"/>
+    <id>http://artaris.cn/uncategorized/北京-出闲置/</id>
+    <published>2018-10-11T10:15:34.000Z</published>
+    <updated>2018-11-17T10:17:28.413Z</updated>
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;数据结构篇——排序&quot;&gt;&lt;a href=&quot;#数据结构篇——排序&quot; class=&quot;headerlink&quot; title=&quot;数据结构篇——排序&quot;&gt;&lt;/a&gt;数据结构篇——排序&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;title: 数据结构篇——排序&lt;br&gt;date: 2018-04-16 
-      
+      &lt;h1 id=&quot;【北京】出闲置-坚果Pro2-一加3T-PS4-小米电视-紫米无线充电器-机械键盘-等，收二手-MIX-2S&quot;&gt;&lt;a href=&quot;#【北京】出闲置-坚果Pro2-一加3T-PS4-小米电视-紫米无线充电器-机械键盘-等，收二手-MIX-2S&quot; class=&quot;headerlink&quot; title=&quot;【北京】出闲置[坚果Pro2][一加3T][PS4][小米电视][紫米无线充电器][机械键盘]等，收二手[MIX 2S]&quot;&gt;&lt;/a&gt;【北京】出闲置[坚果Pro2][一加3T][PS4][小米电视][紫米无线充电器][机械键盘]等，收二手[MIX 2S]&lt;/h1&gt;&lt;p&gt;以下东西北京均可面交，外地走闲鱼(电视除外)。&lt;/p&gt;
+&lt;p&gt;电视就只北京吧，外地不考虑了，弄个货拉拉给你送过去了。&lt;/p&gt;
     
     </summary>
     
@@ -57,42 +48,149 @@
   </entry>
   
   <entry>
-    <title></title>
+    <title>数据结构——排序</title>
+    <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%8E%92%E5%BA%8F/"/>
+    <id>http://artaris.cn/uncategorized/数据结构——排序/</id>
+    <published>2018-05-07T02:02:35.000Z</published>
+    <updated>2018-11-17T10:19:02.445Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;d&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;时间复杂度&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;空间复杂度&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;稳定性&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;插入排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(n2)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(1)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;选择排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(n2)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(1)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;不稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;冒泡排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(n2)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(1)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;归并排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(nLog2n)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(1)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;快速排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(nLog2n)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(nLog2n)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;不稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;堆排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(nLog2n)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;(1)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;不稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;希尔排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(n1.5)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(1)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;不稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;桶排序&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(n)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;O(n)&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;不稳定&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+    
+    </summary>
+    
+    
+      <category term="数据结构" scheme="http://artaris.cn/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据结构——二叉树</title>
     <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E4%BA%8C%E5%8F%89%E6%A0%91/"/>
     <id>http://artaris.cn/uncategorized/数据结构——二叉树/</id>
-    <published>2018-11-12T02:13:07.126Z</published>
-    <updated>2018-11-12T02:13:41.634Z</updated>
+    <published>2018-04-18T03:26:35.000Z</published>
+    <updated>2018-11-17T10:19:02.445Z</updated>
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;数据结构——二叉树&quot;&gt;&lt;a href=&quot;#数据结构——二叉树&quot; class=&quot;headerlink&quot; title=&quot;数据结构——二叉树&quot;&gt;&lt;/a&gt;数据结构——二叉树&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;title: 数据结构——线性表&lt;br&gt;date: 2018-04-18 
-      
+      &lt;p&gt;树形结构的基本概念：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;根节点&lt;/strong&gt;：&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;度&lt;/strong&gt;：结点拥有的直接子节点数称为&lt;strong&gt;结点的度&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;叶子&lt;/strong&gt;：度为0的结点称为&lt;strong&gt;叶子&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;树的度&lt;/strong&gt;：所有结点的度中的最大值&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;孩子&lt;/strong&gt;：一个结点的直接子结点称为它的&lt;strong&gt;孩子&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;双亲&lt;/strong&gt;：一个节点的父节点就是他的双亲节点&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;深度&lt;/strong&gt;：树中最大的结点层&lt;/li&gt;
+&lt;/ul&gt;
     
     </summary>
     
+    
+      <category term="数据结构" scheme="http://artaris.cn/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
     
   </entry>
   
   <entry>
-    <title></title>
-    <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E8%A1%A8/"/>
-    <id>http://artaris.cn/uncategorized/数据结构——线性表/</id>
-    <published>2018-11-12T02:12:28.665Z</published>
-    <updated>2018-11-16T12:12:45.873Z</updated>
+    <title>数据结构——栈和队列</title>
+    <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/"/>
+    <id>http://artaris.cn/uncategorized/数据结构——栈和队列/</id>
+    <published>2018-04-16T02:02:35.000Z</published>
+    <updated>2018-11-17T10:19:02.445Z</updated>
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;数据结构——线性表&quot;&gt;&lt;a href=&quot;#数据结构——线性表&quot; class=&quot;headerlink&quot; title=&quot;数据结构——线性表&quot;&gt;&lt;/a&gt;数据结构——线性表&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;title: 数据结构——线性表&lt;br&gt;date: 2018-04-13 
-      
+      &lt;p&gt;栈和队列是线性表的一种，只是它们是操作受限的线性表。&lt;/p&gt;
     
     </summary>
     
+    
+      <category term="数据结构" scheme="http://artaris.cn/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据结构——线性表</title>
+    <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E8%A1%A8/"/>
+    <id>http://artaris.cn/uncategorized/数据结构——线性表/</id>
+    <published>2018-04-13T03:26:35.000Z</published>
+    <updated>2018-11-17T10:19:02.445Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;strong&gt;线性表&lt;/strong&gt;属于数据结构中的线性结构，&lt;strong&gt;线性结构&lt;/strong&gt;具体有以下特征：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;集合中必存在唯一的一个&lt;strong&gt;第一个元素&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;集合中必存在唯一的一个&lt;strong&gt;最后的元素&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;除最后元素之外，其它数据元素均有唯一的&lt;strong&gt;后继&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;除第一元素之外，其它数据元素均有唯一的&lt;strong&gt;前驱&lt;/strong&gt;；&lt;/li&gt;
+&lt;/ul&gt;
+    
+    </summary>
+    
+    
+      <category term="数据结构" scheme="http://artaris.cn/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
     
   </entry>
   
