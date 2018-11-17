@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://artaris.cn/"/>
-  <updated>2018-11-17T10:28:21.118Z</updated>
+  <updated>2018-11-17T10:50:30.933Z</updated>
   <id>http://artaris.cn/</id>
   
   <author>
@@ -17,25 +17,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>OMAndroid</title>
-    <link href="http://artaris.cn/uncategorized/OMAndroid/"/>
-    <id>http://artaris.cn/uncategorized/OMAndroid/</id>
-    <published>2018-11-17T10:28:21.000Z</published>
-    <updated>2018-11-17T10:28:21.118Z</updated>
-    
-    <summary type="html">
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
     <title>[北京]出闲置</title>
     <link href="http://artaris.cn/uncategorized/%E5%8C%97%E4%BA%AC-%E5%87%BA%E9%97%B2%E7%BD%AE/"/>
     <id>http://artaris.cn/uncategorized/北京-出闲置/</id>
     <published>2018-10-11T10:15:34.000Z</published>
-    <updated>2018-11-17T10:17:28.413Z</updated>
+    <updated>2018-11-17T10:50:30.933Z</updated>
     
     <summary type="html">
     
@@ -45,6 +31,34 @@
     </summary>
     
     
+      <category term="生活" scheme="http://artaris.cn/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>OMAndroid</title>
+    <link href="http://artaris.cn/uncategorized/OMAndroid/"/>
+    <id>http://artaris.cn/uncategorized/OMAndroid/</id>
+    <published>2018-06-13T04:21:21.000Z</published>
+    <updated>2018-11-17T10:50:30.933Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;OMAndroid&quot;&gt;&lt;a href=&quot;#OMAndroid&quot; class=&quot;headerlink&quot; title=&quot;OMAndroid&quot;&gt;&lt;/a&gt;OMAndroid&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;p&gt;OMAndroid 是一个整合了如下主流开源项目的 Android 快速开发框架，其中包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dagger&lt;/li&gt;
+&lt;li&gt;Retrofit  + OkHttp&lt;/li&gt;
+&lt;li&gt;RxJava&lt;/li&gt;
+&lt;li&gt;ButterKnife&lt;/li&gt;
+&lt;li&gt;SqlBrite&lt;/li&gt;
+&lt;li&gt;EventBus&lt;/li&gt;
+&lt;/ul&gt;
+    
+    </summary>
+    
+    
+      <category term="OMAndroid" scheme="http://artaris.cn/tags/OMAndroid/"/>
+    
   </entry>
   
   <entry>
@@ -52,12 +66,11 @@
     <link href="http://artaris.cn/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%8E%92%E5%BA%8F/"/>
     <id>http://artaris.cn/uncategorized/数据结构——排序/</id>
     <published>2018-05-07T02:02:35.000Z</published>
-    <updated>2018-11-17T10:19:02.445Z</updated>
+    <updated>2018-11-17T10:50:30.932Z</updated>
     
     <summary type="html">
     
-      &lt;p&gt;d&lt;/p&gt;
-&lt;table&gt;
+      &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style=&quot;text-align:center&quot;&gt;&lt;/th&gt;
@@ -204,7 +217,7 @@
     <summary type="html">
     
       &lt;p&gt;当我在 Android Studio 中使用如下方式&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;new Thread(new Runnable() &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    @Override&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    public void run() &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        // do sth.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;).start();&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight aspectj&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; Thread(&lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; Runnable() &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;meta&quot;&gt;@Override&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;comment&quot;&gt;// do sth.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;).start();&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 &lt;p&gt;创造线程时，编译器会报告如下警告：&lt;br&gt;&lt;img src=&quot;http://img.artaris.cn/android_thread/thread_warning.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;带着这些疑问，让我去学习了一下直接创造线程有什么缺点，及线程池的优点和使用。&lt;/p&gt;
     
     </summary>
