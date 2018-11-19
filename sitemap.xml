@@ -2,14 +2,21 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://artaris.cn/uncategorized/OMAndroid/</loc>
+    <loc>http://artaris.cn/Android/%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1%E2%80%94%E2%80%94AIDL/</loc>
+    
+    <lastmod>2018-11-19T07:55:09.468Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://artaris.cn/uncategorized/%E5%8C%97%E4%BA%AC-%E5%87%BA%E9%97%B2%E7%BD%AE/</loc>
     
     <lastmod>2018-11-17T10:50:30.933Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://artaris.cn/uncategorized/%E5%8C%97%E4%BA%AC-%E5%87%BA%E9%97%B2%E7%BD%AE/</loc>
+    <loc>http://artaris.cn/uncategorized/OMAndroid/</loc>
     
     <lastmod>2018-11-17T10:50:30.933Z</lastmod>
     
@@ -44,13 +51,6 @@
   </url>
   
   <url>
-    <loc>http://artaris.cn/categories/index.html</loc>
-    
-    <lastmod>2018-09-27T06:26:40.388Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://artaris.cn/tags/index.html</loc>
     
     <lastmod>2018-09-27T06:26:40.388Z</lastmod>
@@ -58,14 +58,21 @@
   </url>
   
   <url>
-    <loc>http://artaris.cn/MarkDown/MarkDown-%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <loc>http://artaris.cn/categories/index.html</loc>
+    
+    <lastmod>2018-09-27T06:26:40.388Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/</loc>
     
     <lastmod>2018-09-27T06:26:40.383Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/</loc>
+    <loc>http://artaris.cn/MarkDown/MarkDown-%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     
     <lastmod>2018-09-27T06:26:40.383Z</lastmod>
     

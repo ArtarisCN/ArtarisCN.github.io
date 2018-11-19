@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://artaris.cn/"/>
-  <updated>2018-11-17T10:50:30.933Z</updated>
+  <updated>2018-11-19T07:55:09.468Z</updated>
   <id>http://artaris.cn/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>进程之间的通信——AIDL</title>
+    <link href="http://artaris.cn/Android/%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1%E2%80%94%E2%80%94AIDL/"/>
+    <id>http://artaris.cn/Android/进程之间的通信——AIDL/</id>
+    <published>2018-11-19T07:51:54.000Z</published>
+    <updated>2018-11-19T07:55:09.468Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;进程之间的通信——AIDL（Android-Interface-Definition-Language&quot;&gt;&lt;a href=&quot;#进程之间的通信——AIDL（Android-Interface-Definition-Language&quot; class=&quot;headerlink&quot; title=&quot;进程之间的通信——AIDL（Android Interface Definition Language)&quot;&gt;&lt;/a&gt;进程之间的通信——AIDL（Android Interface Definition Language)&lt;/h1&gt;&lt;p&gt;AIDL 是 Android 提供的一种进程间通信 (IPC—— Inter-Process Communication) 机制。&lt;br&gt;在 Android 上，一个进程通常无法访问另一个进程的内存。 每一个进程都有自己的Dalvik VM实例，都有自己的一块独立的内存，都在自己的内存上存储自己的数据，执行着自己的操作，都在自己的那片狭小的空间里过完自己的一生。每个进程之间都你不知我，我不知你。尽管如此，进程需要将其对象分解成操作系统能够识别的原语，并将对象编组成跨越边界的对象。&lt;br&gt;AIDL 就是 Android 为我们提供的一种跨进程的通讯方式。通过这种机制，我们只需要写好 aidl 接口文件，编译时系统会帮我们生成 Binder 接口。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Android" scheme="http://artaris.cn/categories/Android/"/>
+    
+    
+      <category term="Android" scheme="http://artaris.cn/tags/Android/"/>
+    
+  </entry>
   
   <entry>
     <title>[北京]出闲置</title>
