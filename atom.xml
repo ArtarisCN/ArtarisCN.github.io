@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://artaris.cn/"/>
-  <updated>2018-11-19T07:55:09.468Z</updated>
+  <updated>2019-02-20T03:37:24.341Z</updated>
   <id>http://artaris.cn/</id>
   
   <author>
@@ -15,6 +15,48 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Java 中单例的实现与线程安全</title>
+    <link href="http://artaris.cn/uncategorized/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/"/>
+    <id>http://artaris.cn/uncategorized/Java-中单例的实现与线程安全/</id>
+    <published>2019-02-20T03:37:24.000Z</published>
+    <updated>2019-02-20T03:37:24.341Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Java 的内存模型与 volatile 关键字</title>
+    <link href="http://artaris.cn/uncategorized/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/"/>
+    <id>http://artaris.cn/uncategorized/Java-的内存模型与-volatile-关键字/</id>
+    <published>2019-02-20T03:35:41.000Z</published>
+    <updated>2019-02-20T03:35:41.901Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>LeetCode解题笔记</title>
+    <link href="http://artaris.cn/uncategorized/LeetCode%E8%A7%A3%E9%A2%98%E7%AC%94%E8%AE%B0/"/>
+    <id>http://artaris.cn/uncategorized/LeetCode解题笔记/</id>
+    <published>2018-11-19T08:23:31.000Z</published>
+    <updated>2018-11-19T08:23:31.120Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>进程之间的通信——AIDL</title>
@@ -402,7 +444,7 @@
     <link href="http://artaris.cn/MicroBlog/Hello%20World/"/>
     <id>http://artaris.cn/MicroBlog/Hello World/</id>
     <published>2016-07-22T10:47:44.000Z</published>
-    <updated>2018-09-27T06:26:40.382Z</updated>
+    <updated>2019-02-18T09:17:48.177Z</updated>
     
     <summary type="html">
     
