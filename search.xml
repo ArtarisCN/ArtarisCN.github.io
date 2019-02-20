@@ -5,17 +5,122 @@
     
     <entry>
       <title><![CDATA[Java 中单例的实现与线程安全]]></title>
-      <url>http://artaris.cn/uncategorized/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
-      <content type="html"></content>
+      <url>http://artaris.cn/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
+      <content type="html"><![CDATA[<h1 id="Java-中单例的实现与线程安全"><a href="#Java-中单例的实现与线程安全" class="headerlink" title="Java 中单例的实现与线程安全"></a>Java 中单例的实现与线程安全</h1><p>单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：</p>
+<ol>
+<li>单例功能：基本功能</li>
+<li>延迟加载：避免不必要的资源消耗</li>
+<li>线程安全：多个线程同时创建对象时为同一个对象</li>
+<li>没有性能问题：创建函数不能影响效率</li>
+<li>防止序列化产生新对象：安全</li>
+<li>防止反射攻击：安全</li>
+</ol>
+<a id="more"></a>
+<h2 id="饿汉式（类加载时就完成初始化）"><a href="#饿汉式（类加载时就完成初始化）" class="headerlink" title="饿汉式（类加载时就完成初始化）"></a>饿汉式（类加载时就完成初始化）</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="literal">null</span>) &#123;</span><br><span class="line">           <span class="built_in"> instance </span>= new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，加载类的时候就初始化完成了，线程安全。<br>缺点：消耗资源，如果使用时机较晚或不使用，浪费内存。</p>
+<h2 id="懒汉式-线程不安全"><a href="#懒汉式-线程不安全" class="headerlink" title="懒汉式(线程不安全)"></a>懒汉式(线程不安全)</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="literal">null</span>) &#123;</span><br><span class="line">           <span class="built_in"> instance </span>= new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：延迟初始化，避免了不必要的内存开销；<br>缺点：线程不安全。</p>
+<h2 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h2><p>使用<code>synchronized</code>修饰获取方法。<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getInstance() &#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="literal">null</span>) &#123;</span><br><span class="line">           <span class="built_in"> instance </span>= new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>优点：延迟初始化，避免了不必要的内存开销；线程安全；<br>缺点：每次获取实例都需要同步，其实只需要第一次同步就可以了。</p>
+<h2 id="懒汉式（线程安全，同步代码块-DCL-double-check-lock）"><a href="#懒汉式（线程安全，同步代码块-DCL-double-check-lock）" class="headerlink" title="懒汉式（线程安全，同步代码块 DCL:double check lock）"></a>懒汉式（线程安全，同步代码块 DCL:double check lock）</h2><p>使用<code>synchronized</code>同步 new 方法，内外加双重判断，volatile 修饰实例。<br>synchronized 能保证每次只有一个线程访问代码块，volatile 保证了 instance 创建的原子性。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果实现了Serializable, 必须重写这个方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Object <span class="title">readResolve</span><span class="params">()</span> <span class="keyword">throws</span> ObjectStreamException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> &#123;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 私有化构造方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SingletonHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 类级的内部类，也就是静态的成员式内部类，该内部类的实例与外部类的实例没有绑定关系，</span></span><br><span class="line"><span class="comment">     * 而且只有被调用到才会装载，从而实现了延迟加载</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHolder</span> &#123;</span></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 静态初始化器，由JVM来保证线程安全</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> final Singleton INSTANCE = <span class="keyword">new</span> Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h2><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public <span class="class"><span class="keyword">enum</span> <span class="title">Singleton</span> &#123;</span></span><br><span class="line"></span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，线程安全，高效，自动避免序列化/反序列化攻击、反射攻击(枚举类不能通过反射生成)<br>缺点：可读性差</p>
+<p>关联阅读</p>
+<blockquote>
+<h2 id="synchronized-关键字"><a href="#synchronized-关键字" class="headerlink" title="synchronized 关键字"></a>synchronized 关键字</h2><p>synchronized 是 Java 中的关键字，是利用锁的机制来控制多线程同步的关键字.<br>锁的性质：</p>
+<ol>
+<li>互斥性/原子性：同一时间只允许一个线程持有某个对象锁，通过对锁的持有来保证同一时间只有一个线程对需同步的代码块(复合操作)进行访问；</li>
+<li>可见性：当一个线程释放锁之后，对共享变量所做的更改对之后获取该锁的另一个线程可见；<br>锁的分类:</li>
+<li>对象锁: 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”。类的对象可以有多个，所以每个对象有其独立的对象锁，互不干扰。</li>
+<li>类锁:在 Java 中，针对每个类也有一个锁，可以称为“类锁”，类锁实际上是通过对象锁实现的，即类的 Class 对象锁。每个类只有一个 Class 对象，所以每个类只有一个类锁。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">修饰代码块</th>
+<th style="text-align:center">修饰代码块</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">获取对象锁</td>
+<td style="text-align:center">synchronized(this\</td>
+<td style="text-align:center">object) {}</td>
+<td>修饰非静态方法</td>
+</tr>
+<tr>
+<td style="text-align:center">获取类锁</td>
+<td style="text-align:center">synchronized(类.class) {}</td>
+<td style="text-align:center">修饰静态方法</td>
+</tr>
+</tbody>
+</table>
+<p><strong>对于同一种锁的访问是同步的</strong></p>
+</blockquote>
+]]></content>
       
+        <categories>
+            
+            <category> Java </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
         
     </entry>
     
     <entry>
       <title><![CDATA[Java 的内存模型与 volatile 关键字]]></title>
-      <url>http://artaris.cn/uncategorized/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/</url>
-      <content type="html"></content>
+      <url>http://artaris.cn/Java/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/</url>
+      <content type="html"><![CDATA[<h2 id="Java-的内存模型"><a href="#Java-的内存模型" class="headerlink" title="Java 的内存模型"></a>Java 的内存模型</h2><p>Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。</p>
+<a id="more"></a>
+<p>Java内存模型规定所有的变量都是存在主存当中，每个线程都有自己的工作内存。线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作。并且每个线程不能访问其他线程的工作内存。<br>Java 内存模型为程序的原子性、可见性以及有序性的保证：</p>
+<ul>
+<li><p>原子性<br>  对基本数据类型的变量的读取和赋值操作是原子性操作，即这些操作是不可被中断的，要么执行，要么不执行。<br>  只有简单的读取、赋值（而且必须是将数字赋值给某个变量，变量之间的相互赋值不是原子操作）才是原子操作。</p>
+<p>  <em>x++和 x = x+1包括3个操作：读取x的值，进行加1操作，写入新的值。</em></p>
+<p>  大范围的原子性操作通过 synchronized 和 Lock 来实现</p>
+</li>
+<li>可见性：<br>  Java提供了volatile关键字来保证可见性。当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去内存中读取新值。<br>  而普通的共享变量不能保证可见性，因为普通共享变量被修改之后，什么时候被写入主存是不确定的，当其他线程去读取时，此时内存中可能还是原来的旧值，因此无法保证可见性。<br>  synchronized和Lock也能够保证可见性，</li>
+<li>有序性<br>  在Java内存模型中，允许编译器和处理器对指令进行重排序，但是重排序过程不会影响到单线程程序的执行，却会影响到多线程并发执行的正确性。<br>  在Java里面，可以通过volatile关键字来保证一定的“有序性”<br>  Java 还具有一些先天的有序性，也称为 happens-before 原则，如果两个操作的执行次序无法从happens-before原则推导出来，那么它们就不能保证它们的有序性，虚拟机可以随意地对它们进行重排序。<ul>
+<li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
+<li>锁定规则：一个unLock操作先行发生于后面对同一个锁额lock操作</li>
+<li>volatile变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作</li>
+<li>传递规则：如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C</li>
+</ul>
+</li>
+</ul>
+<h2 id="volatole-关键字"><a href="#volatole-关键字" class="headerlink" title="volatole 关键字"></a>volatole 关键字</h2><p>被 volatole 修饰的共享变量会具有两层含义：<br>　　1. 保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。即<strong>它会保证修改的值会立即被更新到主存</strong><br>　　2. 禁止进行指令重排序。保证被 volatile 修饰变量与其他指令的绝对顺序。</p>
+<h4 id="volatole-的实现原理"><a href="#volatole-的实现原理" class="headerlink" title="volatole 的实现原理"></a>volatole 的实现原理</h4><p>volatole 是通过内存屏障来实现加锁操作的</p>
+<blockquote>
+<p>“观察加入volatile关键字和没有加入volatile关键字时所生成的汇编代码发现，加入volatile关键字时，会多出一个lock前缀指令”</p>
+</blockquote>
+<p>lock前缀指令实际上相当于一个内存屏障（也成内存栅栏），内存屏障会提供3个功能：</p>
+<ul>
+<li>它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面；即在执行到内存屏障这句指令时，在它前面的操作已经全部完成；</li>
+<li>它会强制将对缓存的修改操作立即写入主存；</li>
+<li>如果是写操作，它会导致其他CPU中对应的缓存行无效。</li>
+</ul>
+]]></content>
       
+        <categories>
+            
+            <category> Java </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
         
     </entry>
     

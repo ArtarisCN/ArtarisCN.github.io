@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://artaris.cn/"/>
-  <updated>2019-02-20T03:37:24.341Z</updated>
+  <updated>2019-02-20T03:41:18.165Z</updated>
   <id>http://artaris.cn/</id>
   
   <author>
@@ -18,29 +18,49 @@
   
   <entry>
     <title>Java 中单例的实现与线程安全</title>
-    <link href="http://artaris.cn/uncategorized/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/"/>
-    <id>http://artaris.cn/uncategorized/Java-中单例的实现与线程安全/</id>
+    <link href="http://artaris.cn/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/"/>
+    <id>http://artaris.cn/Java/Java-中单例的实现与线程安全/</id>
     <published>2019-02-20T03:37:24.000Z</published>
-    <updated>2019-02-20T03:37:24.341Z</updated>
+    <updated>2019-02-20T03:41:18.165Z</updated>
     
     <summary type="html">
     
+      &lt;h1 id=&quot;Java-中单例的实现与线程安全&quot;&gt;&lt;a href=&quot;#Java-中单例的实现与线程安全&quot; class=&quot;headerlink&quot; title=&quot;Java 中单例的实现与线程安全&quot;&gt;&lt;/a&gt;Java 中单例的实现与线程安全&lt;/h1&gt;&lt;p&gt;单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;单例功能：基本功能&lt;/li&gt;
+&lt;li&gt;延迟加载：避免不必要的资源消耗&lt;/li&gt;
+&lt;li&gt;线程安全：多个线程同时创建对象时为同一个对象&lt;/li&gt;
+&lt;li&gt;没有性能问题：创建函数不能影响效率&lt;/li&gt;
+&lt;li&gt;防止序列化产生新对象：安全&lt;/li&gt;
+&lt;li&gt;防止反射攻击：安全&lt;/li&gt;
+&lt;/ol&gt;
+    
     </summary>
     
+      <category term="Java" scheme="http://artaris.cn/categories/Java/"/>
+    
+    
+      <category term="Java" scheme="http://artaris.cn/tags/Java/"/>
     
   </entry>
   
   <entry>
     <title>Java 的内存模型与 volatile 关键字</title>
-    <link href="http://artaris.cn/uncategorized/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/"/>
-    <id>http://artaris.cn/uncategorized/Java-的内存模型与-volatile-关键字/</id>
-    <published>2019-02-20T03:35:41.000Z</published>
-    <updated>2019-02-20T03:35:41.901Z</updated>
+    <link href="http://artaris.cn/Java/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/"/>
+    <id>http://artaris.cn/Java/Java-的内存模型与-volatile-关键字/</id>
+    <published>2019-01-13T05:35:41.000Z</published>
+    <updated>2019-02-20T03:40:05.785Z</updated>
     
     <summary type="html">
     
+      &lt;h2 id=&quot;Java-的内存模型&quot;&gt;&lt;a href=&quot;#Java-的内存模型&quot; class=&quot;headerlink&quot; title=&quot;Java 的内存模型&quot;&gt;&lt;/a&gt;Java 的内存模型&lt;/h2&gt;&lt;p&gt;Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。&lt;/p&gt;
+    
     </summary>
     
+      <category term="Java" scheme="http://artaris.cn/categories/Java/"/>
+    
+    
+      <category term="Java" scheme="http://artaris.cn/tags/Java/"/>
     
   </entry>
   

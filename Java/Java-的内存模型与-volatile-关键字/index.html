@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="Artaris's Blog" />
+  <meta name="keywords" content="Java," />
 
 
 
@@ -88,17 +88,18 @@
 
 
 
-<meta name="description" content="一失足成千古风流人物">
-<meta property="og:type" content="website">
-<meta property="og:title" content="tags">
-<meta property="og:url" content="http://artaris.cn/tags/index.html">
+<meta name="description" content="Java 的内存模型Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 的内存模型与 volatile 关键字">
+<meta property="og:url" content="http://artaris.cn/Java/Java-的内存模型与-volatile-关键字/index.html">
 <meta property="og:site_name" content="Artaris&#39;s Blog">
-<meta property="og:description" content="一失足成千古风流人物">
+<meta property="og:description" content="Java 的内存模型Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-27T06:26:40.388Z">
+<meta property="og:updated_time" content="2019-02-20T03:40:05.785Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tags">
-<meta name="twitter:description" content="一失足成千古风流人物">
+<meta name="twitter:title" content="Java 的内存模型与 volatile 关键字">
+<meta name="twitter:description" content="Java 的内存模型Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。">
 
 
 
@@ -128,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="http://artaris.cn/tags/"/>
+  <link rel="canonical" href="http://artaris.cn/Java/Java-的内存模型与-volatile-关键字/"/>
 
 
 
 
 
-  <title>tags | Artaris's Blog</title>
+  <title>Java 的内存模型与 volatile 关键字 | Artaris's Blog</title>
   
 
 
@@ -297,40 +298,261 @@
 
   <div id="posts" class="posts-expand">
     
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://artaris.cn/Java/Java-的内存模型与-volatile-关键字/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Artaris">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Artaris's Blog">
+    </span>
+
     
-    
-    <div class="post-block page">
       <header class="post-header">
 
-	<h1 class="post-title" itemprop="name headline">tags</h1>
-
-
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
         
         
-          <div class="tag-cloud">
-            <div class="tag-cloud-title">
-                目前共计 8 个标签
+          <h1 class="post-title" itemprop="name headline">Java 的内存模型与 volatile 关键字</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-13T13:35:41+08:00">
+                2019-01-13
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2019-02-20T11:40:05+08:00">
+                2019-02-20
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/Java/Java-的内存模型与-volatile-关键字/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="Java/Java-的内存模型与-volatile-关键字/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  
+                </span>
+              
             </div>
-            <div class="tag-cloud-tags">
-              <a href="/tags/Android/" style="font-size: 30px; color: #111">Android</a> <a href="/tags/Hexo/" style="font-size: 12px; color: #ccc">Hexo</a> <a href="/tags/Java/" style="font-size: 18px; color: #8e8e8e">Java</a> <a href="/tags/MarkDown/" style="font-size: 12px; color: #ccc">MarkDown</a> <a href="/tags/OMAndroid/" style="font-size: 12px; color: #ccc">OMAndroid</a> <a href="/tags/戏说/" style="font-size: 12px; color: #ccc">戏说</a> <a href="/tags/数据结构/" style="font-size: 24px; color: #4f4f4f">数据结构</a> <a href="/tags/生活/" style="font-size: 12px; color: #ccc">生活</a>
-            </div>
-          </div>
-        
-      </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
       
       
+
+      
+        <h2 id="Java-的内存模型"><a href="#Java-的内存模型" class="headerlink" title="Java 的内存模型"></a>Java 的内存模型</h2><p>Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。</p>
+<a id="more"></a>
+<p>Java内存模型规定所有的变量都是存在主存当中，每个线程都有自己的工作内存。线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作。并且每个线程不能访问其他线程的工作内存。<br>Java 内存模型为程序的原子性、可见性以及有序性的保证：</p>
+<ul>
+<li><p>原子性<br>  对基本数据类型的变量的读取和赋值操作是原子性操作，即这些操作是不可被中断的，要么执行，要么不执行。<br>  只有简单的读取、赋值（而且必须是将数字赋值给某个变量，变量之间的相互赋值不是原子操作）才是原子操作。</p>
+<p>  <em>x++和 x = x+1包括3个操作：读取x的值，进行加1操作，写入新的值。</em></p>
+<p>  大范围的原子性操作通过 synchronized 和 Lock 来实现</p>
+</li>
+<li>可见性：<br>  Java提供了volatile关键字来保证可见性。当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去内存中读取新值。<br>  而普通的共享变量不能保证可见性，因为普通共享变量被修改之后，什么时候被写入主存是不确定的，当其他线程去读取时，此时内存中可能还是原来的旧值，因此无法保证可见性。<br>  synchronized和Lock也能够保证可见性，</li>
+<li>有序性<br>  在Java内存模型中，允许编译器和处理器对指令进行重排序，但是重排序过程不会影响到单线程程序的执行，却会影响到多线程并发执行的正确性。<br>  在Java里面，可以通过volatile关键字来保证一定的“有序性”<br>  Java 还具有一些先天的有序性，也称为 happens-before 原则，如果两个操作的执行次序无法从happens-before原则推导出来，那么它们就不能保证它们的有序性，虚拟机可以随意地对它们进行重排序。<ul>
+<li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
+<li>锁定规则：一个unLock操作先行发生于后面对同一个锁额lock操作</li>
+<li>volatile变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作</li>
+<li>传递规则：如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C</li>
+</ul>
+</li>
+</ul>
+<h2 id="volatole-关键字"><a href="#volatole-关键字" class="headerlink" title="volatole 关键字"></a>volatole 关键字</h2><p>被 volatole 修饰的共享变量会具有两层含义：<br>　　1. 保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。即<strong>它会保证修改的值会立即被更新到主存</strong><br>　　2. 禁止进行指令重排序。保证被 volatile 修饰变量与其他指令的绝对顺序。</p>
+<h4 id="volatole-的实现原理"><a href="#volatole-的实现原理" class="headerlink" title="volatole 的实现原理"></a>volatole 的实现原理</h4><p>volatole 是通过内存屏障来实现加锁操作的</p>
+<blockquote>
+<p>“观察加入volatile关键字和没有加入volatile关键字时所生成的汇编代码发现，加入volatile关键字时，会多出一个lock前缀指令”</p>
+</blockquote>
+<p>lock前缀指令实际上相当于一个内存屏障（也成内存栅栏），内存屏障会提供3个功能：</p>
+<ul>
+<li>它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面；即在执行到内存屏障这句指令时，在它前面的操作已经全部完成；</li>
+<li>它会强制将对缓存的修改操作立即写入主存；</li>
+<li>如果是写操作，它会导致其他CPU中对应的缓存行无效。</li>
+</ul>
+
       
     </div>
     
     
     
+
+    <div>
+        
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">------ 本文结束------</div>
+    
+</div>
+
+        
+     </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/uncategorized/LeetCode解题笔记/" rel="next" title="LeetCode解题笔记">
+                <i class="fa fa-chevron-left"></i> LeetCode解题笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/Java/Java-中单例的实现与线程安全/" rel="prev" title="Java 中单例的实现与线程安全">
+                Java 中单例的实现与线程安全 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
   </div>
 
 
@@ -339,6 +561,17 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+      <div class="ds-thread" data-thread-key="Java/Java-的内存模型与-volatile-关键字/"
+           data-title="Java 的内存模型与 volatile 关键字" data-url="http://artaris.cn/Java/Java-的内存模型与-volatile-关键字/">
+      </div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -359,8 +592,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -459,6 +701,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java-的内存模型"><span class="nav-number">1.</span> <span class="nav-text">Java 的内存模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#volatole-关键字"><span class="nav-number">2.</span> <span class="nav-text">volatole 关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#volatole-的实现原理"><span class="nav-number">2.0.1.</span> <span class="nav-text">volatole 的实现原理</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
