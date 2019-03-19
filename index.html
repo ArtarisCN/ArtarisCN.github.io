@@ -356,7 +356,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-03-19T10:10:28+08:00">
+              <time title="更新于" itemprop="dateModified" datetime="2019-03-19T10:37:16+08:00">
                 2019-03-19
               </time>
             
@@ -465,218 +465,14 @@
 
       
         
-          
-            <a id="more"></a>
-<h2 id="Java-中-和-equals-和-hashCode-的区别"><a href="#Java-中-和-equals-和-hashCode-的区别" class="headerlink" title="Java 中 == 和 equals() 和 hashCode() 的区别"></a>Java 中 == 和 equals() 和 hashCode() 的区别</h2><ul>
-<li>对于基本数据类型，== 是比较这两个基本数据类型的值</li>
-<li>对于对象，== 是比较两个对象的内存地址。equals() 是所有对象 Object 基类的一个方法，默认实现是比较两个对象的内存地址，在对于 Java 的有些类中重写了这个方法，内部使用了不同的逻辑，如 String 类的 equals() 方法是比较两个字符串是否相同。</li>
-<li>hashCode()是计算一个对象的 hash 值，用在 HashMap 等对比冲突的地方<ul>
-<li>相等（相同）的对象必须具有相等的哈希码（或者散列码）。</li>
-<li>如果两个对象的hashCode相同，它们并不一定相同。</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>扩展：Integer 等包装类，会有一个128大小的自有缓冲区，当一个新的 Integer 被创建时，它会先去缓冲区寻找，找到值会直接赋值给这个对象，所以两个 Integer 的值在这个缓冲区是，它们的 == 方法虽然是比较它们的内存地址，但是返回是 true。</p>
-<p>String 对象比较特殊，是不可变的字符串，当有新的对象创建使用 <code>String s = &quot;Hello World.&quot;;</code>时，会去缓冲区去找是否有相同的字符串，如果有就直接这个内存地址赋给这个对象。但是使用<code>String s = new String(&quot;Hello World.&quot;);</code>会直接开辟一块新的内存地址。</p>
-</blockquote>
-<h2 id="int、char、long各占多少字节数"><a href="#int、char、long各占多少字节数" class="headerlink" title="int、char、long各占多少字节数"></a>int、char、long各占多少字节数</h2><p><img src="http://img.artaris.cn/2019-03-19-15508221786523.jpg" alt=""></p>
-<h2 id="int-与-Integer-的区别"><a href="#int-与-Integer-的区别" class="headerlink" title="int 与 Integer 的区别"></a>int 与 Integer 的区别</h2><p>int 是 Java 的基本数据类型，具体请看</p>
-<h2 id="谈谈对-Java-多态的理解"><a href="#谈谈对-Java-多态的理解" class="headerlink" title="谈谈对 Java 多态的理解"></a>谈谈对 Java 多态的理解</h2><p>Java 面向对象的三大特性：继承、封装、多态。</p>
-<ul>
-<li>封装：封装私有变量，创建公共方法供外部调用，实现了访问控制，让客户端程序员无法触及不该触及的部分，创建者通过内外分离不担心自己的修改影响了外部调用。</li>
-<li>继承：</li>
-<li>多态：指允许不同类的对象对同一消息做出响应。即同一消息可以根据发送对象的不同而采用多种不同的行为方式。</li>
-</ul>
-<p>实现多态的技术成为：动态绑定</p>
-<h2 id="String、StringBuffer、StringBuilder区别"><a href="#String、StringBuffer、StringBuilder区别" class="headerlink" title="String、StringBuffer、StringBuilder区别"></a>String、StringBuffer、StringBuilder区别</h2><ul>
-<li>String 字符串常量<br>  是不可变的对象, 因此在每次对 String 类型进行改变的时候其实都等同于生成了一个新的 String 对象，然后将指针指向新的 String 对象，所以经常改变内容的字符串最好不要用 String</li>
-<li>StringBuilder 字符串变量（非线程安全）<br>  可变对象</li>
-<li>StringBuffer 字符串变量（线程安全）<br>  <code>append()</code>相比起 StringBuilder 来说多了一个 synchronized 关键字，会执行线程同步。</li>
-</ul>
-<blockquote>
-<p>为啥 Java 中 String 要设计成不可变的对象</p>
-<ol>
-<li>字符串常量池的需要：当创建一个String对象时,假如此字符串值已经存在于常量池中,则不会创建一个新的对象,而是引用已经存在的对象。</li>
-<li>安全性：String被许多的Java类(库)用来当做参数或者key,假若String不是固定不变的,将会引起各种安全隐患,容易引起中间篡改。</li>
-<li>允许String对象缓存HashCode：字符串不变性保证了hash码的唯一性,因此可以放心地进行缓存.这也是一种性能优化手段,意味着不必每次都去计算新的哈希码.</li>
-</ol>
-</blockquote>
-<h2 id="什么是内部类？内部类的作用"><a href="#什么是内部类？内部类的作用" class="headerlink" title="什么是内部类？内部类的作用"></a>什么是内部类？内部类的作用</h2><p>内部类是在类中声明的一个类</p>
-<p>内部类的 new 方法：</p>
-<figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">OuterClass outerObject = <span class="keyword">new</span> <span class="type">OuterClass</span>();</span><br><span class="line">outerClass.InnerClass innerObject = outerObject.<span class="keyword">new</span> <span class="type">InnerClass</span>();</span><br></pre></td></tr></table></figure>
-<h3 id="内部类的性质"><a href="#内部类的性质" class="headerlink" title="内部类的性质"></a>内部类的性质</h3><ul>
-<li>内部类提供了更好的封装，除了该外围类，其他类都不能访问。</li>
-</ul>
-<blockquote>
-<p>当外部类的对象创建了一个内部类的对象时，内部类对象必定会秘密捕获一个指向外部类对象的引用，然后访问外部类的成员时，就是用那个引用来选择外围类的成员的。</p>
-</blockquote>
-<ul>
-<li>内部类可以直接访问外部类的属性和方法</li>
-<li>每个内部类都能独立地继承一个（接口的）实现</li>
-<li>内部类可以用多个实例，每个实例都有自己的状态信息，并且与其他外围对象的信息相互独立。</li>
-<li>创建内部类对象的时刻必须先创建了外部类之后才能创建，但之后并不依赖于外围类对象的创建。</li>
-<li>成员内部类中不能存在任何 static 的变量和方法，(因为1、static类型的属性和方法，在类加载的时候就会存在于内存中。2、要使用某个类的static属性或者方法，那么这个类必须要加载到jvm中。内部类在外部类创建时没有加载，因此不能使用其 static 属性和方法)，除非内部类是 static 类。</li>
-</ul>
-<blockquote>
-<p>此种不能同时存在的类均与 Java 的生命周期相关，内部类的生命周期是从外内部类创建之后才有的，但是静态属性是随着类的加载的，这是相互矛盾的。当内部类设为静态类时生命周期就一致了</p>
-</blockquote>
-<p>静态内部类</p>
-<ul>
-<li>静态内部类：</li>
-<li>它的创建是不需要依赖于外围类的。</li>
-<li>它不能使用任何外围类的非static成员变量和方法。</li>
-</ul>
-<p>匿名内部类</p>
-<ul>
-<li>可以简化代码。</li>
-<li>匿名内部类是没有访问修饰符的。</li>
-<li>匿名内部类是没有构造方法的。</li>
-<li>匿名内部类中不能存在任何静态成员或方法。</li>
-</ul>
-<h3 id="内部类的作用"><a href="#内部类的作用" class="headerlink" title="内部类的作用"></a>内部类的作用</h3><ul>
-<li>使用内部类可以间接实现多重继承</li>
-<li>提供了更好的封装，只有外部类能访问内部类，其他类不能直接访问内部类（即是内部类是public 的也只能通过其承载的外部类访问）</li>
-</ul>
-<h2 id="抽象类和接口区别"><a href="#抽象类和接口区别" class="headerlink" title="抽象类和接口区别"></a>抽象类和接口区别</h2><h3 id="抽象类"><a href="#抽象类" class="headerlink" title="抽象类"></a>抽象类</h3><ul>
-<li>抽象类可以有自己的方法实现：接口只能定义方法，是抽象的。</li>
-<li>抽象类中子类使用 extends 来继承抽象类，如果子类不是抽象类，它需要实现所有的抽象方法：接口中子类使用关键字implements来实现接口。它需要提供接口中所有声明的方法的实现</li>
-<li>抽象类可以有构造器：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center"></th>
-<th style="text-align:center">抽象类</th>
-<th style="text-align:center">接口</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">继承</td>
-<td style="text-align:center">子类使用extends关键字来继承抽象类。如果子类不是抽象类的话，它需要提供抽象类中所有声明的方法的实现。</td>
-<td style="text-align:center">子类使用关键字implements来实现接口。它需要提供接口中所有声明的方法的实现</td>
-</tr>
-<tr>
-<td style="text-align:center">构造器</td>
-<td style="text-align:center">抽象类可以有构造器</td>
-<td style="text-align:center">接口不能有构造器</td>
-</tr>
-<tr>
-<td style="text-align:center">与实体Java类的区别</td>
-<td style="text-align:center">除了你不能实例化抽象类之外，它和普通Java类没有任何区别</td>
-<td style="text-align:center">接口是完全不同的类型</td>
-</tr>
-<tr>
-<td style="text-align:center">访问修饰符</td>
-<td style="text-align:center">抽象方法可以有public、protected和default这些修饰符</td>
-<td style="text-align:center">接口方法默认修饰符是public。你不可以使用其它修饰符。</td>
-</tr>
-<tr>
-<td style="text-align:center">main方法</td>
-<td style="text-align:center">抽象方法可以有main方法并且我们可以运行它</td>
-<td style="text-align:center">接口没有main方法，因此我们不能运行它。</td>
-</tr>
-<tr>
-<td style="text-align:center">多继承</td>
-<td style="text-align:center">抽象方法可以继承一个类和实现多个接口</td>
-<td style="text-align:center">接口只可以继承一个或多个其它接口</td>
-</tr>
-<tr>
-<td style="text-align:center">速度</td>
-<td style="text-align:center">它比接口速度要快</td>
-<td style="text-align:center">接口是稍微有点慢的，因为它需要时间去寻找在类中实现的方法。</td>
-</tr>
-<tr>
-<td style="text-align:center">添加新方法</td>
-<td style="text-align:center">如果你往抽象类中添加新的方法，你可以给它提供默认的实现。因此你不需要改变你现在的代码。</td>
-<td style="text-align:center">如果你往接口中添加方法，那么你必须改变实现该接口的类。</td>
-</tr>
-<tr>
-<td style="text-align:center">默认的方法实现</td>
-<td style="text-align:center">它可以有默认的方法实现</td>
-<td style="text-align:center">接口完全是抽象的。它根本不存在方法的实现</td>
-</tr>
-</tbody>
-</table>
-<h2 id="抽象类的意义"><a href="#抽象类的意义" class="headerlink" title="抽象类的意义"></a>抽象类的意义</h2><ol>
-<li>为子类提供一个公共的类型；</li>
-<li>封装子类中重复内容（成员变量和方法）；</li>
-<li>定义有抽象方法，子类虽然有不同的实现，但该方法的定义是一致的。<h2 id="抽象类与接口的应用场景"><a href="#抽象类与接口的应用场景" class="headerlink" title="抽象类与接口的应用场景"></a>抽象类与接口的应用场景</h2></li>
-</ol>
-<h3 id="抽象类-1"><a href="#抽象类-1" class="headerlink" title="抽象类"></a>抽象类</h3><ul>
-<li>如果想定义一些公共方法并给其中一些方法默认实现，使用抽象类；</li>
-<li>抽象类是用来捕捉子类的通用特性的，一般作为类的基类，在其中添加了一些方法不回影响到所有子类（子类不需要全部覆盖）；</li>
-</ul>
-<h3 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h3><ul>
-<li>多重继承只能使用接口；</li>
-<li>作为两个类的通信协议，传递一些信息或者数据时，定义接口；</li>
-</ul>
-<h2 id="抽象类是否可以没有方法和属性？"><a href="#抽象类是否可以没有方法和属性？" class="headerlink" title="抽象类是否可以没有方法和属性？"></a>抽象类是否可以没有方法和属性？</h2><p>可以没有方法和属性。<br>抽象类的作用在于子类对其的继承和实现，也就是多态；而没有抽象方法的抽象类的存在价值在于：<strong>实例化了没有意义，因为类已经定义好了，不能改变其中的方法体，但是实例化出来的对象却满足不了要求，只有继承并重写了他的子类才能满足要求。所以才把它定义为没有抽象方法的抽象类</strong></p>
-<ul>
-<li>抽象类专用于派生出子类，子类必须实现抽象类所声明的抽象方法，否则，子类仍是抽象类。</li>
-<li>包含抽象方法的类一定是抽象类，但抽象类中的方法不一定是抽象方法。</li>
-</ul>
-<h2 id="接口的意义"><a href="#接口的意义" class="headerlink" title="接口的意义"></a>接口的意义</h2><ul>
-<li>接口体现了抽象的特点，抽象的定义就是抽取像的部分，可以提取一些类的共性。</li>
-<li>接口并不负责具体的操作，具体的操作是由接口的实现类完成的</li>
-<li>接口具有简单，规范性：实现相同接口的类可以替换，他们遵循相同的规范，实现了相同的功能。</li>
-<li>接口具维护、拓展性：在之后代码中可以随时替换类，只要这些类实现了相同的接口，接口具有规范性</li>
-<li><p>接口具有安全、严密性：在两个类进行通信的时候，并不公开全部的内部代码，只要通过接口进行通信即可<br>*</p>
-<h2 id="泛型中extends和super的区别"><a href="#泛型中extends和super的区别" class="headerlink" title="泛型中extends和super的区别"></a>泛型中extends和super的区别</h2><p>简单来说，&lt;? super T&gt;表示包括T在内的任何T的父类，&lt;? extends T&gt;表示包括T在内的任何T的子类。</p>
-</li>
-<li><p>&lt;? extends T&gt; 只能用于方法返回，告诉编译器此返参的类型的最小继承边界为T，T和T的父类都能接收，但是入参类型无法确定，只能接受null的传入</p>
-</li>
-<li>&lt;? super T&gt;只能用于限定方法入参，告诉编译器入参只能是T或其子类型，而返参只能用Object类接收</li>
-<li>? 既不能用于入参也不能用于返参</li>
-</ul>
-<h2 id="父类的静态方法能否被子类重写"><a href="#父类的静态方法能否被子类重写" class="headerlink" title="父类的静态方法能否被子类重写"></a>父类的静态方法能否被子类重写</h2><p>不可以。<br><strong>所谓静态就是指：在编译之后所分配的内存会一直存在（不会被回收），直到程序退出内存才会释放这个空间。
-</strong><br>静态方法只与类有关，不与实例有关，重写只适用于实例方法，不适用于静态方法。</p>
-<p>因为静态方法是程序一运行就已经分配好了内存地址，而且该地址是固定的，所有引用到该方法的对象（父类或者子类）所指向的始终是同一个内存地址中的数据，即该静态方法。如果子类定义了相同名称的静态方法，只会新增一个内存地址，并不会重写。</p>
-<h2 id="进程和线程的区别"><a href="#进程和线程的区别" class="headerlink" title="进程和线程的区别"></a>进程和线程的区别</h2><p>进程和线程都是一个时间段的描述，是CPU工作时间段的描述。</p>
-<p>简而言之,一个程序至少有一个进程,一个进程至少有一个线程.<br>线程的划分尺度小于进程，使得多线程程序的并发性高。<br>另外，进程在执行过程中拥有独立的内存单元，而多个线程共享内存，从而极大地提高了程序的运行效率。<br>线程在执行过程中与进程还是有区别的。每个独立的线程有一个程序运行的入口、顺序执行序列和程序的出口。但是线程不能够独立执行，必须依存在应用程序中，由应用程序提供多个线程执行控制。<br>从逻辑角度来看，多线程的意义在于一个应用程序中，有多个执行部分可以同时执行。但操作系统并没有将多个线程看做多个独立的应用，来实现进程的调度和管理以及资源分配。这就是进程和线程的重要区别。</p>
-<p>进程是具有一定独立功能的程序关于某个数据集合上的一次运行活动,进程是系统进行资源分配和调度的一个独立单位.<br>线程是进程的一个实体,是CPU调度和分派的基本单位,它是比进程更小的能独立运行的基本单位.线程自己基本上不拥有系统资源,只拥有一点在运行中必不可少的资源(如程序计数器,一组寄存器和栈),但是它可与同属一个进程的其他的线程共享进程所拥有的全部资源.<br>一个线程可以创建和撤销另一个线程;同一个进程中的多个线程之间可以并发执行.</p>
-<p>进程包括自己独立的地址空间、堆栈和局部变量，线程共享进程的地址空间、堆栈和局部变量。<br>进程切换的时候需要切换上下文，耗费资源较大。</p>
-<h2 id="final，finally，finalize的区别"><a href="#final，finally，finalize的区别" class="headerlink" title="final，finally，finalize的区别"></a>final，finally，finalize的区别</h2><h3 id="final"><a href="#final" class="headerlink" title="final"></a>final</h3><p>用于申明属性，方法和类，表示属性不可变，方法不可以被覆盖，类不可以被继承。</p>
-<ul>
-<li>变量<br>  final修饰变量表示该变量是不可变的。当指向一个对象时：指向的内存地址是不变的，但是被指的内存地址中的类是可以改变的。</li>
-<li>方法<br>  final修饰方法时表示该方法是不能被子类重写的。</li>
-<li>类<br>  final修饰类时表示该类是不能被继承的，由于java的单继承关系，所以该类是继承关系链中的终端。</li>
-</ul>
-<p>接口中声明的所有变量都是final的；</p>
-<h3 id="finally"><a href="#finally" class="headerlink" title="finally"></a>finally</h3><p>是异常处理语句结构中，表示总是执行的部分。　　<br>//TODO</p>
-<h3 id="finalize"><a href="#finalize" class="headerlink" title="finalize"></a>finalize</h3><p>表示是object类一个方法，在垃圾回收机制中执行的时候会被调用被回收对象的方法。允许回收此前未回收的内存垃圾。所有object都继承了 <code>finalize()</code> 方法</p>
-<h2 id="序列化的方式"><a href="#序列化的方式" class="headerlink" title="序列化的方式"></a>序列化的方式</h2><p>将序列化的数据实现 Serializable/Parcelable 接口，通过 Intent.putExtra 或者 Binder 传递数据。</p>
-<h2 id="Serializable-和-Parcelable-的区别"><a href="#Serializable-和-Parcelable-的区别" class="headerlink" title="Serializable 和 Parcelable 的区别"></a>Serializable 和 Parcelable 的区别</h2><h3 id="Serializable-接口"><a href="#Serializable-接口" class="headerlink" title="Serializable 接口"></a>Serializable 接口</h3><p>实现非常简单，出了需要继承 Serializable 接口外只要创建一个 serialVersionUID 属性就好。</p>
-<h4 id="serialVersionUID"><a href="#serialVersionUID" class="headerlink" title="serialVersionUID"></a>serialVersionUID</h4><p>serialVersionUID 在运行时唯一标识了一个可序列化的类。一个类序列化时，运行时会保存它的版本号，然后在反序列化时检查你要反序列化成的对象版本号是否一致，不一致的话就会报错：InvalidClassException。</p>
-<h4 id="序列化和反序列化"><a href="#序列化和反序列化" class="headerlink" title="序列化和反序列化"></a>序列化和反序列化</h4><p>Serializable 的序列化与反序列化分别通过 ObjectOutputStream 和 ObjectInputStream 进行，实例代码如下：</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 序列化对象</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> obj</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> path</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">synchronized</span> <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">boolean</span> <span class="title">saveObject</span><span class="params">(Object obj, String path)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (obj == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ObjectOutputStream oos = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        oos = <span class="keyword">new</span> ObjectOutputStream(<span class="keyword">new</span> FileOutputStream(path));</span><br><span class="line">        oos.writeObject(obj);</span><br><span class="line">        oos.close();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (oos != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                oos.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反序列化对象</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> path</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked "</span>)</span><br><span class="line"><span class="keyword">synchronized</span> <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">readObject</span><span class="params">(String path)</span> </span>&#123;</span><br><span class="line">    ObjectInputStream ojs = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        ojs = <span class="keyword">new</span> ObjectInputStream(<span class="keyword">new</span> FileInputStream(path));</span><br><span class="line">        <span class="keyword">return</span> (T) ojs.readObject();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException | ClassNotFoundException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        close(ojs);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="Parcelable-接口"><a href="#Parcelable-接口" class="headerlink" title="Parcelable 接口"></a>Parcelable 接口</h3><p>Parcelable 是 Android 特有的序列化方式<br>实现 Parcelable 的方法如下：</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ParcelClass</span> <span class="keyword">implements</span> <span class="title">Parcelable</span> &#123;</span></span><br><span class="line">    <span class="keyword">public</span> String name;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 系统自动添加，给createFromParcel里面用</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> in</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> ParcelClass(Parcel <span class="keyword">in</span>) &#123;</span><br><span class="line">        name = <span class="keyword">in</span>.readString();</span><br><span class="line">        id = <span class="keyword">in</span>.readInt();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 序列话数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> dest</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> flags</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> writeToParcel(Parcel dest, <span class="keyword">int</span> flags) &#123;</span><br><span class="line">        dest.writeString(name);</span><br><span class="line">        dest.writeInt(id);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 内容接口描述，默认返回0即可。</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> describeContents() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Creator&lt;ParcelClass&gt; CREATOR = <span class="keyword">new</span> Creator&lt;ParcelClass&gt;() &#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@param</span> in</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">         * createFromParcel()方法中我们要去读取刚才写出的name和age字段，</span></span><br><span class="line"><span class="comment">         * 并创建一个Person对象进行返回，其中 name 和 id 都是调用Parcel的readXxx()方法读取到的，</span></span><br><span class="line"><span class="comment">         * 注意这里读取的顺序一定要和刚才写出的顺序完全相同。</span></span><br><span class="line"><span class="comment">         * 读取的工作我们利用一个构造函数帮我们完成了</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ParcelClass createFromParcel(Parcel <span class="keyword">in</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ParcelClass(<span class="keyword">in</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//供反序列化本类数组时调用的</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ParcelClass[] newArray(<span class="keyword">int</span> size) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ParcelClass[size];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="区别"><a href="#区别" class="headerlink" title="区别"></a>区别</h3><ul>
-<li>编码上：</li>
-</ul>
-<p>Serializable代码量少，写起来方便<br>Parcelable代码多一些</p>
-<ul>
-<li>效率上：</li>
-</ul>
-<p>Parcelable的速度比高十倍以上。<br>Serializable 这种方法的缺点是使用了反射，序列化的过程较慢。这种机制会在序列化的时候创建许多的临时对象，容易触发垃圾回收。</p>
-<h2 id="静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？"><a href="#静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？" class="headerlink" title="静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？"></a>静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？</h2><p>可以被继承，不可以被重写。</p>
-<ol>
-<li>静态方法和属性是属于类的，调用的时候直接通过类名.方法名完成对，不需要继承机制即可以调用。如果子类里面定义了静态方法和属性，那么这时候父类的静态方法或属性称之为”隐藏”。如果你想要调用父类的静态方法和属性，直接通过父类名.方法或变量名完成，至于是否继承一说，子类是有继承静态方法和属性，但是跟实例方法和属性不太一样，存在”隐藏”的这种情况。</li>
-<li>多态之所以能够实现依赖于继承、接口和重写、重载（继承和重写最为关键）。有了继承和重写就可以实现父类的引用指向不同子类的对象。重写的功能是：”重写”后子类的优先级要高于父类的优先级，但是“隐藏”是没有这个优先级之分的。</li>
-<li>静态属性、静态方法和非静态的属性都可以被继承和隐藏而不能被重写，因此不能实现多态，不能实现父类的引用可以指向不同子类的对象。非静态方法可以被继承和重写，因此可以实现多态。</li>
-</ol>
-<h2 id="静态内部类的设计意图"><a href="#静态内部类的设计意图" class="headerlink" title="静态内部类的设计意图"></a>静态内部类的设计意图</h2><ul>
-<li>它的创建是不需要依赖于外围类的。</li>
-<li>它不能使用任何外围类的非static成员变量和方法。</li>
-</ul>
-<h2 id="成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用"><a href="#成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用" class="headerlink" title="成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用"></a>成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用</h2><p>//TODO</p>
-<h2 id="谈谈对kotlin的理解"><a href="#谈谈对kotlin的理解" class="headerlink" title="谈谈对kotlin的理解"></a>谈谈对kotlin的理解</h2><p>//TODO</p>
-<h2 id="闭包和局部内部类的区别"><a href="#闭包和局部内部类的区别" class="headerlink" title="闭包和局部内部类的区别"></a>闭包和局部内部类的区别</h2><p>局部内部类就像是方法里面的一个局部变量一样，是不能有public、protected、private以及static修饰符的。</p>
-<h2 id="string-转换成-integer的方式及原理"><a href="#string-转换成-integer的方式及原理" class="headerlink" title="string 转换成 integer的方式及原理"></a>string 转换成 integer的方式及原理</h2><p>进过一系列判断，最后负着一直加首位的数，再乘以十，最后负的返回原值，正的返回相反数</p>
-
-          
+          <p>一些 Java 基础知识的问题。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/面试/Java/Android-知识整理-一、Java-基础知识/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -985,7 +781,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-03-19T09:54:01+08:00">
+              <time title="更新于" itemprop="dateModified" datetime="2019-03-19T10:22:45+08:00">
                 2019-03-19
               </time>
             
@@ -1083,8 +879,7 @@
 
       
         
-          <p>Android\ 知识整理(一、Java\ 基础知识)</p>
-<h2 id="Java-的内存模型"><a href="#Java-的内存模型" class="headerlink" title="Java 的内存模型"></a>Java 的内存模型</h2><p>Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。</p>
+          <h2 id="Java-的内存模型"><a href="#Java-的内存模型" class="headerlink" title="Java 的内存模型"></a>Java 的内存模型</h2><p>Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/Java/Java-的内存模型与-volatile-关键字/#more" rel="contents">

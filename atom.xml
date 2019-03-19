@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://artaris.cn/"/>
-  <updated>2019-03-19T02:10:28.037Z</updated>
+  <updated>2019-03-19T02:37:16.668Z</updated>
   <id>http://artaris.cn/</id>
   
   <author>
@@ -21,15 +21,11 @@
     <link href="http://artaris.cn/%E9%9D%A2%E8%AF%95/Java/Android-%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E4%B8%80%E3%80%81Java-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
     <id>http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/</id>
     <published>2019-03-19T01:53:03.000Z</published>
-    <updated>2019-03-19T02:10:28.037Z</updated>
+    <updated>2019-03-19T02:37:16.668Z</updated>
     
     <summary type="html">
     
-      
-      
-        &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h2 id=&quot;Java-中-和-equals-和-hashCode-的区别&quot;&gt;&lt;a href=&quot;#Java-中-和-equals-和-hashCode-的区别&quot; class=&quot;headerlink&quot; title=&quot;Java 中 == 和 eq
-      
+      &lt;p&gt;一些 Java 基础知识的问题。&lt;/p&gt;
     
     </summary>
     
@@ -77,12 +73,11 @@
     <link href="http://artaris.cn/Java/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/"/>
     <id>http://artaris.cn/Java/Java-的内存模型与-volatile-关键字/</id>
     <published>2019-01-13T05:35:41.000Z</published>
-    <updated>2019-03-19T01:54:01.208Z</updated>
+    <updated>2019-03-19T02:22:45.018Z</updated>
     
     <summary type="html">
     
-      &lt;p&gt;Android\ 知识整理(一、Java\ 基础知识)&lt;/p&gt;
-&lt;h2 id=&quot;Java-的内存模型&quot;&gt;&lt;a href=&quot;#Java-的内存模型&quot; class=&quot;headerlink&quot; title=&quot;Java 的内存模型&quot;&gt;&lt;/a&gt;Java 的内存模型&lt;/h2&gt;&lt;p&gt;Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。&lt;/p&gt;
+      &lt;h2 id=&quot;Java-的内存模型&quot;&gt;&lt;a href=&quot;#Java-的内存模型&quot; class=&quot;headerlink&quot; title=&quot;Java 的内存模型&quot;&gt;&lt;/a&gt;Java 的内存模型&lt;/h2&gt;&lt;p&gt;Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。&lt;/p&gt;
     
     </summary>
     
