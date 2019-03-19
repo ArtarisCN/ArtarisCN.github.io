@@ -88,17 +88,17 @@
 
 
 
-<meta name="description" content="一失足成千古风流人物">
+<meta name="description" content="LeetCode 解题笔记Artaris 的 LeetCode">
 <meta property="og:type" content="article">
 <meta property="og:title" content="LeetCode解题笔记">
 <meta property="og:url" content="http://artaris.cn/uncategorized/LeetCode解题笔记/index.html">
 <meta property="og:site_name" content="Artaris&#39;s Blog">
-<meta property="og:description" content="一失足成千古风流人物">
+<meta property="og:description" content="LeetCode 解题笔记Artaris 的 LeetCode">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-19T08:23:31.120Z">
+<meta property="og:updated_time" content="2019-03-19T02:04:21.475Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LeetCode解题笔记">
-<meta name="twitter:description" content="一失足成千古风流人物">
+<meta name="twitter:description" content="LeetCode 解题笔记Artaris 的 LeetCode">
 
 
 
@@ -338,8 +338,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-19T16:23:31+08:00">
-                2018-11-19
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-19T16:23:31+08:00">
+                2017-08-19
               </time>
             
 
@@ -354,8 +354,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2018-11-19T16:23:31+08:00">
-                2018-11-19
+              <time title="更新于" itemprop="dateModified" datetime="2019-03-19T10:04:21+08:00">
+                2019-03-19
               </time>
             
           </span>
@@ -429,7 +429,35 @@
       
 
       
-        
+        <h1 id="LeetCode-解题笔记"><a href="#LeetCode-解题笔记" class="headerlink" title="LeetCode 解题笔记"></a>LeetCode 解题笔记</h1><p><a href="https://github.com/ArtarisCN/LeetCode" target="_blank" rel="noopener">Artaris 的 LeetCode</a></p>
+<a id="more"></a>
+<h3 id="827-Making-A-Large-Island"><a href="#827-Making-A-Large-Island" class="headerlink" title="827. Making A Large Island"></a>827. Making A Large Island</h3><p>这道题使用了并查集的知识，将所有岛先进行一次并查集操作，转化成只有两级的以代表元为根的树形结构，记录每个岛的父节点，在另一个数组中存储这个“合并岛”的大小。然后遍历为0的岛，判断是否有相邻为1的岛并去查找其父节点，找到父节点之后去查找该父节点的“合并岛”的大小（注意去重，有可能相邻的岛查到了形同的父节点），找到四个相邻岛加起来就是该为0的岛的结果，找到最大的结果即可。</p>
+<h3 id="513-Find-Bottom-Left-Tree-Value"><a href="#513-Find-Bottom-Left-Tree-Value" class="headerlink" title="513. Find Bottom Left Tree Value"></a>513. Find Bottom Left Tree Value</h3><p>这道题要求找到二叉树最下面一排的第一个元素，思路就是每次遍历一层二叉树，并在遍历的时候记录第一个元素，全部遍历完，记录的那个元素就是结果。这里使用队列来进行二叉树的遍历，我使用 Java 中的 LinkedList 当作队列来使用，遇到的一个坑就是向队列队尾添加元素应该使用 offer 而不是使用 push ，<strong>push 在队列里是向队首添加元素的意思！</strong>,</p>
+<ul>
+<li>poll 队首弹出</li>
+<li>offer 添加队尾</li>
+<li>element 预览</li>
+</ul>
+<h3 id="79-Word-Search"><a href="#79-Word-Search" class="headerlink" title="79. Word Search"></a>79. Word Search</h3><p>这道题是使用递归，同时传入所需子串和当前搜索位置，搜索完字符串则成功。需要注意的每一个位置只能使用一次，所以需要一个数组记录访问过的位置。</p>
+<h3 id="48-Rotate-Image"><a href="#48-Rotate-Image" class="headerlink" title="48. Rotate Image"></a>48. Rotate Image</h3><p>这道题是旋转一个数组，观察之后发现旋转是一环一环进行的，外圈怎么旋转也不会到内圈去（有点像玩魔方，角块怎么转也不会去边上），故使用递归一圈一圈旋转。</p>
+<p>对于一圈一圈转的时候，是四条边互相交换位置，所以遍历一条边上的数，对于一条边上的某个值，作四次对换就OK了，就是确定四个值的位置时需要小心一些，算好就可以了。</p>
+<h3 id="803-Bricks-Falling-When-Hit"><a href="#803-Bricks-Falling-When-Hit" class="headerlink" title="803. Bricks Falling When Hit"></a>803. Bricks Falling When Hit</h3><p>打砖块，如果没有和顶部相连的砖块就算作掉下来，此题通过逆向思维，先将所有的砖块打落，然后通过深度优先计算与顶部相连的砖块，是击落最后一块砖之后的结果，然后倒着加砖块，每加一块砖，重新计算一次与顶部相连的砖块，计算完成之后的数量减去上一只与顶部相连的砖块的值即是本次击落的砖块。</p>
+<h3 id="147-Insertion-Sort-List"><a href="#147-Insertion-Sort-List" class="headerlink" title="147. Insertion Sort List"></a>147. Insertion Sort List</h3><p>通过两次遍历来插入链表，</p>
+<ul>
+<li>第一层遍历：遍历需要比较的节点，每次记录当前比较的节点、已排好序的链表的头节点、还未比较链表的头节点。</li>
+<li>第二层遍历：将当前比较的节点一次与已排好序的链表进行比较，找到合适位置插入，注意如果是最大🔥最小的情况处理。<br>注意将每次当前比较的节点的后驱置为 null ，不然会造成链表循环。</li>
+</ul>
+<h3 id="164-Maximum-Gap"><a href="#164-Maximum-Gap" class="headerlink" title="164. Maximum Gap"></a>164. Maximum Gap</h3><p>要求找到排序之后的相差最大的两个值，这个题要求空间时间复杂度都是线性的，其实是考排序算法的。<br><del>偷鸡法：Arrays.sort(nums)</del><br>要求时间空间复杂度是线形的，这里使用基数排序来实现。</p>
+<h3 id="523-Continuous-Subarray-Sum"><a href="#523-Continuous-Subarray-Sum" class="headerlink" title="523. Continuous Subarray Sum"></a>523. Continuous Subarray Sum</h3><p>这道题是要求找出是否有相邻的几个数的和正好是给定数据的倍数，思路是线形相加，每次对给定倍数取余数，并放到字典里，下次相加是如果字典里有这个余数，说明存在这样的数，用到了下面的原理：</p>
+<blockquote>
+<p>如果给定 …i…j…k… 的数据的序列，如果 sum(0,j) % divisor = m 且 sum(0,k) % divisor = m ,那么 [sum(j, k) - m] % divisor = 0;</p>
+</blockquote>
+<p>想法很好，但是做起来有很多坑，如</p>
+<ul>
+<li>连续相邻的两个 0 是所有数的倍数</li>
+<li>只有一个除数不算，要多于一个数才行</li>
+</ul>
+
       
     </div>
     
@@ -464,8 +492,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/Android/进程之间的通信——AIDL/" rel="next" title="进程之间的通信——AIDL">
-                <i class="fa fa-chevron-left"></i> 进程之间的通信——AIDL
+              <a href="/Java/try、catch、finally、throw和throws/" rel="next" title="try、catch、finally、throw和throws">
+                <i class="fa fa-chevron-left"></i> try、catch、finally、throw和throws
               </a>
             
           </div>
@@ -474,8 +502,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/Java/Java-的内存模型与-volatile-关键字/" rel="prev" title="Java 的内存模型与 volatile 关键字">
-                Java 的内存模型与 volatile 关键字 <i class="fa fa-chevron-right"></i>
+              <a href="/Android/ADB 使用指南/" rel="prev" title="ADB 使用指南">
+                ADB 使用指南 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -535,8 +563,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -635,6 +672,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#LeetCode-解题笔记"><span class="nav-number">1.</span> <span class="nav-text">LeetCode 解题笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#827-Making-A-Large-Island"><span class="nav-number">1.0.1.</span> <span class="nav-text">827. Making A Large Island</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#513-Find-Bottom-Left-Tree-Value"><span class="nav-number">1.0.2.</span> <span class="nav-text">513. Find Bottom Left Tree Value</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#79-Word-Search"><span class="nav-number">1.0.3.</span> <span class="nav-text">79. Word Search</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#48-Rotate-Image"><span class="nav-number">1.0.4.</span> <span class="nav-text">48. Rotate Image</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#803-Bricks-Falling-When-Hit"><span class="nav-number">1.0.5.</span> <span class="nav-text">803. Bricks Falling When Hit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#147-Insertion-Sort-List"><span class="nav-number">1.0.6.</span> <span class="nav-text">147. Insertion Sort List</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#164-Maximum-Gap"><span class="nav-number">1.0.7.</span> <span class="nav-text">164. Maximum Gap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#523-Continuous-Subarray-Sum"><span class="nav-number">1.0.8.</span> <span class="nav-text">523. Continuous Subarray Sum</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
