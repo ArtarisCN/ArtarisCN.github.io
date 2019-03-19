@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-flash.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,面试," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Artaris's Blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Java 基础知识Java 中 == 和 equals() 和 hashCode() 的区别 对于基本数据类型，== 是比较这两个基本数据类型的值 对于对象，== 是比较两个对象的内存地址。equals() 是所有对象 Object 基类的一个方法，默认实现是比较两个对象的内存地址，在对于 Java 的有些类中重写了这个方法，内部使用了不同的逻辑，如 String 类的 equals() 方法是比">
+<meta name="keywords" content="Java,面试">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 知识整理(一、Java 基础知识)">
+<meta property="og:url" content="http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/index.html">
+<meta property="og:site_name" content="Artaris&#39;s Blog">
+<meta property="og:description" content="Java 基础知识Java 中 == 和 equals() 和 hashCode() 的区别 对于基本数据类型，== 是比较这两个基本数据类型的值 对于对象，== 是比较两个对象的内存地址。equals() 是所有对象 Object 基类的一个方法，默认实现是比较两个对象的内存地址，在对于 Java 的有些类中重写了这个方法，内部使用了不同的逻辑，如 String 类的 equals() 方法是比">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/media/15508029886725/15508221786523.jpg">
+<meta property="og:updated_time" content="2019-03-19T01:53:51.222Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 知识整理(一、Java 基础知识)">
+<meta name="twitter:description" content="Java 基础知识Java 中 == 和 equals() 和 hashCode() 的区别 对于基本数据类型，== 是比较这两个基本数据类型的值 对于对象，== 是比较两个对象的内存地址。equals() 是所有对象 Object 基类的一个方法，默认实现是比较两个对象的内存地址，在对于 Java 的有些类中重写了这个方法，内部使用了不同的逻辑，如 String 类的 equals() 方法是比">
+<meta name="twitter:image" content="http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/media/15508029886725/15508221786523.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/"/>
+
+
+
+
+
+  <title>Android 知识整理(一、Java 基础知识) | Artaris's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband">
+      <a href="https://github.com/ArtarisCN">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png">
+      </a>
+    </div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Artaris's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Artaris">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Artaris's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 知识整理(一、Java 基础知识)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-19T09:53:03+08:00">
+                2019-03-19
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2019-03-19T09:53:51+08:00">
+                2019-03-19
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/面试/" itemprop="url" rel="index">
+                    <span itemprop="name">面试</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/面试/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/面试/Java/Android-知识整理-一、Java-基础知识/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="面试/Java/Android-知识整理-一、Java-基础知识/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Java-基础知识"><a href="#Java-基础知识" class="headerlink" title="Java 基础知识"></a>Java 基础知识</h1><h2 id="Java-中-和-equals-和-hashCode-的区别"><a href="#Java-中-和-equals-和-hashCode-的区别" class="headerlink" title="Java 中 == 和 equals() 和 hashCode() 的区别"></a>Java 中 == 和 equals() 和 hashCode() 的区别</h2><ul>
+<li>对于基本数据类型，== 是比较这两个基本数据类型的值</li>
+<li>对于对象，== 是比较两个对象的内存地址。equals() 是所有对象 Object 基类的一个方法，默认实现是比较两个对象的内存地址，在对于 Java 的有些类中重写了这个方法，内部使用了不同的逻辑，如 String 类的 equals() 方法是比较两个字符串是否相同。</li>
+<li>hashCode()是计算一个对象的 hash 值，用在 HashMap 等对比冲突的地方<ul>
+<li>相等（相同）的对象必须具有相等的哈希码（或者散列码）。</li>
+<li>如果两个对象的hashCode相同，它们并不一定相同。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>扩展：Integer 等包装类，会有一个128大小的自有缓冲区，当一个新的 Integer 被创建时，它会先去缓冲区寻找，找到值会直接赋值给这个对象，所以两个 Integer 的值在这个缓冲区是，它们的 == 方法虽然是比较它们的内存地址，但是返回是 true。</p>
+<p>String 对象比较特殊，是不可变的字符串，当有新的对象创建使用 <code>String s = &quot;Hello World.&quot;;</code>时，会去缓冲区去找是否有相同的字符串，如果有就直接这个内存地址赋给这个对象。但是使用<code>String s = new String(&quot;Hello World.&quot;);</code>会直接开辟一块新的内存地址。</p>
+</blockquote>
+<h2 id="int、char、long各占多少字节数"><a href="#int、char、long各占多少字节数" class="headerlink" title="int、char、long各占多少字节数"></a>int、char、long各占多少字节数</h2><p><img src="media/15508029886725/15508221786523.jpg" alt="-w952"></p>
+<h2 id="int-与-Integer-的区别"><a href="#int-与-Integer-的区别" class="headerlink" title="int 与 Integer 的区别"></a>int 与 Integer 的区别</h2><p>int 是 Java 的基本数据类型，具体请看</p>
+<h2 id="谈谈对-Java-多态的理解"><a href="#谈谈对-Java-多态的理解" class="headerlink" title="谈谈对 Java 多态的理解"></a>谈谈对 Java 多态的理解</h2><p>Java 面向对象的三大特性：继承、封装、多态。</p>
+<ul>
+<li>封装：封装私有变量，创建公共方法供外部调用，实现了访问控制，让客户端程序员无法触及不该触及的部分，创建者通过内外分离不担心自己的修改影响了外部调用。</li>
+<li>继承：</li>
+<li>多态：指允许不同类的对象对同一消息做出响应。即同一消息可以根据发送对象的不同而采用多种不同的行为方式。</li>
+</ul>
+<p>实现多态的技术成为：动态绑定</p>
+<h2 id="String、StringBuffer、StringBuilder区别"><a href="#String、StringBuffer、StringBuilder区别" class="headerlink" title="String、StringBuffer、StringBuilder区别"></a>String、StringBuffer、StringBuilder区别</h2><ul>
+<li>String 字符串常量<br>  是不可变的对象, 因此在每次对 String 类型进行改变的时候其实都等同于生成了一个新的 String 对象，然后将指针指向新的 String 对象，所以经常改变内容的字符串最好不要用 String</li>
+<li>StringBuilder 字符串变量（非线程安全）<br>  可变对象</li>
+<li>StringBuffer 字符串变量（线程安全）<br>  <code>append()</code>相比起 StringBuilder 来说多了一个 synchronized 关键字，会执行线程同步。</li>
+</ul>
+<blockquote>
+<p>为啥 Java 中 String 要设计成不可变的对象</p>
+<ol>
+<li>字符串常量池的需要：当创建一个String对象时,假如此字符串值已经存在于常量池中,则不会创建一个新的对象,而是引用已经存在的对象。</li>
+<li>安全性：String被许多的Java类(库)用来当做参数或者key,假若String不是固定不变的,将会引起各种安全隐患,容易引起中间篡改。</li>
+<li>允许String对象缓存HashCode：字符串不变性保证了hash码的唯一性,因此可以放心地进行缓存.这也是一种性能优化手段,意味着不必每次都去计算新的哈希码.</li>
+</ol>
+</blockquote>
+<h2 id="什么是内部类？内部类的作用"><a href="#什么是内部类？内部类的作用" class="headerlink" title="什么是内部类？内部类的作用"></a>什么是内部类？内部类的作用</h2><p>内部类是在类中声明的一个类</p>
+<p>内部类的 new 方法：</p>
+<figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">OuterClass outerObject = <span class="keyword">new</span> <span class="type">OuterClass</span>();</span><br><span class="line">outerClass.InnerClass innerObject = outerObject.<span class="keyword">new</span> <span class="type">InnerClass</span>();</span><br></pre></td></tr></table></figure>
+<h3 id="内部类的性质"><a href="#内部类的性质" class="headerlink" title="内部类的性质"></a>内部类的性质</h3><ul>
+<li>内部类提供了更好的封装，除了该外围类，其他类都不能访问。</li>
+</ul>
+<blockquote>
+<p>当外部类的对象创建了一个内部类的对象时，内部类对象必定会秘密捕获一个指向外部类对象的引用，然后访问外部类的成员时，就是用那个引用来选择外围类的成员的。</p>
+</blockquote>
+<ul>
+<li>内部类可以直接访问外部类的属性和方法</li>
+<li>每个内部类都能独立地继承一个（接口的）实现</li>
+<li>内部类可以用多个实例，每个实例都有自己的状态信息，并且与其他外围对象的信息相互独立。</li>
+<li>创建内部类对象的时刻必须先创建了外部类之后才能创建，但之后并不依赖于外围类对象的创建。</li>
+<li>成员内部类中不能存在任何 static 的变量和方法，(因为1、static类型的属性和方法，在类加载的时候就会存在于内存中。2、要使用某个类的static属性或者方法，那么这个类必须要加载到jvm中。内部类在外部类创建时没有加载，因此不能使用其 static 属性和方法)，除非内部类是 static 类。</li>
+</ul>
+<blockquote>
+<p>此种不能同时存在的类均与 Java 的生命周期相关，内部类的生命周期是从外内部类创建之后才有的，但是静态属性是随着类的加载的，这是相互矛盾的。当内部类设为静态类时生命周期就一致了</p>
+</blockquote>
+<p>静态内部类</p>
+<ul>
+<li>静态内部类：</li>
+<li>它的创建是不需要依赖于外围类的。</li>
+<li>它不能使用任何外围类的非static成员变量和方法。</li>
+</ul>
+<p>匿名内部类</p>
+<ul>
+<li>可以简化代码。</li>
+<li>匿名内部类是没有访问修饰符的。</li>
+<li>匿名内部类是没有构造方法的。</li>
+<li>匿名内部类中不能存在任何静态成员或方法。</li>
+</ul>
+<h3 id="内部类的作用"><a href="#内部类的作用" class="headerlink" title="内部类的作用"></a>内部类的作用</h3><ul>
+<li>使用内部类可以间接实现多重继承</li>
+<li>提供了更好的封装，只有外部类能访问内部类，其他类不能直接访问内部类（即是内部类是public 的也只能通过其承载的外部类访问）</li>
+</ul>
+<h2 id="抽象类和接口区别"><a href="#抽象类和接口区别" class="headerlink" title="抽象类和接口区别"></a>抽象类和接口区别</h2><h3 id="抽象类"><a href="#抽象类" class="headerlink" title="抽象类"></a>抽象类</h3><ul>
+<li>抽象类可以有自己的方法实现：接口只能定义方法，是抽象的。</li>
+<li>抽象类中子类使用 extends 来继承抽象类，如果子类不是抽象类，它需要实现所有的抽象方法：接口中子类使用关键字implements来实现接口。它需要提供接口中所有声明的方法的实现</li>
+<li>抽象类可以有构造器：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">抽象类</th>
+<th style="text-align:center">接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">继承</td>
+<td style="text-align:center">子类使用extends关键字来继承抽象类。如果子类不是抽象类的话，它需要提供抽象类中所有声明的方法的实现。</td>
+<td style="text-align:center">子类使用关键字implements来实现接口。它需要提供接口中所有声明的方法的实现</td>
+</tr>
+<tr>
+<td style="text-align:center">构造器</td>
+<td style="text-align:center">抽象类可以有构造器</td>
+<td style="text-align:center">接口不能有构造器</td>
+</tr>
+<tr>
+<td style="text-align:center">与实体Java类的区别</td>
+<td style="text-align:center">除了你不能实例化抽象类之外，它和普通Java类没有任何区别</td>
+<td style="text-align:center">接口是完全不同的类型</td>
+</tr>
+<tr>
+<td style="text-align:center">访问修饰符</td>
+<td style="text-align:center">抽象方法可以有public、protected和default这些修饰符</td>
+<td style="text-align:center">接口方法默认修饰符是public。你不可以使用其它修饰符。</td>
+</tr>
+<tr>
+<td style="text-align:center">main方法</td>
+<td style="text-align:center">抽象方法可以有main方法并且我们可以运行它</td>
+<td style="text-align:center">接口没有main方法，因此我们不能运行它。</td>
+</tr>
+<tr>
+<td style="text-align:center">多继承</td>
+<td style="text-align:center">抽象方法可以继承一个类和实现多个接口</td>
+<td style="text-align:center">接口只可以继承一个或多个其它接口</td>
+</tr>
+<tr>
+<td style="text-align:center">速度</td>
+<td style="text-align:center">它比接口速度要快</td>
+<td style="text-align:center">接口是稍微有点慢的，因为它需要时间去寻找在类中实现的方法。</td>
+</tr>
+<tr>
+<td style="text-align:center">添加新方法</td>
+<td style="text-align:center">如果你往抽象类中添加新的方法，你可以给它提供默认的实现。因此你不需要改变你现在的代码。</td>
+<td style="text-align:center">如果你往接口中添加方法，那么你必须改变实现该接口的类。</td>
+</tr>
+<tr>
+<td style="text-align:center">默认的方法实现</td>
+<td style="text-align:center">它可以有默认的方法实现</td>
+<td style="text-align:center">接口完全是抽象的。它根本不存在方法的实现</td>
+</tr>
+</tbody>
+</table>
+<h2 id="抽象类的意义"><a href="#抽象类的意义" class="headerlink" title="抽象类的意义"></a>抽象类的意义</h2><ol>
+<li>为子类提供一个公共的类型；</li>
+<li>封装子类中重复内容（成员变量和方法）；</li>
+<li>定义有抽象方法，子类虽然有不同的实现，但该方法的定义是一致的。<h2 id="抽象类与接口的应用场景"><a href="#抽象类与接口的应用场景" class="headerlink" title="抽象类与接口的应用场景"></a>抽象类与接口的应用场景</h2></li>
+</ol>
+<h3 id="抽象类-1"><a href="#抽象类-1" class="headerlink" title="抽象类"></a>抽象类</h3><ul>
+<li>如果想定义一些公共方法并给其中一些方法默认实现，使用抽象类；</li>
+<li>抽象类是用来捕捉子类的通用特性的，一般作为类的基类，在其中添加了一些方法不回影响到所有子类（子类不需要全部覆盖）；</li>
+</ul>
+<h3 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h3><ul>
+<li>多重继承只能使用接口；</li>
+<li>作为两个类的通信协议，传递一些信息或者数据时，定义接口；</li>
+</ul>
+<h2 id="抽象类是否可以没有方法和属性？"><a href="#抽象类是否可以没有方法和属性？" class="headerlink" title="抽象类是否可以没有方法和属性？"></a>抽象类是否可以没有方法和属性？</h2><p>可以没有方法和属性。<br>抽象类的作用在于子类对其的继承和实现，也就是多态；而没有抽象方法的抽象类的存在价值在于：<strong>实例化了没有意义，因为类已经定义好了，不能改变其中的方法体，但是实例化出来的对象却满足不了要求，只有继承并重写了他的子类才能满足要求。所以才把它定义为没有抽象方法的抽象类</strong></p>
+<ul>
+<li>抽象类专用于派生出子类，子类必须实现抽象类所声明的抽象方法，否则，子类仍是抽象类。</li>
+<li>包含抽象方法的类一定是抽象类，但抽象类中的方法不一定是抽象方法。</li>
+</ul>
+<h2 id="接口的意义"><a href="#接口的意义" class="headerlink" title="接口的意义"></a>接口的意义</h2><ul>
+<li>接口体现了抽象的特点，抽象的定义就是抽取像的部分，可以提取一些类的共性。</li>
+<li>接口并不负责具体的操作，具体的操作是由接口的实现类完成的</li>
+<li>接口具有简单，规范性：实现相同接口的类可以替换，他们遵循相同的规范，实现了相同的功能。</li>
+<li>接口具维护、拓展性：在之后代码中可以随时替换类，只要这些类实现了相同的接口，接口具有规范性</li>
+<li><p>接口具有安全、严密性：在两个类进行通信的时候，并不公开全部的内部代码，只要通过接口进行通信即可<br>*</p>
+<h2 id="泛型中extends和super的区别"><a href="#泛型中extends和super的区别" class="headerlink" title="泛型中extends和super的区别"></a>泛型中extends和super的区别</h2><p>简单来说，&lt;? super T&gt;表示包括T在内的任何T的父类，&lt;? extends T&gt;表示包括T在内的任何T的子类。</p>
+</li>
+<li><p>&lt;? extends T&gt; 只能用于方法返回，告诉编译器此返参的类型的最小继承边界为T，T和T的父类都能接收，但是入参类型无法确定，只能接受null的传入</p>
+</li>
+<li>&lt;? super T&gt;只能用于限定方法入参，告诉编译器入参只能是T或其子类型，而返参只能用Object类接收</li>
+<li>? 既不能用于入参也不能用于返参</li>
+</ul>
+<h2 id="父类的静态方法能否被子类重写"><a href="#父类的静态方法能否被子类重写" class="headerlink" title="父类的静态方法能否被子类重写"></a>父类的静态方法能否被子类重写</h2><p>不可以。<br><strong>所谓静态就是指：在编译之后所分配的内存会一直存在（不会被回收），直到程序退出内存才会释放这个空间。
+</strong><br>静态方法只与类有关，不与实例有关，重写只适用于实例方法，不适用于静态方法。</p>
+<p>因为静态方法是程序一运行就已经分配好了内存地址，而且该地址是固定的，所有引用到该方法的对象（父类或者子类）所指向的始终是同一个内存地址中的数据，即该静态方法。如果子类定义了相同名称的静态方法，只会新增一个内存地址，并不会重写。</p>
+<h2 id="进程和线程的区别"><a href="#进程和线程的区别" class="headerlink" title="进程和线程的区别"></a>进程和线程的区别</h2><p>进程和线程都是一个时间段的描述，是CPU工作时间段的描述。</p>
+<p>简而言之,一个程序至少有一个进程,一个进程至少有一个线程.<br>线程的划分尺度小于进程，使得多线程程序的并发性高。<br>另外，进程在执行过程中拥有独立的内存单元，而多个线程共享内存，从而极大地提高了程序的运行效率。<br>线程在执行过程中与进程还是有区别的。每个独立的线程有一个程序运行的入口、顺序执行序列和程序的出口。但是线程不能够独立执行，必须依存在应用程序中，由应用程序提供多个线程执行控制。<br>从逻辑角度来看，多线程的意义在于一个应用程序中，有多个执行部分可以同时执行。但操作系统并没有将多个线程看做多个独立的应用，来实现进程的调度和管理以及资源分配。这就是进程和线程的重要区别。</p>
+<p>进程是具有一定独立功能的程序关于某个数据集合上的一次运行活动,进程是系统进行资源分配和调度的一个独立单位.<br>线程是进程的一个实体,是CPU调度和分派的基本单位,它是比进程更小的能独立运行的基本单位.线程自己基本上不拥有系统资源,只拥有一点在运行中必不可少的资源(如程序计数器,一组寄存器和栈),但是它可与同属一个进程的其他的线程共享进程所拥有的全部资源.<br>一个线程可以创建和撤销另一个线程;同一个进程中的多个线程之间可以并发执行.</p>
+<p>进程包括自己独立的地址空间、堆栈和局部变量，线程共享进程的地址空间、堆栈和局部变量。<br>进程切换的时候需要切换上下文，耗费资源较大。</p>
+<h2 id="final，finally，finalize的区别"><a href="#final，finally，finalize的区别" class="headerlink" title="final，finally，finalize的区别"></a>final，finally，finalize的区别</h2><h3 id="final"><a href="#final" class="headerlink" title="final"></a>final</h3><p>用于申明属性，方法和类，表示属性不可变，方法不可以被覆盖，类不可以被继承。</p>
+<ul>
+<li>变量<br>  final修饰变量表示该变量是不可变的。当指向一个对象时：指向的内存地址是不变的，但是被指的内存地址中的类是可以改变的。</li>
+<li>方法<br>  final修饰方法时表示该方法是不能被子类重写的。</li>
+<li>类<br>  final修饰类时表示该类是不能被继承的，由于java的单继承关系，所以该类是继承关系链中的终端。</li>
+</ul>
+<p>接口中声明的所有变量都是final的；</p>
+<h3 id="finally"><a href="#finally" class="headerlink" title="finally"></a>finally</h3><p>是异常处理语句结构中，表示总是执行的部分。　　<br>//TODO</p>
+<h3 id="finalize"><a href="#finalize" class="headerlink" title="finalize"></a>finalize</h3><p>表示是object类一个方法，在垃圾回收机制中执行的时候会被调用被回收对象的方法。允许回收此前未回收的内存垃圾。所有object都继承了 <code>finalize()</code> 方法</p>
+<h2 id="序列化的方式"><a href="#序列化的方式" class="headerlink" title="序列化的方式"></a>序列化的方式</h2><p>将序列化的数据实现 Serializable/Parcelable 接口，通过 Intent.putExtra 或者 Binder 传递数据。</p>
+<h2 id="Serializable-和-Parcelable-的区别"><a href="#Serializable-和-Parcelable-的区别" class="headerlink" title="Serializable 和 Parcelable 的区别"></a>Serializable 和 Parcelable 的区别</h2><h3 id="Serializable-接口"><a href="#Serializable-接口" class="headerlink" title="Serializable 接口"></a>Serializable 接口</h3><p>实现非常简单，出了需要继承 Serializable 接口外只要创建一个 serialVersionUID 属性就好。</p>
+<h4 id="serialVersionUID"><a href="#serialVersionUID" class="headerlink" title="serialVersionUID"></a>serialVersionUID</h4><p>serialVersionUID 在运行时唯一标识了一个可序列化的类。一个类序列化时，运行时会保存它的版本号，然后在反序列化时检查你要反序列化成的对象版本号是否一致，不一致的话就会报错：InvalidClassException。</p>
+<h4 id="序列化和反序列化"><a href="#序列化和反序列化" class="headerlink" title="序列化和反序列化"></a>序列化和反序列化</h4><p>Serializable 的序列化与反序列化分别通过 ObjectOutputStream 和 ObjectInputStream 进行，实例代码如下：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 序列化对象</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> obj</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> path</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">synchronized</span> <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">boolean</span> <span class="title">saveObject</span><span class="params">(Object obj, String path)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (obj == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ObjectOutputStream oos = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        oos = <span class="keyword">new</span> ObjectOutputStream(<span class="keyword">new</span> FileOutputStream(path));</span><br><span class="line">        oos.writeObject(obj);</span><br><span class="line">        oos.close();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (oos != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                oos.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反序列化对象</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> path</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked "</span>)</span><br><span class="line"><span class="keyword">synchronized</span> <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">readObject</span><span class="params">(String path)</span> </span>&#123;</span><br><span class="line">    ObjectInputStream ojs = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        ojs = <span class="keyword">new</span> ObjectInputStream(<span class="keyword">new</span> FileInputStream(path));</span><br><span class="line">        <span class="keyword">return</span> (T) ojs.readObject();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException | ClassNotFoundException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        close(ojs);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Parcelable-接口"><a href="#Parcelable-接口" class="headerlink" title="Parcelable 接口"></a>Parcelable 接口</h3><p>Parcelable 是 Android 特有的序列化方式<br>实现 Parcelable 的方法如下：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ParcelClass</span> <span class="keyword">implements</span> <span class="title">Parcelable</span> &#123;</span></span><br><span class="line">    <span class="keyword">public</span> String name;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 系统自动添加，给createFromParcel里面用</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> in</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> ParcelClass(Parcel <span class="keyword">in</span>) &#123;</span><br><span class="line">        name = <span class="keyword">in</span>.readString();</span><br><span class="line">        id = <span class="keyword">in</span>.readInt();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 序列话数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> dest</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> flags</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> writeToParcel(Parcel dest, <span class="keyword">int</span> flags) &#123;</span><br><span class="line">        dest.writeString(name);</span><br><span class="line">        dest.writeInt(id);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 内容接口描述，默认返回0即可。</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> describeContents() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Creator&lt;ParcelClass&gt; CREATOR = <span class="keyword">new</span> Creator&lt;ParcelClass&gt;() &#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@param</span> in</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">         * createFromParcel()方法中我们要去读取刚才写出的name和age字段，</span></span><br><span class="line"><span class="comment">         * 并创建一个Person对象进行返回，其中 name 和 id 都是调用Parcel的readXxx()方法读取到的，</span></span><br><span class="line"><span class="comment">         * 注意这里读取的顺序一定要和刚才写出的顺序完全相同。</span></span><br><span class="line"><span class="comment">         * 读取的工作我们利用一个构造函数帮我们完成了</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ParcelClass createFromParcel(Parcel <span class="keyword">in</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ParcelClass(<span class="keyword">in</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//供反序列化本类数组时调用的</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ParcelClass[] newArray(<span class="keyword">int</span> size) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ParcelClass[size];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="区别"><a href="#区别" class="headerlink" title="区别"></a>区别</h3><ul>
+<li>编码上：</li>
+</ul>
+<p>Serializable代码量少，写起来方便<br>Parcelable代码多一些</p>
+<ul>
+<li>效率上：</li>
+</ul>
+<p>Parcelable的速度比高十倍以上。<br>Serializable 这种方法的缺点是使用了反射，序列化的过程较慢。这种机制会在序列化的时候创建许多的临时对象，容易触发垃圾回收。</p>
+<h2 id="静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？"><a href="#静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？" class="headerlink" title="静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？"></a>静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？</h2><p>可以被继承，不可以被重写。</p>
+<ol>
+<li>静态方法和属性是属于类的，调用的时候直接通过类名.方法名完成对，不需要继承机制即可以调用。如果子类里面定义了静态方法和属性，那么这时候父类的静态方法或属性称之为”隐藏”。如果你想要调用父类的静态方法和属性，直接通过父类名.方法或变量名完成，至于是否继承一说，子类是有继承静态方法和属性，但是跟实例方法和属性不太一样，存在”隐藏”的这种情况。</li>
+<li>多态之所以能够实现依赖于继承、接口和重写、重载（继承和重写最为关键）。有了继承和重写就可以实现父类的引用指向不同子类的对象。重写的功能是：”重写”后子类的优先级要高于父类的优先级，但是“隐藏”是没有这个优先级之分的。</li>
+<li>静态属性、静态方法和非静态的属性都可以被继承和隐藏而不能被重写，因此不能实现多态，不能实现父类的引用可以指向不同子类的对象。非静态方法可以被继承和重写，因此可以实现多态。</li>
+</ol>
+<h2 id="静态内部类的设计意图"><a href="#静态内部类的设计意图" class="headerlink" title="静态内部类的设计意图"></a>静态内部类的设计意图</h2><ul>
+<li>它的创建是不需要依赖于外围类的。</li>
+<li>它不能使用任何外围类的非static成员变量和方法。</li>
+</ul>
+<h2 id="成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用"><a href="#成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用" class="headerlink" title="成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用"></a>成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用</h2><p>//TODO</p>
+<h2 id="谈谈对kotlin的理解"><a href="#谈谈对kotlin的理解" class="headerlink" title="谈谈对kotlin的理解"></a>谈谈对kotlin的理解</h2><p>//TODO</p>
+<h2 id="闭包和局部内部类的区别"><a href="#闭包和局部内部类的区别" class="headerlink" title="闭包和局部内部类的区别"></a>闭包和局部内部类的区别</h2><p>局部内部类就像是方法里面的一个局部变量一样，是不能有public、protected、private以及static修饰符的。</p>
+<h2 id="string-转换成-integer的方式及原理"><a href="#string-转换成-integer的方式及原理" class="headerlink" title="string 转换成 integer的方式及原理"></a>string 转换成 integer的方式及原理</h2><p>进过一系列判断，最后负着一直加首位的数，再乘以十，最后负的返回原值，正的返回相反数</p>
+
+      
+    </div>
+    
+    
+    
+
+    <div>
+        
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">------ 本文结束------</div>
+    
+</div>
+
+        
+     </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
+          
+            <a href="/tags/面试/" rel="tag"><i class="fa fa-tag"></i> 面试</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Java/try、catch、finally、throw和throws/" rel="next" title="try、catch、finally、throw和throws">
+                <i class="fa fa-chevron-left"></i> try、catch、finally、throw和throws
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/uncategorized/EventBus-源码分析与踩坑指南/" rel="prev" title="EventBus 源码分析与踩坑指南">
+                EventBus 源码分析与踩坑指南 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div class="ds-thread" data-thread-key="面试/Java/Android-知识整理-一、Java-基础知识/"
+           data-title="Android 知识整理(一、Java 基础知识)" data-url="http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/">
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Artaris" />
+            
+              <p class="site-author-name" itemprop="name">Artaris</p>
+              <p class="site-description motion-element" itemprop="description">一失足成千古风流人物</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/ArtarisCN" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:i@artaris.cn" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/ArtarisCN" target="_blank" title="Twitter">
+                    
+                      <i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://weibo.com/5815357470" target="_blank" title="Weibo">
+                    
+                      <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-基础知识"><span class="nav-number">1.</span> <span class="nav-text">Java 基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java-中-和-equals-和-hashCode-的区别"><span class="nav-number">1.1.</span> <span class="nav-text">Java 中 == 和 equals() 和 hashCode() 的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#int、char、long各占多少字节数"><span class="nav-number">1.2.</span> <span class="nav-text">int、char、long各占多少字节数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#int-与-Integer-的区别"><span class="nav-number">1.3.</span> <span class="nav-text">int 与 Integer 的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#谈谈对-Java-多态的理解"><span class="nav-number">1.4.</span> <span class="nav-text">谈谈对 Java 多态的理解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#String、StringBuffer、StringBuilder区别"><span class="nav-number">1.5.</span> <span class="nav-text">String、StringBuffer、StringBuilder区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是内部类？内部类的作用"><span class="nav-number">1.6.</span> <span class="nav-text">什么是内部类？内部类的作用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内部类的性质"><span class="nav-number">1.6.1.</span> <span class="nav-text">内部类的性质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内部类的作用"><span class="nav-number">1.6.2.</span> <span class="nav-text">内部类的作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#抽象类和接口区别"><span class="nav-number">1.7.</span> <span class="nav-text">抽象类和接口区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#抽象类"><span class="nav-number">1.7.1.</span> <span class="nav-text">抽象类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#抽象类的意义"><span class="nav-number">1.8.</span> <span class="nav-text">抽象类的意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#抽象类与接口的应用场景"><span class="nav-number">1.9.</span> <span class="nav-text">抽象类与接口的应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#抽象类-1"><span class="nav-number">1.9.1.</span> <span class="nav-text">抽象类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#接口"><span class="nav-number">1.9.2.</span> <span class="nav-text">接口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#抽象类是否可以没有方法和属性？"><span class="nav-number">1.10.</span> <span class="nav-text">抽象类是否可以没有方法和属性？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接口的意义"><span class="nav-number">1.11.</span> <span class="nav-text">接口的意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#泛型中extends和super的区别"><span class="nav-number">1.12.</span> <span class="nav-text">泛型中extends和super的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#父类的静态方法能否被子类重写"><span class="nav-number">1.13.</span> <span class="nav-text">父类的静态方法能否被子类重写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程和线程的区别"><span class="nav-number">1.14.</span> <span class="nav-text">进程和线程的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#final，finally，finalize的区别"><span class="nav-number">1.15.</span> <span class="nav-text">final，finally，finalize的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#final"><span class="nav-number">1.15.1.</span> <span class="nav-text">final</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#finally"><span class="nav-number">1.15.2.</span> <span class="nav-text">finally</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#finalize"><span class="nav-number">1.15.3.</span> <span class="nav-text">finalize</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#序列化的方式"><span class="nav-number">1.16.</span> <span class="nav-text">序列化的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Serializable-和-Parcelable-的区别"><span class="nav-number">1.17.</span> <span class="nav-text">Serializable 和 Parcelable 的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Serializable-接口"><span class="nav-number">1.17.1.</span> <span class="nav-text">Serializable 接口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#serialVersionUID"><span class="nav-number">1.17.1.1.</span> <span class="nav-text">serialVersionUID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#序列化和反序列化"><span class="nav-number">1.17.1.2.</span> <span class="nav-text">序列化和反序列化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parcelable-接口"><span class="nav-number">1.17.2.</span> <span class="nav-text">Parcelable 接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#区别"><span class="nav-number">1.17.3.</span> <span class="nav-text">区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？"><span class="nav-number">1.18.</span> <span class="nav-text">静态属性和静态方法是否可以被继承？是否可以被重写？以及原因？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#静态内部类的设计意图"><span class="nav-number">1.19.</span> <span class="nav-text">静态内部类的设计意图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用"><span class="nav-number">1.20.</span> <span class="nav-text">成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#谈谈对kotlin的理解"><span class="nav-number">1.21.</span> <span class="nav-text">谈谈对kotlin的理解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#闭包和局部内部类的区别"><span class="nav-number">1.22.</span> <span class="nav-text">闭包和局部内部类的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#string-转换成-integer的方式及原理"><span class="nav-number">1.23.</span> <span class="nav-text">string 转换成 integer的方式及原理</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2016 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Artaris</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count"></span>
+  
+</div>
+
+
+
+
+
+<div>
+ <a href="http://www.miitbeian.gov.cn/">京 ICP 备 16006915 号</a>
+</div>
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_sphere.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"artaris"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  <script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script>
+<script type="text/javascript" src="/js/src/custom.js"></script>
+
+</body>
+</html>
