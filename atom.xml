@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://artaris.cn/"/>
-  <updated>2019-03-19T02:37:16.668Z</updated>
+  <updated>2019-05-30T08:18:25.377Z</updated>
   <id>http://artaris.cn/</id>
   
   <author>
@@ -17,11 +17,39 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>自定义 Handler 的内存泄漏问题</title>
+    <link href="http://artaris.cn/uncategorized/%E8%87%AA%E5%AE%9A%E4%B9%89-Handler-%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E9%97%AE%E9%A2%98/"/>
+    <id>http://artaris.cn/uncategorized/自定义-Handler-的内存泄漏问题/</id>
+    <published>2019-05-30T08:18:25.000Z</published>
+    <updated>2019-05-30T08:18:25.377Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>快速设置</title>
+    <link href="http://artaris.cn/uncategorized/%E5%BF%AB%E9%80%9F%E8%AE%BE%E7%BD%AE/"/>
+    <id>http://artaris.cn/uncategorized/快速设置/</id>
+    <published>2019-03-20T04:05:06.000Z</published>
+    <updated>2019-03-20T04:05:06.148Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Android 知识整理(一、Java 基础知识)</title>
     <link href="http://artaris.cn/%E9%9D%A2%E8%AF%95/Java/Android-%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E4%B8%80%E3%80%81Java-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
     <id>http://artaris.cn/面试/Java/Android-知识整理-一、Java-基础知识/</id>
     <published>2019-03-19T01:53:03.000Z</published>
-    <updated>2019-03-19T02:37:16.668Z</updated>
+    <updated>2019-03-20T04:05:41.629Z</updated>
     
     <summary type="html">
     
@@ -455,51 +483,6 @@
     <summary type="html">
     
       &lt;p&gt;try、catch、finally 是 Java 中处理异常的一套机制。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Java" scheme="http://artaris.cn/categories/Java/"/>
-    
-    
-      <category term="Java" scheme="http://artaris.cn/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>EventBus 源码分析与踩坑指南</title>
-    <link href="http://artaris.cn/Android/EventBus-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%B8%A9%E5%9D%91%E6%8C%87%E5%8D%97/"/>
-    <id>http://artaris.cn/Android/EventBus-源码分析与踩坑指南/</id>
-    <published>2017-05-22T05:54:49.000Z</published>
-    <updated>2019-03-19T02:19:36.851Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;EventBus是一个使用发布者/订阅者模式 并且低耦合的Android开源库。 EventBus只需几行代码即可实现中央通信解耦类：简化代码，删除依赖关系，加快应用程序开发速度。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Android" scheme="http://artaris.cn/categories/Android/"/>
-    
-    
-      <category term="Android" scheme="http://artaris.cn/tags/Android/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>int 与 Integer</title>
-    <link href="http://artaris.cn/Java/int-%E4%B8%8E-Integer/"/>
-    <id>http://artaris.cn/Java/int-与-Integer/</id>
-    <published>2017-03-19T11:49:55.000Z</published>
-    <updated>2019-03-19T01:54:01.216Z</updated>
-    
-    <summary type="html">
-    
-      &lt;ul&gt;
-&lt;li&gt;Integer是int的包装类，int则是java的一种基本数据类型&lt;/li&gt;
-&lt;li&gt;Integer变量必须实例化后才能使用，而int变量不需要&lt;/li&gt;
-&lt;li&gt;Integer实际是对象的引用，当new一个Integer时，实际上是生成一个指针指向此对象；而int则是直接存储数据值&lt;/li&gt;
-&lt;li&gt;Integer的默认值是null，int的默认值是0&lt;/li&gt;
-&lt;/ul&gt;
     
     </summary>
     

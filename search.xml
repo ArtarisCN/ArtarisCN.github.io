@@ -4,6 +4,22 @@
   
     
     <entry>
+      <title><![CDATA[自定义 Handler 的内存泄漏问题]]></title>
+      <url>http://artaris.cn/uncategorized/%E8%87%AA%E5%AE%9A%E4%B9%89-Handler-%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E9%97%AE%E9%A2%98/</url>
+      <content type="html"></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[快速设置]]></title>
+      <url>http://artaris.cn/uncategorized/%E5%BF%AB%E9%80%9F%E8%AE%BE%E7%BD%AE/</url>
+      <content type="html"></content>
+      
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Android 知识整理(一、Java 基础知识)]]></title>
       <url>http://artaris.cn/%E9%9D%A2%E8%AF%95/Java/Android-%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E4%B8%80%E3%80%81Java-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</url>
       <content type="html"><![CDATA[<p>一些 Java 基础知识的问题。</p>
@@ -215,7 +231,7 @@
 <h2 id="成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用"><a href="#成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用" class="headerlink" title="成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用"></a>成员内部类、静态内部类、局部内部类和匿名内部类的理解，以及项目中的应用</h2><p>具体请看 <a href="## 什么是内部类？内部类的作用">内部类</a></p>
 <h2 id="谈谈对kotlin的理解"><a href="#谈谈对kotlin的理解" class="headerlink" title="谈谈对kotlin的理解"></a>谈谈对kotlin的理解</h2><p>//TODO</p>
 <h2 id="闭包和局部内部类的区别"><a href="#闭包和局部内部类的区别" class="headerlink" title="闭包和局部内部类的区别"></a>闭包和局部内部类的区别</h2><p>局部内部类就像是方法里面的一个局部变量一样，是不能有public、protected、private以及static修饰符的。</p>
-<h2 id="string-转换成-integer的方式及原理"><a href="#string-转换成-integer的方式及原理" class="headerlink" title="string 转换成 integer的方式及原理"></a>string 转换成 integer的方式及原理</h2><p>进过一系列判断，最后负着一直加首位的数，再乘以十，最后负的返回原值，正的返回相反数</p>
+<h2 id="String-转换成-integer的方式及原理"><a href="#String-转换成-integer的方式及原理" class="headerlink" title="String 转换成 integer的方式及原理"></a>String 转换成 integer的方式及原理</h2><p>进过一系列判断，最后负着一直加首位的数，再乘以十，最后负的返回原值，正的返回相反数</p>
 ]]></content>
       
         <categories>
