@@ -4,14 +4,6 @@
   
     
     <entry>
-      <title><![CDATA[快速设置]]></title>
-      <url>http://artaris.cn/uncategorized/%E5%BF%AB%E9%80%9F%E8%AE%BE%E7%BD%AE/</url>
-      <content type="html"></content>
-      
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Android 知识整理(一、Java 基础知识)]]></title>
       <url>http://artaris.cn/%E9%9D%A2%E8%AF%95/Java/Android-%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E4%B8%80%E3%80%81Java-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</url>
       <content type="html"><![CDATA[<p>一些 Java 基础知识的问题。</p>
@@ -368,13 +360,13 @@
     
     <entry>
       <title><![CDATA[BroadcastReceiver 与 LocalBroadcastReceiver 的比较]]></title>
-      <url>http://artaris.cn/uncategorized/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
+      <url>http://artaris.cn/Android/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
       <content type="html"><![CDATA[<p>LocalBroadcastReceiver 和 BroadcastReceiver 均为常用的广播方法。这里比较一下他们之间的区别与使用。</p>
 <a id="more"></a>
-<p>LocalBroadcastReceiver 是本地广播，只能在应用使用和接收。</p>
+<h2 id="LocalBroadcastReceiver"><a href="#LocalBroadcastReceiver" class="headerlink" title="LocalBroadcastReceiver"></a>LocalBroadcastReceiver</h2><p>LocalBroadcastReceiver 是本地广播，只能在应用使用和接收。</p>
 <ol>
 <li>获取一个localBroadcastManager实例</li>
-<li>使用localBroad**castManager.sendBroadcast(intent)方法发送广播</li>
+<li>使用localBroadcastManager.sendBroadcast(intent)方法发送广播</li>
 <li>写好广播接收器</li>
 <li>注册好广播接收器的要接收的广播地址，然后使用localBroadcastManager.registerReceiver(mBroadcastReceiver,intentFilter);方法进行注册</li>
 <li>记得在onDestroy()中取消注册</li>
@@ -412,6 +404,18 @@
 </blockquote>
 ]]></content>
       
+        <categories>
+            
+            <category> Android </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
+            
+        </tags>
         
     </entry>
     
@@ -484,6 +488,44 @@
 </ol>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ScrollingActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    PersonTransmissionInterface mBinder;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_scrolling);</span><br><span class="line"></span><br><span class="line">        Button add = findViewById(R.id.add_person);</span><br><span class="line">        add.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(mBinder == <span class="keyword">null</span>)&#123;</span><br><span class="line">                    bindSsoAuthServices();</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    addPersion();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        Button get = findViewById(R.id.get_person);</span><br><span class="line">        get.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(mBinder == <span class="keyword">null</span>)</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">                getPerson();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">bindSsoAuthServices</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//指定服务端的包名、Action名以找到对应的 Service</span></span><br><span class="line">        Intent intent = <span class="keyword">new</span> Intent(<span class="string">"cn.artaris.aidi_server.PersonTransmissionService"</span>);</span><br><span class="line">        intent.setPackage(<span class="string">"cn.artaris.aidi_server"</span>);</span><br><span class="line">        bindService(intent,mServiceConnection,Context.BIND_AUTO_CREATE);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ServiceConnection mServiceConnection = <span class="keyword">new</span> ServiceConnection() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceConnected</span><span class="params">(ComponentName name, IBinder service)</span> </span>&#123;</span><br><span class="line">            <span class="comment">//关键代码，通过</span></span><br><span class="line">            mBinder = PersonTransmissionInterface.Stub.asInterface(service);</span><br><span class="line">            addPersion();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceDisconnected</span><span class="params">(ComponentName name)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    String[] name = <span class="keyword">new</span> String[]&#123;<span class="string">"李一"</span>,<span class="string">"李二"</span>,<span class="string">"李三"</span>,<span class="string">"李四"</span>,<span class="string">"李五"</span>,<span class="string">"李六"</span>,<span class="string">"李七"</span>,<span class="string">"李九"</span>,<span class="string">"李十"</span>&#125;;</span><br><span class="line">    <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addPersion</span><span class="params">()</span></span>&#123;</span><br><span class="line">        Log.d(<span class="string">"ScrollingActivity"</span>,<span class="string">"### person client addPersion"</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            mBinder.addPerson(<span class="keyword">new</span> Person(name[count++]));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">getPerson</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Log.d(<span class="string">"ScrollingActivity"</span>,String.valueOf(mBinder.getPersonList().size()));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDestroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy();</span><br><span class="line">        unbindService(mServiceConnection);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="AIDL-原理分析"><a href="#AIDL-原理分析" class="headerlink" title="AIDL 原理分析"></a>AIDL 原理分析</h3><p>在 <code>PersonTransmissionInterface.java</code> 中自动生成了 <code>PersonTransmissionInterface</code> 接口，接口中包含了我们在<code>PersonTransmissionInterface.aidl</code> 定义的两个接口。<br>而最重要的生成了 <code>Stub</code> 类，该类继承了 Binder 类并实现了 <code>PersonTransmissionInterface</code> 接口。<br>Stub最重要的就是 <code>asInterface()</code> 这个函数，在这个函数中会自动判断参数 obj 的类型，如果 obj 是本地的接口类型，则 AIDL 会认为不是进程之间的通信，会直接返回一个本地的 <code>PersonTransmissionInterface</code> 对象；否则会转换成 <code>Stub</code> 类的一个内部类 Proxy 来包装 obj ，将其赋值给内部的 <code>mRemote</code> 字段，<code>Proxy</code> 也实现了 <code>PersonTransmissionInterface</code> 接口，不同的是他是通过 <code>Binder</code> 机制来与远程进行交互的，例如<code>mRemote.transact(Stub.TRANSACTION_addPerson, _data, _reply, 0);</code>，它请求的类型为 <code>Stub.TRANSACTION_addPerson</code>，参数为 <code>Parcel</code> 格式的 data。<br>对于服务端的代码来说，它是拥有同一份的 <code>PersonTransmissionInterface.aidl</code> 与 <code>PersonTransmissionInterface.java</code> 但不同的是服务端是指令的接口端，客户端的调用会通过 Binder 机制传递到服务端，最后到服务端调用的 <code>Stub</code> 的 <code>boolean onTransact()</code> 函数，通过 code 类型判断具体调用的函数，此时两端的传递就对应上了。<br>客户端调用了 <code>bindService(intent,mServiceConnection,Context.BIND_AUTO_CREATE);</code>之后，如果绑定成功则会调用 <code>void onServiceConnected(ComponentName name, IBinder service)</code>，这里的 <code>Service</code> 是 <code>BinderProxy</code> 经过 <code>asInterface()</code>转换以后，被包装成了 <code>Proxy</code> 对象，但是执行的时候，调用的是服务端的对应方法。即：<code>PersonTransmissionInterface</code> 的实例 <code>mBinder</code> 被服务端包装成 <code>BinderProxy</code> 类型，再经过客户端的 <code>Proxy</code> 进行包装，通过 <code>Binder</code> 机制进行包装，实现进程之间的调用。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> Android </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[关于 Context 的二三事]]></title>
+      <url>http://artaris.cn/Android/%E5%85%B3%E4%BA%8E-Context-%E7%9A%84%E4%BA%8C%E4%B8%89%E4%BA%8B/</url>
+      <content type="html"><![CDATA[<p>Context 是Android 开发处处可见的一个对象，这些对象是怎么来的，有什么关系，怎么使用，这里学习记录一下。</p>
+<a id="more"></a>
+<p><img src="http://img.artaris.cn/15564663949291.jpg" alt=""></p>
+<p>Context是一个抽象基类，我们通过它访问当前包的资源（getResources、getAssets）和启动其他组件（Activity、Service、Broadcast）以及得到各种服务（getSystemService）。</p>
+<p>对Context的理解可以来说：Context提供了一个应用的运行环境，在Context的大环境里，应用才可以访问资源，才能完成和其他组件、服务的交互，Context定义了一套基本的功能接口，我们可以理解为一套规范，而Activity和Service是实现这套规范的子类，这么说也许并不准确，因为这套规范实际是被ContextImpl类统一实现的，Activity和Service只是继承并有选择性地重写了某些规范的实现。</p>
+<p><strong>Activity在创建的时候会new一个ContextImpl对象并在attach方法中关联它</strong></p>
+<p>很明确，不同的Context得到的都是同一份资源。这是很好理解的，请看下面的分析，<br>在设备参数和显示参数不变的情况下，不同的ContextImpl访问到的是同一份资源。设备参数不变是指手机的屏幕和android版本不变，显示参数不变是指手机的分辨率和横竖屏状态。也就是说，尽管Application、Activity、Service都有自己的ContextImpl，并且每个ContextImpl都有自己的mResources成员，但是由于它们的mResources成员都来自于唯一的ResourcesManager实例，所以它们看似不同的mResources其实都指向的是同一块内存(C语言的概念)，因此，它们的mResources都是同一个对象（在设备参数和显示参数不变的情况下）。</p>
+<p><img src="http://img.artaris.cn/15564659341006.jpg" alt=""></p>
+<p><strong>getApplication()和getApplicationContext()的区别？</strong><br>getApplication返回结果为Application，且不同的Activity和Service返回的Application均为同一个全局对象，在ActivityThread内部有一个列表专门用于维护所有应用的application<br>getApplicationContext返回的也是Application对象，只不过返回类型为Context，看看它的实现</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span>  </span><br><span class="line"><span class="keyword">public</span> <span class="function">Context <span class="title">getApplicationContext</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> (mPackageInfo != <span class="keyword">null</span>) ?  </span><br><span class="line">            mPackageInfo.getApplication():mMainThread.getApplication();  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码中mPackageInfo是包含当前应用的包信息、比如包名、应用的安装目录等，原则上来说，作为第三方应用，包信息mPackageInfo不可能为空，在这种情况下，getApplicationContext返回的对象和getApplication是同一个。但是对于系统应用，包信息有可能为空，具体就不深入研究了。从这种角度来说，对于第三方应用，一个应用只存在一个Application对象，且通过getApplication和getApplicationContext得到的是同一个对象，两者的区别仅仅是返回类型不同。</p>
+<p><strong>Context 导致的内存泄漏问题？</strong><br>ApplicationContext 会伴随应用的整个生命周期，不会泄漏。Context 泄漏基本都指ActivityContext 。<br>当把Context传入第三方类时，这个类就持有了这个 Activity 这个对象，当Activity销毁的时候，可能这个对象还在使用中（如工具类、Presenter 等）造成Activity无法正常回收，即内存泄漏。</p>
+<p><strong>正确使用 Context 的姿势？</strong></p>
+<ol>
+<li>与视图有关的上下文，尽量使用Activity Context，不去使用ApplicationContext 去创建新的页面（setFlag(FLAG_NEW_TASK|FLAG_CLEAN_TOP)）会开辟一个新的页面栈，不方便管理。</li>
+<li>在初始化工具类的时候，使用getApplicaitonContext()去初始化，不会造成内存泄漏。</li>
+<li>Application Context 在 attachBaseContext()之后才会初始化。执行顺序为<code>Constructor()</code>-&gt;<code>attachBaseContext()</code>-&gt;<code>onCreate()</code></li>
+</ol>
 ]]></content>
       
         <categories>
