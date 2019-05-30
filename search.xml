@@ -4,14 +4,6 @@
   
     
     <entry>
-      <title><![CDATA[自定义 Handler 的内存泄漏问题]]></title>
-      <url>http://artaris.cn/uncategorized/%E8%87%AA%E5%AE%9A%E4%B9%89-Handler-%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E9%97%AE%E9%A2%98/</url>
-      <content type="html"></content>
-      
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[快速设置]]></title>
       <url>http://artaris.cn/uncategorized/%E5%BF%AB%E9%80%9F%E8%AE%BE%E7%BD%AE/</url>
       <content type="html"></content>
@@ -371,6 +363,55 @@
             <tag> Java </tag>
             
         </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[BroadcastReceiver 与 LocalBroadcastReceiver 的比较]]></title>
+      <url>http://artaris.cn/uncategorized/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
+      <content type="html"><![CDATA[<p>LocalBroadcastReceiver 和 BroadcastReceiver 均为常用的广播方法。这里比较一下他们之间的区别与使用。</p>
+<a id="more"></a>
+<p>LocalBroadcastReceiver 是本地广播，只能在应用使用和接收。</p>
+<ol>
+<li>获取一个localBroadcastManager实例</li>
+<li>使用localBroad**castManager.sendBroadcast(intent)方法发送广播</li>
+<li>写好广播接收器</li>
+<li>注册好广播接收器的要接收的广播地址，然后使用localBroadcastManager.registerReceiver(mBroadcastReceiver,intentFilter);方法进行注册</li>
+<li>记得在onDestroy()中取消注册</li>
+</ol>
+<h2 id="BroadcastReceiver"><a href="#BroadcastReceiver" class="headerlink" title="BroadcastReceiver"></a>BroadcastReceiver</h2><p>BroadcastReceiver 是针对应用间、应用与系统间、应用内部进行通信的一种方式<br>LocalBroadcastReceiver 仅在自己的应用内发送接收广播，也就是只有自己的应用能收到，数据更加安全广播只在这个程序里，而且效率更高。<br><strong>BroadcastReceiver 使用</strong></p>
+<ol>
+<li>制作intent（可以携带参数）</li>
+<li>使用sendBroadcast()传入intent;</li>
+<li>制作广播接收器类继承BroadcastReceiver重写onReceive方法（或者可以匿名内部类啥的）</li>
+<li>在java中（动态注册）或者直接在Manifest中注册广播接收器（静态注册）使用registerReceiver()传入接收器和intentFilter</li>
+<li>取消注册可以在OnDestroy()函数中，unregisterReceiver()传入接收器<br>LocalBroadcastReceiver 使用</li>
+<li><p>LocalBroadcastReceiver不能静态注册，只能采用动态注册的方式。<br>在发送和注册的时候采用，LocalBroadcastManager的sendBroadcast方法和registerReceiver方法</p>
+</li>
+<li><p>可以明确的知道正在发送的广播不会离开我们的程序，因此不用担心机密数据泄露问题</p>
+</li>
+<li>其他程序无法将广播发送到我们程序的内部，因此不需要担心会有安全漏洞的隐患</li>
+<li>发送本地广播要比全局广播更加高效</li>
+</ol>
+<ul>
+<li>BroadcastReceiver 是跨应用广播，利用Binder机制实现，支持动态和静态两种方式注册方式。</li>
+<li>LocalBroadcastReceiver 是应用内广播，利用Handler实现，利用了IntentFilter的match功能，提供消息的发布与接收功能，实现应用内通信，效率和安全性比较高，仅支持动态注册。</li>
+</ul>
+<p><strong>广播细分为三种:</strong></p>
+<ul>
+<li>普通广播</li>
+<li>有序广播</li>
+<li>本地广播</li>
+</ul>
+<p><strong>普通广播是什么？</strong><br>调用sendBroadcast()发送</p>
+<p><strong>有序广播是什么？</strong><br>调用sendOrderedBroadcast()发送<br>广播接收者会按照priority优先级从大到小进行排序<br>优先级相同的广播，动态注册的广播优先处理<br>广播接收者还能对广播进行截断和修改</p>
+<p><strong>本地广播的优点?</strong><br>效率更高。<br>发送的广播不会离开我们的应用，不会泄露关键数据。<br>其他程序无法将广播发送到我们程序内部，不会有安全漏洞。</p>
+<p>现在BroadcastReceiver也不推荐使用静态注册了，8.0之后限制了绝大部分广播只能使用动态注册</p>
+<blockquote>
+<p>应用内广播现在还有人用吗？已经被EventBus类似的事件替换了吧？<br>emmmm……</p>
+</blockquote>
+]]></content>
+      
         
     </entry>
     
@@ -2514,6 +2555,34 @@
         <tags>
             
             <tag> Java </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[自定义 Handler 的内存泄漏问题]]></title>
+      <url>http://artaris.cn/Android/%E8%87%AA%E5%AE%9A%E4%B9%89-Handler-%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E9%97%AE%E9%A2%98/</url>
+      <content type="html"><![CDATA[<p>Handler 内存泄漏一直是内存泄漏的一大常见原因。今天主要分析怎么解决这个问题。</p>
+<a id="more"></a>
+<ul>
+<li>设为静态内部类<br>静态内部类属于 GC Root 对象，不会持有外部 Activity 的引用</li>
+<li>在 onDestroy 中让 Handler.removeMessage，removeRunnable handle = null<br>在 onDestroy 取消 Handle 执行的所有任务，释放对外的引用也是不错的办法，不过要注意的是 onDestroy 方法不一定会被调用，这种方法并不能万无一失</li>
+<li>可以设 Handler 对 Activity 的弱引用<br>方法一虽然可以保证内部静态类不持有外部引用了，但是当自线程需要发消息更新主界面的时候还是需要Activity的对象引用，这时候使用弱引用可以避免内存的泄漏，当系统需要回收 Activity 的时候并不会因为 Handler 的持有而失败，使用代码如下：  <figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> static <span class="class"><span class="keyword">class</span> <span class="title">StaticHandle</span> <span class="keyword">extends</span> <span class="title">Handler</span></span>&#123;</span><br><span class="line">    <span class="type">WeakReference</span>&lt;<span class="type">Activity</span>&gt; mActivityReference;</span><br><span class="line"></span><br><span class="line">    public <span class="type">StaticHandle</span>(<span class="type">Activity</span> activity) &#123;</span><br><span class="line">        mActivityReference= <span class="keyword">new</span> <span class="type">WeakReference</span>&lt;<span class="type">Activity</span>&gt;(activity);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    public void handleMessage(<span class="type">Message</span> msg) &#123;</span><br><span class="line">        <span class="type">Activity</span> activity = mActivityReference.get();</span><br><span class="line">        <span class="keyword">if</span>(activity != <span class="literal">null</span>&#123;</span><br><span class="line">            mTextView.setText((<span class="type">String</span>)msg.obj);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> Android </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Android </tag>
             
         </tags>
         
