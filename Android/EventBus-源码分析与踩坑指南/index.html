@@ -6,10 +6,10 @@
 
 
 <html class="theme-next mist use-motion" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#222">
 
 
@@ -27,8 +27,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -47,7 +47,7 @@
 
   
   
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
 
 
 
@@ -55,9 +55,9 @@
 
 
 
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
@@ -75,13 +75,13 @@
 
 
 
-  <meta name="keywords" content="Android," />
+  <meta name="keywords" content="Android,">
 
 
 
 
 
-  <link rel="alternate" href="/atom.xml" title="Artaris's Blog" type="application/atom+xml" />
+  <link rel="alternate" href="/atom.xml" title="Artaris's Blog" type="application/atom+xml">
 
 
 
@@ -96,7 +96,7 @@
 <meta property="og:site_name" content="Artaris&#39;s Blog">
 <meta property="og:description" content="EventBus是一个使用发布者/订阅者模式 并且低耦合的Android开源库。 EventBus只需几行代码即可实现中央通信解耦类：简化代码，删除依赖关系，加快应用程序开发速度。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-19T02:19:36.851Z">
+<meta property="og:updated_time" content="2019-06-08T14:08:22.144Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="EventBus 源码分析与踩坑指南">
 <meta name="twitter:description" content="EventBus是一个使用发布者/订阅者模式 并且低耦合的Android开源库。 EventBus只需几行代码即可实现中央通信解耦类：简化代码，删除依赖关系，加快应用程序开发速度。">
@@ -129,7 +129,7 @@
 
 
 
-  <link rel="canonical" href="http://artaris.cn/Android/EventBus-源码分析与踩坑指南/"/>
+  <link rel="canonical" href="http://artaris.cn/Android/EventBus-源码分析与踩坑指南/">
 
 
 
@@ -167,7 +167,7 @@
     
 
     <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
+      <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">Artaris's Blog</span>
         <span class="logo-line-after"><i></i></span>
@@ -197,7 +197,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
             首页
           </a>
@@ -207,7 +207,7 @@
         <li class="menu-item menu-item-about">
           <a href="/about/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-cv"></i> <br>
             
             关于
           </a>
@@ -217,7 +217,7 @@
         <li class="menu-item menu-item-tags">
           <a href="/tags/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
             
             标签
           </a>
@@ -227,7 +227,7 @@
         <li class="menu-item menu-item-categories">
           <a href="/categories/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
             
             分类
           </a>
@@ -237,7 +237,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
             归档
           </a>
@@ -250,7 +250,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
             
             搜索
           </a>
@@ -271,9 +271,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -314,7 +312,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Artaris">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="/images/avatar.png">
     </span>
 
@@ -355,14 +353,14 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-03-19T10:19:36+08:00">
-                2019-03-19
+              <time title="更新于" itemprop="dateModified" datetime="2019-06-08T22:08:22+08:00">
+                2019-06-08
               </time>
             
           </span>
 
           
-            <span class="post-category" >
+            <span class="post-category">
             
               <span class="post-meta-divider">|</span>
             
@@ -472,7 +470,7 @@
 <p>我们看到其中最主要的是<code>unsubscribeByEventType</code>这个方法，继续查看</p>
 <figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">private void unsubscribeByEventType(Object <span class="keyword">subscriber, </span>Class&lt;?&gt; eventType) &#123;</span><br><span class="line">    List&lt;<span class="keyword">Subscription&gt; </span><span class="keyword">subscriptions </span>= <span class="keyword">subscriptionsByEventType.get(eventType);</span></span><br><span class="line"><span class="keyword"> </span>   if (<span class="keyword">subscriptions </span>!= null) &#123;</span><br><span class="line">        int size = <span class="keyword">subscriptions.size();</span></span><br><span class="line"><span class="keyword"> </span>       for (int i = <span class="number">0</span><span class="comment">; i &lt; size; i++) &#123;</span></span><br><span class="line">            <span class="keyword">Subscription </span><span class="keyword">subscription </span>= <span class="keyword">subscriptions.get(i);</span></span><br><span class="line"><span class="keyword"> </span>           if (<span class="keyword">subscription.subscriber </span>== <span class="keyword">subscriber) </span>&#123;</span><br><span class="line">                <span class="keyword">subscription.active </span>= false<span class="comment">;</span></span><br><span class="line">                <span class="keyword">subscriptions.remove(i);</span></span><br><span class="line"><span class="keyword"> </span>               i--<span class="comment">;</span></span><br><span class="line">                size--<span class="comment">;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>即从 <code>subscriptionsByEventType</code>找到所有的订阅事件包装类，分别更新这些包装类。</p>
-<h4 id="事件分发"><a href="#事件分发" class="headerlink" title="事件分发"></a>事件分发</h4><figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">post</span>(<span class="params">Object <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">    PostingThreadState postingState = currentPostingThreadState.<span class="keyword">get</span>();</span><br><span class="line">    List&lt;Object&gt; eventQueue = postingState.eventQueue;</span><br><span class="line">    eventQueue.<span class="keyword">add</span>(<span class="keyword">event</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!postingState.isPosting) &#123;</span><br><span class="line">        postingState.isMainThread = isMainThread();</span><br><span class="line">        postingState.isPosting = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (postingState.canceled) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> EventBusException(<span class="string">"Internal error. Abort state was not reset"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (!eventQueue.isEmpty()) &#123;</span><br><span class="line">                postSingleEvent(eventQueue.<span class="keyword">remove</span>(<span class="number">0</span>), postingState);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            postingState.isPosting = <span class="literal">false</span>;</span><br><span class="line">            postingState.isMainThread = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="事件分发"><a href="#事件分发" class="headerlink" title="事件分发"></a>事件分发</h4><figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">post</span>(<span class="params">Object <span class="keyword">event</span></span>)</span> &#123;</span><br><span class="line">    PostingThreadState postingState = currentPostingThreadState.<span class="keyword">get</span>();</span><br><span class="line">    List&lt;Object&gt; eventQueue = postingState.eventQueue;</span><br><span class="line">    eventQueue.<span class="keyword">add</span>(<span class="keyword">event</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!postingState.isPosting) &#123;</span><br><span class="line">        postingState.isMainThread = isMainThread();</span><br><span class="line">        postingState.isPosting = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (postingState.canceled) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> EventBusException(<span class="string">"Internal error. Abort state was not reset"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (!eventQueue.isEmpty()) &#123;</span><br><span class="line">                postSingleEvent(eventQueue.<span class="keyword">remove</span>(<span class="number">0</span>), postingState);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            postingState.isPosting = <span class="literal">false</span>;</span><br><span class="line">            postingState.isMainThread = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>如注释所说，<code>post()</code>是将事件发送到 EventBus ,具体什么时候调用时由 EventBus 调度，我们继续查看原理。<br>因为发布事件的线程即调用<code>post()</code>的线程与调用订阅者方法的线程不同，所以设计了一个<code>PostingThreadState</code>来保存发送的状态。<br><code>PostingThreadState</code>的结构如下：</p>
 <figure class="highlight zephir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">PostingThreadState</span> </span>&#123;</span><br><span class="line">    <span class="comment">//用来保存当前线程需要发送的事件</span></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">List</span>&lt;Object&gt; eventQueue = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">boolean</span> isPosting;</span><br><span class="line">    <span class="keyword">boolean</span> isMainThread;</span><br><span class="line">    Subscription subscription;</span><br><span class="line">    Object event;</span><br><span class="line">    <span class="keyword">boolean</span> canceled;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>故发送事件中最重要的步骤是<code>postSingleEvent()</code>:</p>
@@ -480,10 +478,10 @@
 <p><code>eventInheritance</code>这个开关是表明是否考虑时间类型的继承关系，默认为true，然后调用<code>lookupAllEventTypes()</code>去查找所有订阅了这个时间的Class，最后调用<code>postSingleEventForEventType()</code>来判断是否查找到对应的订阅方法，最后将事件通过<code>postSingleEventForEventType()</code>方法继续处理：</p>
 <figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">private <span class="keyword">boolean </span>postSingleEventForEventType(Object event, PostingThreadState postingState, Class&lt;?&gt; eventClass) &#123;</span><br><span class="line">    CopyOnWriteArrayList&lt;<span class="keyword">Subscription&gt; </span><span class="keyword">subscriptions;</span></span><br><span class="line"><span class="keyword"> </span>   <span class="keyword">synchronized </span>(this) &#123;</span><br><span class="line">        <span class="keyword">subscriptions </span>= <span class="keyword">subscriptionsByEventType.get(eventClass);</span></span><br><span class="line"><span class="keyword"> </span>   &#125;</span><br><span class="line">    if (<span class="keyword">subscriptions </span>!= null &amp;&amp; !<span class="keyword">subscriptions.isEmpty()) </span>&#123;</span><br><span class="line">        for (<span class="keyword">Subscription </span><span class="keyword">subscription </span>: <span class="keyword">subscriptions) </span>&#123;</span><br><span class="line">            postingState.event = event<span class="comment">;</span></span><br><span class="line">            postingState.<span class="keyword">subscription </span>= <span class="keyword">subscription;</span></span><br><span class="line"><span class="keyword"> </span>           <span class="keyword">boolean </span>aborted = false<span class="comment">;</span></span><br><span class="line">            try &#123;</span><br><span class="line">                postToSubscription(<span class="keyword">subscription, </span>event, postingState.isMainThread)<span class="comment">;</span></span><br><span class="line">                aborted = postingState.canceled<span class="comment">;</span></span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                postingState.event = null<span class="comment">;</span></span><br><span class="line">                postingState.<span class="keyword">subscription </span>= null<span class="comment">;</span></span><br><span class="line">                postingState.canceled = false<span class="comment">;</span></span><br><span class="line">            &#125;</span><br><span class="line">            if (aborted) &#123;</span><br><span class="line">                <span class="keyword">break;</span></span><br><span class="line"><span class="keyword"> </span>           &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line">    return false<span class="comment">;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>首先通过一次 CopyOnWriteArrayList ，每次对List 的修改都会立即同步一份。在这里找到每一个包装类，通过方法<code>postToSubscription()</code>来进行分发，</p>
-<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">postToSubscription</span>(<span class="params">Subscription subscription, Object <span class="keyword">event</span>, boolean isMainThread</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (subscription.subscriberMethod.threadMode) &#123;</span><br><span class="line">        <span class="keyword">case</span> POSTING:</span><br><span class="line">            invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MAIN:</span><br><span class="line">            <span class="keyword">if</span> (isMainThread) &#123;</span><br><span class="line">                invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MAIN_ORDERED:</span><br><span class="line">            <span class="keyword">if</span> (mainThreadPoster != <span class="literal">null</span>) &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// temporary: technically not correct as poster not decoupled from subscriber</span></span><br><span class="line">                invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> BACKGROUND:</span><br><span class="line">            <span class="keyword">if</span> (isMainThread) &#123;</span><br><span class="line">                backgroundPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ASYNC:</span><br><span class="line">            asyncPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unknown thread mode: "</span> + subscription.subscriberMethod.threadMode);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">postToSubscription</span>(<span class="params">Subscription subscription, Object <span class="keyword">event</span>, boolean isMainThread</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> (subscription.subscriberMethod.threadMode) &#123;</span><br><span class="line">        <span class="keyword">case</span> POSTING:</span><br><span class="line">            invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MAIN:</span><br><span class="line">            <span class="keyword">if</span> (isMainThread) &#123;</span><br><span class="line">                invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MAIN_ORDERED:</span><br><span class="line">            <span class="keyword">if</span> (mainThreadPoster != <span class="literal">null</span>) &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// temporary: technically not correct as poster not decoupled from subscriber</span></span><br><span class="line">                invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> BACKGROUND:</span><br><span class="line">            <span class="keyword">if</span> (isMainThread) &#123;</span><br><span class="line">                backgroundPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                invokeSubscriber(subscription, <span class="keyword">event</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ASYNC:</span><br><span class="line">            asyncPoster.enqueue(subscription, <span class="keyword">event</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unknown thread mode: "</span> + subscription.subscriberMethod.threadMode);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这里到了最后的分发事件，在构造方法中构造的四个线程池，加入响应的队列，异步执行，</p>
 <p>执行方法为：</p>
-<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">invokeSubscriber</span>(<span class="params">Subscription subscription, Object <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        subscription.subscriberMethod.method.invoke(subscription.subscriber, <span class="keyword">event</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">        handleSubscriberException(subscription, <span class="keyword">event</span>, e.getCause());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unexpected exception"</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">invokeSubscriber</span>(<span class="params">Subscription subscription, Object <span class="keyword">event</span></span>)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        subscription.subscriberMethod.method.invoke(subscription.subscriber, <span class="keyword">event</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">        handleSubscriberException(subscription, <span class="keyword">event</span>, e.getCause());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unexpected exception"</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这里使用了反射，反射调用订阅者的方法，方法存储在subsription的subsribeMethod变量中。</p>
 <h2 id="优缺点分析"><a href="#优缺点分析" class="headerlink" title="优缺点分析"></a>优缺点分析</h2><ul>
 <li>优点：洒脱的解藕，在多个界面传递时省去了层层的值传递。</li>
@@ -592,8 +590,7 @@
 
   
     <div class="comments" id="comments">
-      <div class="ds-thread" data-thread-key="Android/EventBus-源码分析与踩坑指南/"
-           data-title="EventBus 源码分析与踩坑指南" data-url="http://artaris.cn/Android/EventBus-源码分析与踩坑指南/">
+      <div class="ds-thread" data-thread-key="Android/EventBus-源码分析与踩坑指南/" data-title="EventBus 源码分析与踩坑指南" data-url="http://artaris.cn/Android/EventBus-源码分析与踩坑指南/">
       </div>
     </div>
 
@@ -634,9 +631,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image"
-                src="/images/avatar.png"
-                alt="Artaris" />
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Artaris">
             
               <p class="site-author-name" itemprop="name">Artaris</p>
               <p class="site-description motion-element" itemprop="description">一失足成千古风流人物</p>
