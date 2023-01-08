@@ -1,51 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Activity 的加载模式</title>
-    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
-<span id="more"></span>
-
-<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
-<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
-<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-
-<p>新开的页面继续重复其生命周期</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
-<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
-<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
-<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
-<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
-<li>不同程序之间</li>
-</ul>
-<ol>
-<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
-<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
-<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
-</ol>
-<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
-<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>ADB 使用指南</title>
     <url>/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
     <content><![CDATA[<p>ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能</p>
@@ -1114,125 +1069,175 @@
       </tags>
   </entry>
   <entry>
-    <title>Android 线程池的使用</title>
-    <url>/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        // do sth.</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br></pre></td></tr></table></figure>
-
-<p>创造线程时，编译器会报告如下警告：<br><img src="http://img.artaris.cn/android_thread/thread_warning.png"><br>带着这些疑问，让我去学习了一下直接创造线程有什么缺点，及线程池的优点和使用。</p>
+    <title>Activity 的加载模式</title>
+    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
 <span id="more"></span>
 
-<h3 id="使用new-Thread-创造显式线程的缺点"><a href="#使用new-Thread-创造显式线程的缺点" class="headerlink" title="使用new Thread()创造显式线程的缺点"></a>使用<code>new Thread()</code>创造显式线程的缺点</h3><ul>
-<li>在大量任务都在创建线程时，会频繁创建线程，而后这些线程使用完成之后又会被收回，导致频繁的GC，这种情况在多个列表 item 异步加载时极为常见;</li>
-<li>多个线程之间互相竞争，缺乏统一的管理，降低了程序的运行效率，甚至卡顿；</li>
-<li>当显式线程需要停止时，必须要保留每个线程的实例对象，在多个列表 item 异步加载时管理不便；</li>
-</ul>
-<h3 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h3><p>使用线程池可以给我们带来很多好处，首先通过线程池中线程的重用，减少创建和销毁线程的性能开销。其次，能控制线程池中的并发数，否则会因为大量的线程争夺 CPU 资源造成阻塞。最后，线程池能够对线程进行管理，比如使用 ScheduledThreadPool 来设置延迟N秒后执行任务，并且每隔 M 秒循环执行一次。</p>
-<p>Android中常用的线程池都是通过对 ThreadPoolExecutor 进行不同配置来实现的，那么我们今天就从这这个 ThreadPoolExecutor 来开始吧！</p>
-<h4 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h4><p>ThreadPoolExecutor 的构造方法中各个参数如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ThreadPoolExecutor(int corePoolSize,</span><br><span class="line">                          int maximumPoolSize,</span><br><span class="line">                          long keepAliveTime,</span><br><span class="line">                          TimeUnit unit,</span><br><span class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                          ThreadFactory threadFactory,</span><br><span class="line">                          RejectedExecutionHandler handler)</span><br></pre></td></tr></table></figure>
+<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
+<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
 
-<ul>
-<li><code>corePoolSize</code>:线程池中核心线程的数量;</li>
-<li><code>maximumPoolSize</code>:线程池中最大线程数量;</li>
-<li><code>keepAliveTime</code>:非核心线程的超时时长。当系统中非核心线程闲置时间超过keepAliveTime之后，则会被回收。如果ThreadPoolExecutor的allowCoreThreadTimeOut属性设置为true，则该参数也表示核心线程的超时时长;</li>
-<li><code>unit</code>:非核心线程的超时时长参数的单位。有纳秒、微秒、毫秒、秒、分、时、天等.eg.<code>TimeUnit.SECONDS</code>、<code>TimeUnit.MILLISECONDS</code>;</li>
-<li><code>workQueue</code>:线程池中的任务队列。该队列主要用来存储已经被提交但是尚未执行的任务。存储在这里的任务是由ThreadPoolExecutor的execute方法提交来的。workQueue 是一个 BlockingQueue 类型，BlockingQueue 是一个特殊的队列，当我们从 BlockingQueue 中取数据时，如果 BlockingQueue 是空的，则取数据的操作会进入到阻塞状态，当 BlockingQueue 中有了新数据时，这个取数据的操作又会被重新唤醒。同理，如果 BlockingQueue 中的数据已经满了，往 BlockingQueue 中存数据的操作又会进入阻塞状态，直到 BlockingQueue 中又有新的空间，存数据的操作又会被冲洗唤醒。<br>BlockingQueue 常用的实现类如下几种：</li>
+<p>新开的页面继续重复其生命周期</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
+<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
+<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
+<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
+<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
+<li>不同程序之间</li>
 </ul>
 <ol>
-<li><p><code>ArrayBlockingQueue</code>:这个表示一个规定了大小的 BlockingQueue ， ArrayBlockingQueue 的构造函数接受一个 int 类型的数据，该数据表示 BlockingQueue 的大小，存储在 ArrayBlockingQueue 中的元素按照 FIFO （先进先出）的方式来进行存取。</p>
-</li>
-<li><p><code>LinkedBlockingQueue</code>:这个表示一个大小不确定的 BlockingQueue ，在 LinkedBlockingQueue 的构造方法中可以传一个int类型的数据，这样创建出来的 LinkedBlockingQueue 是有大小的，也可以不传，不传的话， LinkedBlockingQueue 的大小就为 Integer.MAX_VALUE，源码如下：</p>
-</li>
+<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
+<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
+<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
 </ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with a capacity of</span><br><span class="line"> * &#123;@link Integer#MAX_VALUE&#125;.</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue() &#123;</span><br><span class="line">    this(Integer.MAX_VALUE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with the given (fixed) capacity.</span><br><span class="line"> *</span><br><span class="line"> * @param capacity the capacity of this queue</span><br><span class="line"> * @throws IllegalArgumentException if &#123;@code capacity&#125; is not greater</span><br><span class="line"> *         than zero</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue(int capacity) &#123;</span><br><span class="line">    if (capacity &lt;= 0) throw new IllegalArgumentException();</span><br><span class="line">    this.capacity = capacity;</span><br><span class="line">    last = head = new Node&lt;E&gt;(null);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
+<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android  7.1 新特性——Shortcuts</title>
+    <url>/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
+    <content><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
+<p><a href="http://img.artaris.cn/shortcuts/ShortcutsDemo.apk">吐泡泡 Shortcuts Demo 下载</a></p>
+<span id="more"></span>
 
-<ol start="3">
-<li><p><code>PriorityBlockingQueue</code>:这个队列和LinkedBlockingQueue类似，不同的是PriorityBlockingQueue中的元素不是按照FIFO来排序的，而是按照元素的Comparator来决定存取顺序的（这个功能也反映了存入PriorityBlockingQueue中的数据必须实现了Comparator接口）。</p>
-</li>
-<li><p><code>SynchronousQueue</code>:这个是同步Queue，属于线程安全的BlockingQueue的一种，在SynchronousQueue中，生产者线程的插入操作必须要等待消费者线程的移除操作，Synchronous内部没有数据缓存空间，因此我们无法对SynchronousQueue进行读取或者遍历其中的数据，元素只有在你试图取走的时候才有可能存在。我们可以理解为生产者和消费者互相等待，等到对方之后然后再一起离开。</p>
-</li>
-</ol>
+<p>如下图所示：</p>
+<p><img src="http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p"></p>
+<h4 id="分类及作用"><a href="#分类及作用" class="headerlink" title="分类及作用"></a>分类及作用</h4><p>Shortcuts 也可以通过静态和动态方式添加。静态的方式可以作为 APP 的一个快捷入口来使用，动态的方式可以作为可变换的选项来使用。</p>
 <ul>
-<li><p><code>threadFactory</code>:为线程池提供创建新线程的功能，这个我们一般使用默认即可</p>
+<li><p><strong>Static shortcuts</strong>：静态shortcuts是在资源文件中定义的，所以你只能通过升级你的app来更新静态shortcuts的相关信息。</p>
 </li>
-<li><p><code>handler</code>:拒绝策略。当线程无法执行新任务时（一般是由于线程池中的线程数量已经达到最大数或者线程池关闭导致的），默认情况下，当线程池无法处理新线程时，会抛出一个RejectedExecutionException。<br>默认如下:</p>
+<li><p><strong>Dynamic shortcuts</strong>：动态shortcuts是通过ShortcutManager相关的API来实现运行时新增、修改、移除shortcuts的。</p>
 </li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static class AbortPolicy implements RejectedExecutionHandler &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Creates an &#123;@code AbortPolicy&#125;.</span><br><span class="line">     */</span><br><span class="line">    public AbortPolicy() &#123; &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Always throws RejectedExecutionException.</span><br><span class="line">     *</span><br><span class="line">     * @param r the runnable task requested to be executed</span><br><span class="line">     * @param e the executor attempting to execute this task</span><br><span class="line">     * @throws RejectedExecutionException always</span><br><span class="line">     */</span><br><span class="line">    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) &#123;</span><br><span class="line">        throw new RejectedExecutionException(&quot;Task &quot; + r.toString() +</span><br><span class="line">                                             &quot; rejected from &quot; +</span><br><span class="line">                                             e.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>以上则是线程池的构造参数的解释。</p>
-<p>那么对于核心线程数和最大线程数，可以参考<code>AsyncTask</code>，如下所示：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public abstract class AsyncTask&lt;Params, Progress, Result&gt; &#123;</span><br><span class="line">    private static final String LOG_TAG = &quot;AsyncTask&quot;;</span><br><span class="line"></span><br><span class="line">    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();</span><br><span class="line">    // We want at least 2 threads and at most 4 threads in the core pool,</span><br><span class="line">    // preferring to have 1 less than the CPU count to avoid saturating</span><br><span class="line">    // the CPU with background work</span><br><span class="line">    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));</span><br><span class="line">    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;</span><br><span class="line">    private static final int KEEP_ALIVE_SECONDS = 30;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private static final BlockingQueue&lt;Runnable&gt; sPoolWorkQueue =</span><br><span class="line">            new LinkedBlockingQueue&lt;Runnable&gt;(128);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * An &#123;@link Executor&#125; that can be used to execute tasks in parallel.</span><br><span class="line">     */</span><br><span class="line">    public static final Executor THREAD_POOL_EXECUTOR;</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(</span><br><span class="line">                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,</span><br><span class="line">                sPoolWorkQueue, sThreadFactory);</span><br><span class="line">        threadPoolExecutor.allowCoreThreadTimeOut(true);</span><br><span class="line">        THREAD_POOL_EXECUTOR = threadPoolExecutor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>核心线程数为手机 CPU 数 +1（ CPU 数量获取方式<code>Runtime.getRuntime().availableProcessors()</code>），最大线程数为手机 CPU 数 × 2 + 1，线程队列的大小为 128</p>
-<h4 id="ThreadPoolExecutor-的执行规则"><a href="#ThreadPoolExecutor-的执行规则" class="headerlink" title="ThreadPoolExecutor 的执行规则"></a>ThreadPoolExecutor 的执行规则</h4><p>当任务提交到线程池中以后，则会按照一下规则进行处理：</p>
-<ol>
-<li><p>execute 一个线程之后，如果线程池中的线程数未达到核心线程数，则会立马启用一个核心线程去执行；</p>
-</li>
-<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数，且 workQueue 未满，则将新线程放入 workQueue 中等待执行；</p>
-</li>
-<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数但未超过非核心线程数，且workQueue已满，则开启一个非核心线程来执行任务；</p>
-</li>
-<li><p>execute 一个线程之后，如果线程池中的线程数已经超过非核心线程数，则拒绝执行该任务；</p>
-</li>
-</ol>
-<h4 id="系统配置的-ThreadPoolExecutor"><a href="#系统配置的-ThreadPoolExecutor" class="headerlink" title="系统配置的 ThreadPoolExecutor"></a>系统配置的 ThreadPoolExecutor</h4><ul>
-<li>FixedThreadPool<br>FixedThreadPool是一个核心线程数量固定的线程池，创建方式如下：</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);  </span><br><span class="line"></span><br><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看到核心线程数和最大线程数一样，说明在 FixedThreadPool 中没有非核心线程，所有的线程都是核心线程，且线程的超时时间为0，说明核心线程即使在没有任务可执行的时候也不会被销毁（这样可让 FixedThreadPool 更快速的响应请求），最后的线程队列是一个 LinkedBlockingQueue ，但是 LinkedBlockingQueue 却没有参数，这说明线程队列的大小为 Integer.MAX_VALUE（2的31次方减1），OK，看完参数，我们大概也就知道了 FixedThreadPool 的工作特点了，当所有的核心线程都在执行任务的时候，新的任务只能进入线程队列中进行等待，直到有线程被空闲出来.</p>
-<ul>
-<li>SingleThreadExecutor</li>
-</ul>
-<p>SingleThreadExecutor 和 FixedThreadPool 很像，不同的就是 SingleThreadExecutor 的核心线程数只有 1。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用 SingleThreadExecutor 的一个最大好处就是可以避免我们去处理线程同步问题，其实如果我们把 FixedThreadPool 的参数传个1，效果就和SingleThreadExecutor一致了.</p>
-<ul>
-<li>CachedThreadPool</li>
-</ul>
-<p>CachedTreadPool一个最大的优势是它可以根据程序的运行情况自动来调整线程池中的线程数量。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newCachedThreadPool() &#123;</span><br><span class="line">    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,</span><br><span class="line">                                  60L, TimeUnit.SECONDS,</span><br><span class="line">                                  new SynchronousQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看到， CachedThreadPool 中是没有核心线程的，但是它的最大线程数却为 Integer.MAX_VALUE ，另外，它是有线程超时机制的，超时时间为60秒，这里它使用了 SynchronousQueue 作为线程队列， SynchronousQueue 的特点上文已经说过了，这里不再赘述。那么我们提交到 CachedThreadPool 消息队列中的任务在执行的过程中有什么特点呢？由于最大线程数为无限大，所以每当我们添加一个新任务进来的时候，如果线程池中有空闲的线程，则由该空闲的线程执行新任务，如果没有空闲线程，则创建新线程来执行任务。根据 CachedThreadPool 的特点，我们可以在有大量任务请求的时候使用 CachedThreadPool ，因为当 CachedThreadPool 中没有新任务的时候，它里边所有的线程都会因为超时而被终止。</p>
-<ul>
-<li>ScheduledThreadPool</li>
-</ul>
-<p>ScheduledThreadPool是一个具有定时定期执行任务功能的线程池，源码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledThreadPoolExecutor(int corePoolSize) &#123;</span><br><span class="line">    super(corePoolSize, Integer.MAX_VALUE,</span><br><span class="line">          DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,</span><br><span class="line">          new DelayedWorkQueue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们可以看到，它的核心线程数量是固定的（我们在构造的时候传入的），但是非核心线程是无穷大，当非核心线程闲置时，则会被立即回收。</p>
-<p>使用ScheduledThreadPool时，我们可以通过如下几个方法来添加任务：</p>
-<ol>
-<li>延迟启动任务</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
-
-
+<h4 id="静态-Shorcuts-Static-shortcuts"><a href="#静态-Shorcuts-Static-shortcuts" class="headerlink" title="静态 Shorcuts(Static shortcuts)"></a>静态 Shorcuts(Static shortcuts)</h4><p>静态 ShortcutsStatic Shortcuts通过在 Manifest 中声明添加。缺点是不可以修改，只能通过应用升级来添加新的静态 Shortcuts。添加主要分为两步：</p>
+<p>1 . AndroidManifest.xml 的 Main Launcher 对应的 Activity 内添加 <code>meta-data meta-data name</code> 为<code>android.app.shortcuts</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.MainActivity&quot;&gt;</span><br><span class="line">	&lt;intent-filter&gt;</span><br><span class="line">		&lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br><span class="line">		&lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br><span class="line">	&lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">	&lt;meta-data</span><br><span class="line">		android:name=&quot;android.app.shortcuts&quot;</span><br><span class="line">		android:resource=&quot;@xml/shortcuts&quot;/&gt;   </span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
+<p>必须在启动界面对应的 Activity 定义 shortcuts ，<code>android:resource</code>指向了 shortcuts 的资源文件。</p>
 <ol start="2">
-<li>延迟定时执行循环任务</li>
+<li>资源文件中定义具体的 shortcuts<br>res 目录下新建 xml 文件夹，并新建 shortcuts.xml 文件，内容如下：</li>
 </ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
-
-<p>延迟 initialDelay 秒后每个 period 秒执行一次任务。</p>
-<ol start="3">
-<li>延迟执行任务</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command,</span><br><span class="line">                                                 long initialDelay,</span><br><span class="line">                                                 long delay,</span><br><span class="line">                                                 TimeUnit unit)</span><br></pre></td></tr></table></figure>
-
-<p>第一次延迟 initialDelay 秒，以后每次延迟 delay 秒执行一个任务。</p>
-<h4 id="ThreadPoolExecutor-其他常用功能"><a href="#ThreadPoolExecutor-其他常用功能" class="headerlink" title="ThreadPoolExecutor 其他常用功能"></a>ThreadPoolExecutor 其他常用功能</h4><ul>
-<li><code>shutDown()</code> 关闭线程池，不影响已经提交的任务;</li>
-<li><code>shutDownNow()</code> 关闭线程池，并尝试去终止正在执行的线程;</li>
-<li><code>allowCoreThreadTimeOut(boolean value)</code> 允许核心线程闲置超时时被回收</li>
-<li><code>submit()</code></li>
-<li>ThreadPoolExecutor 执行任务回调：</li>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;shortcuts xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    &lt;shortcut</span><br><span class="line">        android:shortcutId=&quot;settings&quot;</span><br><span class="line">        android:enabled=&quot;true&quot;</span><br><span class="line">        android:icon=&quot;@mipmap/ic_star_border_black_24dp&quot;</span><br><span class="line">        android:shortcutShortLabel=&quot;@string/settings_short_name&quot;</span><br><span class="line">        android:shortcutLongLabel=&quot;@string/settings_long_name&quot;</span><br><span class="line">        android:shortcutDisabledMessage=&quot;@string/settings_disable_msg&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;intent</span><br><span class="line">            android:action=&quot;android.intent.action.VIEW&quot;</span><br><span class="line">            android:targetPackage=&quot;cn.artaris.shortcutsdemo&quot;</span><br><span class="line">            android:targetClass=&quot;cn.artaris.shortcutsdemo.MainActivity&quot; /&gt;</span><br><span class="line">        &lt;categories android:name=&quot;android.shortcut.conversation&quot;/&gt;</span><br><span class="line">    &lt;/shortcut&gt;</span><br><span class="line">&lt;/shortcuts&gt;</span><br></pre></td></tr></table></figure>
+<p>以 <code>&lt;shortcuts&gt;</code>元素为根，可以包含多个 shortcut 元素，每个 shortcut 元素表示一个 shortcut。其中不同字段的含义为：</p>
+<ul>
+<li>shortcutId表示 shortcut 唯一标识符，相同的 shortcutId 会被覆盖。必须字段。</li>
+<li>shortcutShortLabel为将 shortcut 拖动到桌面时显示的名字，官方建议不超过 10 个字符，必须字段。</li>
+<li>shortcutLongLabel为 shortcut 列表中每个 shortcut 的名字，不宜过长，如果过长或未设置默认会显示 ShortLabel，官方建议不超过 25 个字符。可选字段。</li>
+<li>icon为 shortcut 的 icon，在列表展示和拖动到桌面时显示需要，可选字段。</li>
+<li>enabled表示 shortcut 是否可用，false 表示禁用。xml 中这个属性几乎没有被设置为 false 的实际场景，具体原因可见<strong>6.7 如何更好的删除(废弃)老的 Shortcut</strong>中介绍。</li>
+<li>shortcutDisabledMessage为已固定在桌面的 shortcut 被 Disabled 后点击时的 Toast 提示内容。可选字段。</li>
+<li>intent为点击 shortcut 时响应的 Intent，必须字段。这里可以添加多个 Intent，成为一个 Intent 栈，点击会启动最后一个 Intent，在这个 Intent 回退时会启动它前面一个 Intent，相当于自动将所有 Intent 添加到了堆栈。对于先跳转到某个页面，Back 键希望退回主页而不是结束 App 这类场景，多个 Intents 挺实用的。</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void beforeExecute(Thread t, Runnable r) &#123;</span><br><span class="line">    super.beforeExecute(t, r);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 开始执行任务！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void afterExecute(Runnable r, Throwable t) &#123;</span><br><span class="line">    super.afterExecute(r, t);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 任务执行结束！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void terminated() &#123;</span><br><span class="line">    super.terminated();</span><br><span class="line">    //当调用shutDown()或者shutDownNow()时会触发该方法  </span><br><span class="line">    Log.d(TAG, &quot;terminated: 线程池关闭！&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>intent可设置属性包括：</strong><br><code>android:action</code>、<code>android:data</code>、<code>android:mimeType</code>、<code>android:targetClass</code>、<code>android:targetPackage</code>。其中<code>android:action</code>为必须属性。</p>
+</blockquote>
+<h4 id="动态-Shorcuts-Dynamic-shortcuts"><a href="#动态-Shorcuts-Dynamic-shortcuts" class="headerlink" title="动态 Shorcuts(Dynamic shortcuts)"></a>动态 Shorcuts(Dynamic shortcuts)</h4><p>动态 ShortcutsDynamic Shortcuts 通过 ShortcutManager API 进行操作。可以动态添加、修改、删除。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N_MR1) &#123;</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 管理 shortcuts</span><br><span class="line">    */</span><br><span class="line">    mShortcutManager = getSystemService(ShortcutManager.class);</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 支持的最多 shortcuts 个数</span><br><span class="line">    */</span><br><span class="line">    mMaxShortcutCount = mShortcutManager.getMaxShortcutCountPerActivity();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    new AlertDialog.Builder(mContext)</span><br><span class="line">            .setTitle(getString(R.string.main_dialog_simple_title))</span><br><span class="line">            .setMessage(getString(R.string.main_dialog_simple_message))</span><br><span class="line">            .setNeutralButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void onClick(DialogInterface dialog, int which) &#123;</span><br><span class="line">                    finish();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            .show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建新的 shortcut 的方法为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Icon icon = Icon.createWithResource(mContext, R.mipmap.ic_favorite_black_24dp);   Intent intent = new Intent(mContext, ShowShortcutsActivity.class); intent.setAction(Intent.ACTION_VIEW); intent.putExtra(&quot;msg&quot;, singleChoiceItems[itemSelected]);</span><br><span class="line"></span><br><span class="line">ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, String.valueOf(itemSelected))</span><br><span class="line">        .setShortLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setLongLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setIcon(icon)</span><br><span class="line">        .setIntent(intent)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+<p>添加的方法有：</p>
+<ul>
+<li><code>setDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以替换并添加所有 shortcut 列表；</li>
+<li><code>addDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以添加新的 shortcut 到列表，超过最大个数会报异常；</li>
+<li><code>updateShortcuts(List&lt;ShortcutInfo&gt;)</code>可以更新一组 shortcuts；</li>
+<li><code>removeDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>和removeAllDynamicShortcuts() 可以删除部分或所有 shortcuts。</li>
+</ul>
+<p>ShortcutInfo 的属性与 xml 中定义字段含义一致，shortcutId shortcutShortLabel intent 是必须设置的字段，并且intent必须设置Action。</p>
+<h4 id="固定的-Shortcuts-Pinned-Shortcuts"><a href="#固定的-Shortcuts-Pinned-Shortcuts" class="headerlink" title="固定的 Shortcuts(Pinned Shortcuts)"></a>固定的 Shortcuts(Pinned Shortcuts)</h4><p>Pinned Shortcuts 是指将 Shortcut 固定到桌面的功能，如下图所示：<br><img src="http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p"><br>由于固定到了桌面，APP 不能再添加、修改、删除这些这些 Shortcut ，只能禁用这些 Shortcut 。即便 App 内删除了某个 Shorcut，对应的已固定到桌面的 Shortcuts 也不会被删除。</p>
+<p>可以通过：</p>
+<ol>
+<li><code>getPinnedShortcuts()</code>得到所有固定的 Shortcuts 的信息。</li>
+<li><code>disableShortcuts(List)</code>或<code>disableShortcuts(List, CharSequence)</code>禁用动态的 Shortcuts。</li>
+</ol>
+<p>对于静态的 Shortcuts 需要在资源文件中设置<code>android:enabled=&quot;false&quot;</code>进行禁用，不过静态 Shortcuts 可直接通过删除达到禁用的效果.</p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ul>
+<li>动态 Shortcuts 与静态 Shortcuts 区别</li>
+</ul>
+<ol>
+<li>静态 Shortcuts 只能通过升级应用修改，动态 Shortcuts 随时可以修改；</li>
+<li>静态 Shortcuts 的 Intent 无法设置 Flag，默认为<code>FLAG_ACTIVITY_NEW_TASK</code>和<code>FLAG_ACTIVITY_CLEAR_TASK Flag</code>，即若应用运行中会清除所有已存在的 Activity。动态 Shortcuts 的 Intent 可以设置 Flag；</li>
+<li>静态 Shortcuts 的rank系统默认根据声明顺序设置，动态 Shortcuts 的rank可以通过setRank(int rank)接口主动设置，rank 不能小于 0，值越大表示在 shortcut 列表展示时离 App Icon 越远。静态 Shortcuts 默认比动态 Shortcuts 离 App Icon 更近。</li>
+<li>静态 Shortcuts 删除可以直接删除，动态 Shortcuts 建议通过禁用删除；</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>BroadcastReceiver 与 LocalBroadcastReceiver 的比较</title>
+    <url>/Android/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<p>LocalBroadcastReceiver 和 BroadcastReceiver 均为常用的广播方法。这里比较一下他们之间的区别与使用。</p>
+<span id="more"></span>
 
-<p>当线程池中的任务被执行的时候会回调此方法。</p>
+<h2 id="LocalBroadcastReceiver"><a href="#LocalBroadcastReceiver" class="headerlink" title="LocalBroadcastReceiver"></a>LocalBroadcastReceiver</h2><p>LocalBroadcastReceiver 是本地广播，只能在应用使用和接收。</p>
+<ol>
+<li>获取一个localBroadcastManager实例</li>
+<li>使用localBroadcastManager.sendBroadcast(intent)方法发送广播</li>
+<li>写好广播接收器</li>
+<li>注册好广播接收器的要接收的广播地址，然后使用localBroadcastManager.registerReceiver(mBroadcastReceiver,intentFilter);方法进行注册</li>
+<li>记得在onDestroy()中取消注册</li>
+</ol>
+<h2 id="BroadcastReceiver"><a href="#BroadcastReceiver" class="headerlink" title="BroadcastReceiver"></a>BroadcastReceiver</h2><p>BroadcastReceiver 是针对应用间、应用与系统间、应用内部进行通信的一种方式<br>LocalBroadcastReceiver 仅在自己的应用内发送接收广播，也就是只有自己的应用能收到，数据更加安全广播只在这个程序里，而且效率更高。<br><strong>BroadcastReceiver 使用</strong></p>
+<ol>
+<li><p>制作intent（可以携带参数）</p>
+</li>
+<li><p>使用sendBroadcast()传入intent;</p>
+</li>
+<li><p>制作广播接收器类继承BroadcastReceiver重写onReceive方法（或者可以匿名内部类啥的）</p>
+</li>
+<li><p>在java中（动态注册）或者直接在Manifest中注册广播接收器（静态注册）使用registerReceiver()传入接收器和intentFilter</p>
+</li>
+<li><p>取消注册可以在OnDestroy()函数中，unregisterReceiver()传入接收器<br>LocalBroadcastReceiver 使用</p>
+</li>
+<li><p>LocalBroadcastReceiver不能静态注册，只能采用动态注册的方式。<br>在发送和注册的时候采用，LocalBroadcastManager的sendBroadcast方法和registerReceiver方法</p>
+</li>
+<li><p>可以明确的知道正在发送的广播不会离开我们的程序，因此不用担心机密数据泄露问题</p>
+</li>
+<li><p>其他程序无法将广播发送到我们程序的内部，因此不需要担心会有安全漏洞的隐患</p>
+</li>
+<li><p>发送本地广播要比全局广播更加高效</p>
+</li>
+</ol>
+<ul>
+<li>BroadcastReceiver 是跨应用广播，利用Binder机制实现，支持动态和静态两种方式注册方式。</li>
+<li>LocalBroadcastReceiver 是应用内广播，利用Handler实现，利用了IntentFilter的match功能，提供消息的发布与接收功能，实现应用内通信，效率和安全性比较高，仅支持动态注册。</li>
+</ul>
+<p><strong>广播细分为三种:</strong></p>
+<ul>
+<li>普通广播</li>
+<li>有序广播</li>
+<li>本地广播</li>
+</ul>
+<p><strong>普通广播是什么？</strong><br>调用sendBroadcast()发送</p>
+<p><strong>有序广播是什么？</strong><br>调用sendOrderedBroadcast()发送<br>广播接收者会按照priority优先级从大到小进行排序<br>优先级相同的广播，动态注册的广播优先处理<br>广播接收者还能对广播进行截断和修改</p>
+<p><strong>本地广播的优点?</strong><br>效率更高。<br>发送的广播不会离开我们的应用，不会泄露关键数据。<br>其他程序无法将广播发送到我们程序内部，不会有安全漏洞。</p>
+<p>现在BroadcastReceiver也不推荐使用静态注册了，8.0之后限制了绝大部分广播只能使用动态注册</p>
+<blockquote>
+<p>应用内广播现在还有人用吗？已经被EventBus类似的事件替换了吧？<br>emmmm……</p>
+</blockquote>
 ]]></content>
       <categories>
         <category>Android</category>
@@ -1467,130 +1472,125 @@
       </tags>
   </entry>
   <entry>
-    <title>Android  7.1 新特性——Shortcuts</title>
-    <url>/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
-    <content><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
-<p><a href="http://img.artaris.cn/shortcuts/ShortcutsDemo.apk">吐泡泡 Shortcuts Demo 下载</a></p>
+    <title>Android 线程池的使用</title>
+    <url>/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        // do sth.</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br></pre></td></tr></table></figure>
+
+<p>创造线程时，编译器会报告如下警告：<br><img src="http://img.artaris.cn/android_thread/thread_warning.png"><br>带着这些疑问，让我去学习了一下直接创造线程有什么缺点，及线程池的优点和使用。</p>
 <span id="more"></span>
 
-<p>如下图所示：</p>
-<p><img src="http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p"></p>
-<h4 id="分类及作用"><a href="#分类及作用" class="headerlink" title="分类及作用"></a>分类及作用</h4><p>Shortcuts 也可以通过静态和动态方式添加。静态的方式可以作为 APP 的一个快捷入口来使用，动态的方式可以作为可变换的选项来使用。</p>
+<h3 id="使用new-Thread-创造显式线程的缺点"><a href="#使用new-Thread-创造显式线程的缺点" class="headerlink" title="使用new Thread()创造显式线程的缺点"></a>使用<code>new Thread()</code>创造显式线程的缺点</h3><ul>
+<li>在大量任务都在创建线程时，会频繁创建线程，而后这些线程使用完成之后又会被收回，导致频繁的GC，这种情况在多个列表 item 异步加载时极为常见;</li>
+<li>多个线程之间互相竞争，缺乏统一的管理，降低了程序的运行效率，甚至卡顿；</li>
+<li>当显式线程需要停止时，必须要保留每个线程的实例对象，在多个列表 item 异步加载时管理不便；</li>
+</ul>
+<h3 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h3><p>使用线程池可以给我们带来很多好处，首先通过线程池中线程的重用，减少创建和销毁线程的性能开销。其次，能控制线程池中的并发数，否则会因为大量的线程争夺 CPU 资源造成阻塞。最后，线程池能够对线程进行管理，比如使用 ScheduledThreadPool 来设置延迟N秒后执行任务，并且每隔 M 秒循环执行一次。</p>
+<p>Android中常用的线程池都是通过对 ThreadPoolExecutor 进行不同配置来实现的，那么我们今天就从这这个 ThreadPoolExecutor 来开始吧！</p>
+<h4 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h4><p>ThreadPoolExecutor 的构造方法中各个参数如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ThreadPoolExecutor(int corePoolSize,</span><br><span class="line">                          int maximumPoolSize,</span><br><span class="line">                          long keepAliveTime,</span><br><span class="line">                          TimeUnit unit,</span><br><span class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                          ThreadFactory threadFactory,</span><br><span class="line">                          RejectedExecutionHandler handler)</span><br></pre></td></tr></table></figure>
+
 <ul>
-<li><p><strong>Static shortcuts</strong>：静态shortcuts是在资源文件中定义的，所以你只能通过升级你的app来更新静态shortcuts的相关信息。</p>
+<li><code>corePoolSize</code>:线程池中核心线程的数量;</li>
+<li><code>maximumPoolSize</code>:线程池中最大线程数量;</li>
+<li><code>keepAliveTime</code>:非核心线程的超时时长。当系统中非核心线程闲置时间超过keepAliveTime之后，则会被回收。如果ThreadPoolExecutor的allowCoreThreadTimeOut属性设置为true，则该参数也表示核心线程的超时时长;</li>
+<li><code>unit</code>:非核心线程的超时时长参数的单位。有纳秒、微秒、毫秒、秒、分、时、天等.eg.<code>TimeUnit.SECONDS</code>、<code>TimeUnit.MILLISECONDS</code>;</li>
+<li><code>workQueue</code>:线程池中的任务队列。该队列主要用来存储已经被提交但是尚未执行的任务。存储在这里的任务是由ThreadPoolExecutor的execute方法提交来的。workQueue 是一个 BlockingQueue 类型，BlockingQueue 是一个特殊的队列，当我们从 BlockingQueue 中取数据时，如果 BlockingQueue 是空的，则取数据的操作会进入到阻塞状态，当 BlockingQueue 中有了新数据时，这个取数据的操作又会被重新唤醒。同理，如果 BlockingQueue 中的数据已经满了，往 BlockingQueue 中存数据的操作又会进入阻塞状态，直到 BlockingQueue 中又有新的空间，存数据的操作又会被冲洗唤醒。<br>BlockingQueue 常用的实现类如下几种：</li>
+</ul>
+<ol>
+<li><p><code>ArrayBlockingQueue</code>:这个表示一个规定了大小的 BlockingQueue ， ArrayBlockingQueue 的构造函数接受一个 int 类型的数据，该数据表示 BlockingQueue 的大小，存储在 ArrayBlockingQueue 中的元素按照 FIFO （先进先出）的方式来进行存取。</p>
 </li>
-<li><p><strong>Dynamic shortcuts</strong>：动态shortcuts是通过ShortcutManager相关的API来实现运行时新增、修改、移除shortcuts的。</p>
+<li><p><code>LinkedBlockingQueue</code>:这个表示一个大小不确定的 BlockingQueue ，在 LinkedBlockingQueue 的构造方法中可以传一个int类型的数据，这样创建出来的 LinkedBlockingQueue 是有大小的，也可以不传，不传的话， LinkedBlockingQueue 的大小就为 Integer.MAX_VALUE，源码如下：</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with a capacity of</span><br><span class="line"> * &#123;@link Integer#MAX_VALUE&#125;.</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue() &#123;</span><br><span class="line">    this(Integer.MAX_VALUE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with the given (fixed) capacity.</span><br><span class="line"> *</span><br><span class="line"> * @param capacity the capacity of this queue</span><br><span class="line"> * @throws IllegalArgumentException if &#123;@code capacity&#125; is not greater</span><br><span class="line"> *         than zero</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue(int capacity) &#123;</span><br><span class="line">    if (capacity &lt;= 0) throw new IllegalArgumentException();</span><br><span class="line">    this.capacity = capacity;</span><br><span class="line">    last = head = new Node&lt;E&gt;(null);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p><code>PriorityBlockingQueue</code>:这个队列和LinkedBlockingQueue类似，不同的是PriorityBlockingQueue中的元素不是按照FIFO来排序的，而是按照元素的Comparator来决定存取顺序的（这个功能也反映了存入PriorityBlockingQueue中的数据必须实现了Comparator接口）。</p>
+</li>
+<li><p><code>SynchronousQueue</code>:这个是同步Queue，属于线程安全的BlockingQueue的一种，在SynchronousQueue中，生产者线程的插入操作必须要等待消费者线程的移除操作，Synchronous内部没有数据缓存空间，因此我们无法对SynchronousQueue进行读取或者遍历其中的数据，元素只有在你试图取走的时候才有可能存在。我们可以理解为生产者和消费者互相等待，等到对方之后然后再一起离开。</p>
+</li>
+</ol>
+<ul>
+<li><p><code>threadFactory</code>:为线程池提供创建新线程的功能，这个我们一般使用默认即可</p>
+</li>
+<li><p><code>handler</code>:拒绝策略。当线程无法执行新任务时（一般是由于线程池中的线程数量已经达到最大数或者线程池关闭导致的），默认情况下，当线程池无法处理新线程时，会抛出一个RejectedExecutionException。<br>默认如下:</p>
 </li>
 </ul>
-<h4 id="静态-Shorcuts-Static-shortcuts"><a href="#静态-Shorcuts-Static-shortcuts" class="headerlink" title="静态 Shorcuts(Static shortcuts)"></a>静态 Shorcuts(Static shortcuts)</h4><p>静态 ShortcutsStatic Shortcuts通过在 Manifest 中声明添加。缺点是不可以修改，只能通过应用升级来添加新的静态 Shortcuts。添加主要分为两步：</p>
-<p>1 . AndroidManifest.xml 的 Main Launcher 对应的 Activity 内添加 <code>meta-data meta-data name</code> 为<code>android.app.shortcuts</code>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.MainActivity&quot;&gt;</span><br><span class="line">	&lt;intent-filter&gt;</span><br><span class="line">		&lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br><span class="line">		&lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br><span class="line">	&lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">	&lt;meta-data</span><br><span class="line">		android:name=&quot;android.app.shortcuts&quot;</span><br><span class="line">		android:resource=&quot;@xml/shortcuts&quot;/&gt;   </span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
-<p>必须在启动界面对应的 Activity 定义 shortcuts ，<code>android:resource</code>指向了 shortcuts 的资源文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static class AbortPolicy implements RejectedExecutionHandler &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Creates an &#123;@code AbortPolicy&#125;.</span><br><span class="line">     */</span><br><span class="line">    public AbortPolicy() &#123; &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Always throws RejectedExecutionException.</span><br><span class="line">     *</span><br><span class="line">     * @param r the runnable task requested to be executed</span><br><span class="line">     * @param e the executor attempting to execute this task</span><br><span class="line">     * @throws RejectedExecutionException always</span><br><span class="line">     */</span><br><span class="line">    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) &#123;</span><br><span class="line">        throw new RejectedExecutionException(&quot;Task &quot; + r.toString() +</span><br><span class="line">                                             &quot; rejected from &quot; +</span><br><span class="line">                                             e.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上则是线程池的构造参数的解释。</p>
+<p>那么对于核心线程数和最大线程数，可以参考<code>AsyncTask</code>，如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public abstract class AsyncTask&lt;Params, Progress, Result&gt; &#123;</span><br><span class="line">    private static final String LOG_TAG = &quot;AsyncTask&quot;;</span><br><span class="line"></span><br><span class="line">    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();</span><br><span class="line">    // We want at least 2 threads and at most 4 threads in the core pool,</span><br><span class="line">    // preferring to have 1 less than the CPU count to avoid saturating</span><br><span class="line">    // the CPU with background work</span><br><span class="line">    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));</span><br><span class="line">    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;</span><br><span class="line">    private static final int KEEP_ALIVE_SECONDS = 30;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private static final BlockingQueue&lt;Runnable&gt; sPoolWorkQueue =</span><br><span class="line">            new LinkedBlockingQueue&lt;Runnable&gt;(128);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * An &#123;@link Executor&#125; that can be used to execute tasks in parallel.</span><br><span class="line">     */</span><br><span class="line">    public static final Executor THREAD_POOL_EXECUTOR;</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(</span><br><span class="line">                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,</span><br><span class="line">                sPoolWorkQueue, sThreadFactory);</span><br><span class="line">        threadPoolExecutor.allowCoreThreadTimeOut(true);</span><br><span class="line">        THREAD_POOL_EXECUTOR = threadPoolExecutor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>核心线程数为手机 CPU 数 +1（ CPU 数量获取方式<code>Runtime.getRuntime().availableProcessors()</code>），最大线程数为手机 CPU 数 × 2 + 1，线程队列的大小为 128</p>
+<h4 id="ThreadPoolExecutor-的执行规则"><a href="#ThreadPoolExecutor-的执行规则" class="headerlink" title="ThreadPoolExecutor 的执行规则"></a>ThreadPoolExecutor 的执行规则</h4><p>当任务提交到线程池中以后，则会按照一下规则进行处理：</p>
+<ol>
+<li><p>execute 一个线程之后，如果线程池中的线程数未达到核心线程数，则会立马启用一个核心线程去执行；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数，且 workQueue 未满，则将新线程放入 workQueue 中等待执行；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数但未超过非核心线程数，且workQueue已满，则开启一个非核心线程来执行任务；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经超过非核心线程数，则拒绝执行该任务；</p>
+</li>
+</ol>
+<h4 id="系统配置的-ThreadPoolExecutor"><a href="#系统配置的-ThreadPoolExecutor" class="headerlink" title="系统配置的 ThreadPoolExecutor"></a>系统配置的 ThreadPoolExecutor</h4><ul>
+<li>FixedThreadPool<br>FixedThreadPool是一个核心线程数量固定的线程池，创建方式如下：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);  </span><br><span class="line"></span><br><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到核心线程数和最大线程数一样，说明在 FixedThreadPool 中没有非核心线程，所有的线程都是核心线程，且线程的超时时间为0，说明核心线程即使在没有任务可执行的时候也不会被销毁（这样可让 FixedThreadPool 更快速的响应请求），最后的线程队列是一个 LinkedBlockingQueue ，但是 LinkedBlockingQueue 却没有参数，这说明线程队列的大小为 Integer.MAX_VALUE（2的31次方减1），OK，看完参数，我们大概也就知道了 FixedThreadPool 的工作特点了，当所有的核心线程都在执行任务的时候，新的任务只能进入线程队列中进行等待，直到有线程被空闲出来.</p>
+<ul>
+<li>SingleThreadExecutor</li>
+</ul>
+<p>SingleThreadExecutor 和 FixedThreadPool 很像，不同的就是 SingleThreadExecutor 的核心线程数只有 1。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 SingleThreadExecutor 的一个最大好处就是可以避免我们去处理线程同步问题，其实如果我们把 FixedThreadPool 的参数传个1，效果就和SingleThreadExecutor一致了.</p>
+<ul>
+<li>CachedThreadPool</li>
+</ul>
+<p>CachedTreadPool一个最大的优势是它可以根据程序的运行情况自动来调整线程池中的线程数量。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newCachedThreadPool() &#123;</span><br><span class="line">    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,</span><br><span class="line">                                  60L, TimeUnit.SECONDS,</span><br><span class="line">                                  new SynchronousQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到， CachedThreadPool 中是没有核心线程的，但是它的最大线程数却为 Integer.MAX_VALUE ，另外，它是有线程超时机制的，超时时间为60秒，这里它使用了 SynchronousQueue 作为线程队列， SynchronousQueue 的特点上文已经说过了，这里不再赘述。那么我们提交到 CachedThreadPool 消息队列中的任务在执行的过程中有什么特点呢？由于最大线程数为无限大，所以每当我们添加一个新任务进来的时候，如果线程池中有空闲的线程，则由该空闲的线程执行新任务，如果没有空闲线程，则创建新线程来执行任务。根据 CachedThreadPool 的特点，我们可以在有大量任务请求的时候使用 CachedThreadPool ，因为当 CachedThreadPool 中没有新任务的时候，它里边所有的线程都会因为超时而被终止。</p>
+<ul>
+<li>ScheduledThreadPool</li>
+</ul>
+<p>ScheduledThreadPool是一个具有定时定期执行任务功能的线程池，源码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledThreadPoolExecutor(int corePoolSize) &#123;</span><br><span class="line">    super(corePoolSize, Integer.MAX_VALUE,</span><br><span class="line">          DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,</span><br><span class="line">          new DelayedWorkQueue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，它的核心线程数量是固定的（我们在构造的时候传入的），但是非核心线程是无穷大，当非核心线程闲置时，则会被立即回收。</p>
+<p>使用ScheduledThreadPool时，我们可以通过如下几个方法来添加任务：</p>
+<ol>
+<li>延迟启动任务</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
+
+
 <ol start="2">
-<li>资源文件中定义具体的 shortcuts<br>res 目录下新建 xml 文件夹，并新建 shortcuts.xml 文件，内容如下：</li>
+<li>延迟定时执行循环任务</li>
 </ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;shortcuts xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    &lt;shortcut</span><br><span class="line">        android:shortcutId=&quot;settings&quot;</span><br><span class="line">        android:enabled=&quot;true&quot;</span><br><span class="line">        android:icon=&quot;@mipmap/ic_star_border_black_24dp&quot;</span><br><span class="line">        android:shortcutShortLabel=&quot;@string/settings_short_name&quot;</span><br><span class="line">        android:shortcutLongLabel=&quot;@string/settings_long_name&quot;</span><br><span class="line">        android:shortcutDisabledMessage=&quot;@string/settings_disable_msg&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;intent</span><br><span class="line">            android:action=&quot;android.intent.action.VIEW&quot;</span><br><span class="line">            android:targetPackage=&quot;cn.artaris.shortcutsdemo&quot;</span><br><span class="line">            android:targetClass=&quot;cn.artaris.shortcutsdemo.MainActivity&quot; /&gt;</span><br><span class="line">        &lt;categories android:name=&quot;android.shortcut.conversation&quot;/&gt;</span><br><span class="line">    &lt;/shortcut&gt;</span><br><span class="line">&lt;/shortcuts&gt;</span><br></pre></td></tr></table></figure>
-<p>以 <code>&lt;shortcuts&gt;</code>元素为根，可以包含多个 shortcut 元素，每个 shortcut 元素表示一个 shortcut。其中不同字段的含义为：</p>
-<ul>
-<li>shortcutId表示 shortcut 唯一标识符，相同的 shortcutId 会被覆盖。必须字段。</li>
-<li>shortcutShortLabel为将 shortcut 拖动到桌面时显示的名字，官方建议不超过 10 个字符，必须字段。</li>
-<li>shortcutLongLabel为 shortcut 列表中每个 shortcut 的名字，不宜过长，如果过长或未设置默认会显示 ShortLabel，官方建议不超过 25 个字符。可选字段。</li>
-<li>icon为 shortcut 的 icon，在列表展示和拖动到桌面时显示需要，可选字段。</li>
-<li>enabled表示 shortcut 是否可用，false 表示禁用。xml 中这个属性几乎没有被设置为 false 的实际场景，具体原因可见<strong>6.7 如何更好的删除(废弃)老的 Shortcut</strong>中介绍。</li>
-<li>shortcutDisabledMessage为已固定在桌面的 shortcut 被 Disabled 后点击时的 Toast 提示内容。可选字段。</li>
-<li>intent为点击 shortcut 时响应的 Intent，必须字段。这里可以添加多个 Intent，成为一个 Intent 栈，点击会启动最后一个 Intent，在这个 Intent 回退时会启动它前面一个 Intent，相当于自动将所有 Intent 添加到了堆栈。对于先跳转到某个页面，Back 键希望退回主页而不是结束 App 这类场景，多个 Intents 挺实用的。</li>
-</ul>
-<blockquote>
-<p><strong>intent可设置属性包括：</strong><br><code>android:action</code>、<code>android:data</code>、<code>android:mimeType</code>、<code>android:targetClass</code>、<code>android:targetPackage</code>。其中<code>android:action</code>为必须属性。</p>
-</blockquote>
-<h4 id="动态-Shorcuts-Dynamic-shortcuts"><a href="#动态-Shorcuts-Dynamic-shortcuts" class="headerlink" title="动态 Shorcuts(Dynamic shortcuts)"></a>动态 Shorcuts(Dynamic shortcuts)</h4><p>动态 ShortcutsDynamic Shortcuts 通过 ShortcutManager API 进行操作。可以动态添加、修改、删除。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N_MR1) &#123;</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 管理 shortcuts</span><br><span class="line">    */</span><br><span class="line">    mShortcutManager = getSystemService(ShortcutManager.class);</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 支持的最多 shortcuts 个数</span><br><span class="line">    */</span><br><span class="line">    mMaxShortcutCount = mShortcutManager.getMaxShortcutCountPerActivity();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    new AlertDialog.Builder(mContext)</span><br><span class="line">            .setTitle(getString(R.string.main_dialog_simple_title))</span><br><span class="line">            .setMessage(getString(R.string.main_dialog_simple_message))</span><br><span class="line">            .setNeutralButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void onClick(DialogInterface dialog, int which) &#123;</span><br><span class="line">                    finish();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            .show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>创建新的 shortcut 的方法为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Icon icon = Icon.createWithResource(mContext, R.mipmap.ic_favorite_black_24dp);   Intent intent = new Intent(mContext, ShowShortcutsActivity.class); intent.setAction(Intent.ACTION_VIEW); intent.putExtra(&quot;msg&quot;, singleChoiceItems[itemSelected]);</span><br><span class="line"></span><br><span class="line">ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, String.valueOf(itemSelected))</span><br><span class="line">        .setShortLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setLongLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setIcon(icon)</span><br><span class="line">        .setIntent(intent)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
-<p>添加的方法有：</p>
-<ul>
-<li><code>setDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以替换并添加所有 shortcut 列表；</li>
-<li><code>addDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以添加新的 shortcut 到列表，超过最大个数会报异常；</li>
-<li><code>updateShortcuts(List&lt;ShortcutInfo&gt;)</code>可以更新一组 shortcuts；</li>
-<li><code>removeDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>和removeAllDynamicShortcuts() 可以删除部分或所有 shortcuts。</li>
-</ul>
-<p>ShortcutInfo 的属性与 xml 中定义字段含义一致，shortcutId shortcutShortLabel intent 是必须设置的字段，并且intent必须设置Action。</p>
-<h4 id="固定的-Shortcuts-Pinned-Shortcuts"><a href="#固定的-Shortcuts-Pinned-Shortcuts" class="headerlink" title="固定的 Shortcuts(Pinned Shortcuts)"></a>固定的 Shortcuts(Pinned Shortcuts)</h4><p>Pinned Shortcuts 是指将 Shortcut 固定到桌面的功能，如下图所示：<br><img src="http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p"><br>由于固定到了桌面，APP 不能再添加、修改、删除这些这些 Shortcut ，只能禁用这些 Shortcut 。即便 App 内删除了某个 Shorcut，对应的已固定到桌面的 Shortcuts 也不会被删除。</p>
-<p>可以通过：</p>
-<ol>
-<li><code>getPinnedShortcuts()</code>得到所有固定的 Shortcuts 的信息。</li>
-<li><code>disableShortcuts(List)</code>或<code>disableShortcuts(List, CharSequence)</code>禁用动态的 Shortcuts。</li>
-</ol>
-<p>对于静态的 Shortcuts 需要在资源文件中设置<code>android:enabled=&quot;false&quot;</code>进行禁用，不过静态 Shortcuts 可直接通过删除达到禁用的效果.</p>
-<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ul>
-<li>动态 Shortcuts 与静态 Shortcuts 区别</li>
-</ul>
-<ol>
-<li>静态 Shortcuts 只能通过升级应用修改，动态 Shortcuts 随时可以修改；</li>
-<li>静态 Shortcuts 的 Intent 无法设置 Flag，默认为<code>FLAG_ACTIVITY_NEW_TASK</code>和<code>FLAG_ACTIVITY_CLEAR_TASK Flag</code>，即若应用运行中会清除所有已存在的 Activity。动态 Shortcuts 的 Intent 可以设置 Flag；</li>
-<li>静态 Shortcuts 的rank系统默认根据声明顺序设置，动态 Shortcuts 的rank可以通过setRank(int rank)接口主动设置，rank 不能小于 0，值越大表示在 shortcut 列表展示时离 App Icon 越远。静态 Shortcuts 默认比动态 Shortcuts 离 App Icon 更近。</li>
-<li>静态 Shortcuts 删除可以直接删除，动态 Shortcuts 建议通过禁用删除；</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>BroadcastReceiver 与 LocalBroadcastReceiver 的比较</title>
-    <url>/Android/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
-    <content><![CDATA[<p>LocalBroadcastReceiver 和 BroadcastReceiver 均为常用的广播方法。这里比较一下他们之间的区别与使用。</p>
-<span id="more"></span>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
 
-<h2 id="LocalBroadcastReceiver"><a href="#LocalBroadcastReceiver" class="headerlink" title="LocalBroadcastReceiver"></a>LocalBroadcastReceiver</h2><p>LocalBroadcastReceiver 是本地广播，只能在应用使用和接收。</p>
-<ol>
-<li>获取一个localBroadcastManager实例</li>
-<li>使用localBroadcastManager.sendBroadcast(intent)方法发送广播</li>
-<li>写好广播接收器</li>
-<li>注册好广播接收器的要接收的广播地址，然后使用localBroadcastManager.registerReceiver(mBroadcastReceiver,intentFilter);方法进行注册</li>
-<li>记得在onDestroy()中取消注册</li>
+<p>延迟 initialDelay 秒后每个 period 秒执行一次任务。</p>
+<ol start="3">
+<li>延迟执行任务</li>
 </ol>
-<h2 id="BroadcastReceiver"><a href="#BroadcastReceiver" class="headerlink" title="BroadcastReceiver"></a>BroadcastReceiver</h2><p>BroadcastReceiver 是针对应用间、应用与系统间、应用内部进行通信的一种方式<br>LocalBroadcastReceiver 仅在自己的应用内发送接收广播，也就是只有自己的应用能收到，数据更加安全广播只在这个程序里，而且效率更高。<br><strong>BroadcastReceiver 使用</strong></p>
-<ol>
-<li><p>制作intent（可以携带参数）</p>
-</li>
-<li><p>使用sendBroadcast()传入intent;</p>
-</li>
-<li><p>制作广播接收器类继承BroadcastReceiver重写onReceive方法（或者可以匿名内部类啥的）</p>
-</li>
-<li><p>在java中（动态注册）或者直接在Manifest中注册广播接收器（静态注册）使用registerReceiver()传入接收器和intentFilter</p>
-</li>
-<li><p>取消注册可以在OnDestroy()函数中，unregisterReceiver()传入接收器<br>LocalBroadcastReceiver 使用</p>
-</li>
-<li><p>LocalBroadcastReceiver不能静态注册，只能采用动态注册的方式。<br>在发送和注册的时候采用，LocalBroadcastManager的sendBroadcast方法和registerReceiver方法</p>
-</li>
-<li><p>可以明确的知道正在发送的广播不会离开我们的程序，因此不用担心机密数据泄露问题</p>
-</li>
-<li><p>其他程序无法将广播发送到我们程序的内部，因此不需要担心会有安全漏洞的隐患</p>
-</li>
-<li><p>发送本地广播要比全局广播更加高效</p>
-</li>
-</ol>
-<ul>
-<li>BroadcastReceiver 是跨应用广播，利用Binder机制实现，支持动态和静态两种方式注册方式。</li>
-<li>LocalBroadcastReceiver 是应用内广播，利用Handler实现，利用了IntentFilter的match功能，提供消息的发布与接收功能，实现应用内通信，效率和安全性比较高，仅支持动态注册。</li>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command,</span><br><span class="line">                                                 long initialDelay,</span><br><span class="line">                                                 long delay,</span><br><span class="line">                                                 TimeUnit unit)</span><br></pre></td></tr></table></figure>
+
+<p>第一次延迟 initialDelay 秒，以后每次延迟 delay 秒执行一个任务。</p>
+<h4 id="ThreadPoolExecutor-其他常用功能"><a href="#ThreadPoolExecutor-其他常用功能" class="headerlink" title="ThreadPoolExecutor 其他常用功能"></a>ThreadPoolExecutor 其他常用功能</h4><ul>
+<li><code>shutDown()</code> 关闭线程池，不影响已经提交的任务;</li>
+<li><code>shutDownNow()</code> 关闭线程池，并尝试去终止正在执行的线程;</li>
+<li><code>allowCoreThreadTimeOut(boolean value)</code> 允许核心线程闲置超时时被回收</li>
+<li><code>submit()</code></li>
+<li>ThreadPoolExecutor 执行任务回调：</li>
 </ul>
-<p><strong>广播细分为三种:</strong></p>
-<ul>
-<li>普通广播</li>
-<li>有序广播</li>
-<li>本地广播</li>
-</ul>
-<p><strong>普通广播是什么？</strong><br>调用sendBroadcast()发送</p>
-<p><strong>有序广播是什么？</strong><br>调用sendOrderedBroadcast()发送<br>广播接收者会按照priority优先级从大到小进行排序<br>优先级相同的广播，动态注册的广播优先处理<br>广播接收者还能对广播进行截断和修改</p>
-<p><strong>本地广播的优点?</strong><br>效率更高。<br>发送的广播不会离开我们的应用，不会泄露关键数据。<br>其他程序无法将广播发送到我们程序内部，不会有安全漏洞。</p>
-<p>现在BroadcastReceiver也不推荐使用静态注册了，8.0之后限制了绝大部分广播只能使用动态注册</p>
-<blockquote>
-<p>应用内广播现在还有人用吗？已经被EventBus类似的事件替换了吧？<br>emmmm……</p>
-</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void beforeExecute(Thread t, Runnable r) &#123;</span><br><span class="line">    super.beforeExecute(t, r);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 开始执行任务！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void afterExecute(Runnable r, Throwable t) &#123;</span><br><span class="line">    super.afterExecute(r, t);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 任务执行结束！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void terminated() &#123;</span><br><span class="line">    super.terminated();</span><br><span class="line">    //当调用shutDown()或者shutDownNow()时会触发该方法  </span><br><span class="line">    Log.d(TAG, &quot;terminated: 线程池关闭！&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当线程池中的任务被执行的时候会回调此方法。</p>
 ]]></content>
       <categories>
         <category>Android</category>
@@ -1683,18 +1683,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Hello World</title>
-    <url>/MicroBlog/Hello%20World/</url>
-    <content><![CDATA[<p><code>sudo apt-get install GirlFriend</code><br>正在读取软件包列表… <br>完成正在分析软件包的依赖关系树… <br>完成有一些软件包无法被安装。<br>下列的信息可能会对解决问题有所帮助：<br>下列的软件包有不能满足的依赖关系：<br><code>GirlFriend</code>: 依赖: <code>House</code> 但是它将不会被安装<br><code>GirlFriend</code>: 依赖: <code>Car</code> 但是它将不会被安装<br><code>House</code> ,<code>Car</code> : 依赖: <code>Money</code> 但是它将不会被安装<br><code>Error</code>: 无法安装的软件包</p>
-]]></content>
-      <categories>
-        <category>MicroBlog</category>
-      </categories>
-      <tags>
-        <tag>戏说</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hexo 建站笔记</title>
     <url>/Hexo/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h3 id="建站流程"><a href="#建站流程" class="headerlink" title="建站流程"></a>建站流程</h3><span id="more"></span>
@@ -1729,9 +1717,86 @@
       </tags>
   </entry>
   <entry>
+    <title>Hello World</title>
+    <url>/MicroBlog/Hello%20World/</url>
+    <content><![CDATA[<p><code>sudo apt-get install GirlFriend</code><br>正在读取软件包列表… <br>完成正在分析软件包的依赖关系树… <br>完成有一些软件包无法被安装。<br>下列的信息可能会对解决问题有所帮助：<br>下列的软件包有不能满足的依赖关系：<br><code>GirlFriend</code>: 依赖: <code>House</code> 但是它将不会被安装<br><code>GirlFriend</code>: 依赖: <code>Car</code> 但是它将不会被安装<br><code>House</code> ,<code>Car</code> : 依赖: <code>Money</code> 但是它将不会被安装<br><code>Error</code>: 无法安装的软件包</p>
+]]></content>
+      <categories>
+        <category>MicroBlog</category>
+      </categories>
+      <tags>
+        <tag>戏说</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>容器-HashMap 实现原理</title>
     <url>/uncategorized/Java%20%E5%AE%B9%E5%99%A8%20HashMap%20%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>Java 中单例的实现与线程安全</title>
+    <url>/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
+    <content><![CDATA[<h1 id="Java-中单例的实现与线程安全"><a href="#Java-中单例的实现与线程安全" class="headerlink" title="Java 中单例的实现与线程安全"></a>Java 中单例的实现与线程安全</h1><p>单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：</p>
+<ol>
+<li>单例功能：基本功能</li>
+<li>延迟加载：避免不必要的资源消耗</li>
+<li>线程安全：多个线程同时创建对象时为同一个对象</li>
+<li>没有性能问题：创建函数不能影响效率</li>
+<li>防止序列化产生新对象：安全</li>
+<li>防止反射攻击：安全</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="饿汉式（类加载时就完成初始化）"><a href="#饿汉式（类加载时就完成初始化）" class="headerlink" title="饿汉式（类加载时就完成初始化）"></a>饿汉式（类加载时就完成初始化）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，加载类的时候就初始化完成了，线程安全。<br>缺点：消耗资源，如果使用时机较晚或不使用，浪费内存。</p>
+<h2 id="懒汉式-线程不安全"><a href="#懒汉式-线程不安全" class="headerlink" title="懒汉式(线程不安全)"></a>懒汉式(线程不安全)</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：延迟初始化，避免了不必要的内存开销；<br>缺点：线程不安全。</p>
+<h2 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h2><p>使用<code>synchronized</code>修饰获取方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：延迟初始化，避免了不必要的内存开销；线程安全；<br>缺点：每次获取实例都需要同步，其实只需要第一次同步就可以了。</p>
+<h2 id="懒汉式（线程安全，同步代码块-DCL-double-check-lock）"><a href="#懒汉式（线程安全，同步代码块-DCL-double-check-lock）" class="headerlink" title="懒汉式（线程安全，同步代码块 DCL:double check lock）"></a>懒汉式（线程安全，同步代码块 DCL:double check lock）</h2><p>使用<code>synchronized</code>同步 new 方法，内外加双重判断，volatile 修饰实例。<br>synchronized 能保证每次只有一个线程访问代码块，volatile 保证了 instance 创建的原子性。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static volatile Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if (instance == null) &#123;</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 如果实现了Serializable, 必须重写这个方法</span><br><span class="line">     */</span><br><span class="line">    private Object readResolve() throws ObjectStreamException &#123;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line">    /**</span><br><span class="line">     * 私有化构造方法</span><br><span class="line">     */</span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        return SingletonHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 类级的内部类，也就是静态的成员式内部类，该内部类的实例与外部类的实例没有绑定关系，</span><br><span class="line">     * 而且只有被调用到才会装载，从而实现了延迟加载</span><br><span class="line">     */</span><br><span class="line">    private static class SingletonHolder &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 静态初始化器，由JVM来保证线程安全</span><br><span class="line">         */</span><br><span class="line">        private static final Singleton INSTANCE = new Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public enum Singleton &#123;</span><br><span class="line"></span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，线程安全，高效，自动避免序列化&#x2F;反序列化攻击、反射攻击(枚举类不能通过反射生成)<br>缺点：可读性差</p>
+<p>关联阅读</p>
+<blockquote>
+<h2 id="synchronized-关键字"><a href="#synchronized-关键字" class="headerlink" title="synchronized 关键字"></a>synchronized 关键字</h2><p>synchronized 是 Java 中的关键字，是利用锁的机制来控制多线程同步的关键字.<br>锁的性质：</p>
+<ol>
+<li>互斥性&#x2F;原子性：同一时间只允许一个线程持有某个对象锁，通过对锁的持有来保证同一时间只有一个线程对需同步的代码块(复合操作)进行访问；</li>
+<li>可见性：当一个线程释放锁之后，对共享变量所做的更改对之后获取该锁的另一个线程可见；<br>锁的分类:</li>
+<li>对象锁: 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”。类的对象可以有多个，所以每个对象有其独立的对象锁，互不干扰。</li>
+<li>类锁:在 Java 中，针对每个类也有一个锁，可以称为“类锁”，类锁实际上是通过对象锁实现的，即类的 Class 对象锁。每个类只有一个 Class 对象，所以每个类只有一个类锁。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">修饰代码块</th>
+<th align="center">修饰代码块</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">获取对象锁</td>
+<td align="center">synchronized(this|object) {}</td>
+<td align="center">修饰非静态方法</td>
+</tr>
+<tr>
+<td align="center">获取类锁</td>
+<td align="center">synchronized(类.class) {}</td>
+<td align="center">修饰静态方法</td>
+</tr>
+</tbody></table>
+<p><strong>对于同一种锁的访问是同步的</strong></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
   </entry>
   <entry>
     <title>Java 容器篇：容器总结</title>
@@ -1945,71 +2010,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java 中单例的实现与线程安全</title>
-    <url>/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
-    <content><![CDATA[<h1 id="Java-中单例的实现与线程安全"><a href="#Java-中单例的实现与线程安全" class="headerlink" title="Java 中单例的实现与线程安全"></a>Java 中单例的实现与线程安全</h1><p>单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：</p>
-<ol>
-<li>单例功能：基本功能</li>
-<li>延迟加载：避免不必要的资源消耗</li>
-<li>线程安全：多个线程同时创建对象时为同一个对象</li>
-<li>没有性能问题：创建函数不能影响效率</li>
-<li>防止序列化产生新对象：安全</li>
-<li>防止反射攻击：安全</li>
-</ol>
-<span id="more"></span>
-
-<h2 id="饿汉式（类加载时就完成初始化）"><a href="#饿汉式（类加载时就完成初始化）" class="headerlink" title="饿汉式（类加载时就完成初始化）"></a>饿汉式（类加载时就完成初始化）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：简单粗暴，加载类的时候就初始化完成了，线程安全。<br>缺点：消耗资源，如果使用时机较晚或不使用，浪费内存。</p>
-<h2 id="懒汉式-线程不安全"><a href="#懒汉式-线程不安全" class="headerlink" title="懒汉式(线程不安全)"></a>懒汉式(线程不安全)</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：延迟初始化，避免了不必要的内存开销；<br>缺点：线程不安全。</p>
-<h2 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h2><p>使用<code>synchronized</code>修饰获取方法。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：延迟初始化，避免了不必要的内存开销；线程安全；<br>缺点：每次获取实例都需要同步，其实只需要第一次同步就可以了。</p>
-<h2 id="懒汉式（线程安全，同步代码块-DCL-double-check-lock）"><a href="#懒汉式（线程安全，同步代码块-DCL-double-check-lock）" class="headerlink" title="懒汉式（线程安全，同步代码块 DCL:double check lock）"></a>懒汉式（线程安全，同步代码块 DCL:double check lock）</h2><p>使用<code>synchronized</code>同步 new 方法，内外加双重判断，volatile 修饰实例。<br>synchronized 能保证每次只有一个线程访问代码块，volatile 保证了 instance 创建的原子性。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static volatile Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if (instance == null) &#123;</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 如果实现了Serializable, 必须重写这个方法</span><br><span class="line">     */</span><br><span class="line">    private Object readResolve() throws ObjectStreamException &#123;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line">    /**</span><br><span class="line">     * 私有化构造方法</span><br><span class="line">     */</span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        return SingletonHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 类级的内部类，也就是静态的成员式内部类，该内部类的实例与外部类的实例没有绑定关系，</span><br><span class="line">     * 而且只有被调用到才会装载，从而实现了延迟加载</span><br><span class="line">     */</span><br><span class="line">    private static class SingletonHolder &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 静态初始化器，由JVM来保证线程安全</span><br><span class="line">         */</span><br><span class="line">        private static final Singleton INSTANCE = new Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public enum Singleton &#123;</span><br><span class="line"></span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：简单粗暴，线程安全，高效，自动避免序列化&#x2F;反序列化攻击、反射攻击(枚举类不能通过反射生成)<br>缺点：可读性差</p>
-<p>关联阅读</p>
-<blockquote>
-<h2 id="synchronized-关键字"><a href="#synchronized-关键字" class="headerlink" title="synchronized 关键字"></a>synchronized 关键字</h2><p>synchronized 是 Java 中的关键字，是利用锁的机制来控制多线程同步的关键字.<br>锁的性质：</p>
-<ol>
-<li>互斥性&#x2F;原子性：同一时间只允许一个线程持有某个对象锁，通过对锁的持有来保证同一时间只有一个线程对需同步的代码块(复合操作)进行访问；</li>
-<li>可见性：当一个线程释放锁之后，对共享变量所做的更改对之后获取该锁的另一个线程可见；<br>锁的分类:</li>
-<li>对象锁: 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”。类的对象可以有多个，所以每个对象有其独立的对象锁，互不干扰。</li>
-<li>类锁:在 Java 中，针对每个类也有一个锁，可以称为“类锁”，类锁实际上是通过对象锁实现的，即类的 Class 对象锁。每个类只有一个 Class 对象，所以每个类只有一个类锁。</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th align="center"></th>
-<th align="center">修饰代码块</th>
-<th align="center">修饰代码块</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">获取对象锁</td>
-<td align="center">synchronized(this|object) {}</td>
-<td align="center">修饰非静态方法</td>
-</tr>
-<tr>
-<td align="center">获取类锁</td>
-<td align="center">synchronized(类.class) {}</td>
-<td align="center">修饰静态方法</td>
-</tr>
-</tbody></table>
-<p><strong>对于同一种锁的访问是同步的</strong></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>LeetCode解题笔记</title>
     <url>/uncategorized/LeetCode%E8%A7%A3%E9%A2%98%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h1 id="LeetCode-解题笔记"><a href="#LeetCode-解题笔记" class="headerlink" title="LeetCode 解题笔记"></a>LeetCode 解题笔记</h1><p><a href="https://github.com/ArtarisCN/LeetCode">Artaris 的 LeetCode</a></p>
@@ -2042,6 +2042,57 @@
 <li>只有一个除数不算，要多于一个数才行</li>
 </ul>
 ]]></content>
+  </entry>
+  <entry>
+    <title>int 与 Integer</title>
+    <url>/Java/int-%E4%B8%8E-Integer/</url>
+    <content><![CDATA[<ul>
+<li>Integer是int的包装类，int则是java的一种基本数据类型</li>
+<li>Integer变量必须实例化后才能使用，而int变量不需要</li>
+<li>Integer实际是对象的引用，当new一个Integer时，实际上是生成一个指针指向此对象；而int则是直接存储数据值</li>
+<li>Integer的默认值是null，int的默认值是0</li>
+</ul>
+<span id="more"></span>
+
+
+<h2 id="关于int和Integer的值的比较"><a href="#关于int和Integer的值的比较" class="headerlink" title="关于int和Integer的值的比较"></a>关于int和Integer的值的比较</h2><ul>
+<li>两个通过new生成的Integer变量永远是不相等的。因为 new 出来的对象永远是两个对象，内存地址不同。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Integer i = new Integer(100);</span><br><span class="line">Integer j = new Integer(100);</span><br><span class="line">System.out.print(i == j); //false</span><br></pre></td></tr></table></figure>
+<ul>
+<li>非new生成的Integer变量和new Integer()生成的变量比较时，结果为false。因为非new生成的Integer变量指向的是java常量池中的对象，而new Integer()生成的变量指向堆中新建的对象，两者在内存中的地址不同。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Integer i = new Integer(100);</span><br><span class="line">Integer j = 100;</span><br><span class="line">System.out.print(i == j); //false</span><br></pre></td></tr></table></figure>
+<ul>
+<li>对于两个非new生成的Integer对象，进行比较时，如果两个变量的值在区间-128到127之间，则比较结果为true，如果两个变量的值不在此区间，则比较结果为false。因为在Integer 自动装箱的时候会调用<code>Integer valueOf(int i)</code>函数，判断值是否在缓冲区内。自动装箱请看后文。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Integer i = 100;</span><br><span class="line">Integer j = 100;</span><br><span class="line">System.out.print(i == j); //true</span><br><span class="line"></span><br><span class="line">Integer i = 128;</span><br><span class="line">Integer j = 128;</span><br><span class="line">System.out.print(i == j); //false</span><br></pre></td></tr></table></figure>
+
+<h2 id="int-和-Integer-应用中具体会产生哪些差异"><a href="#int-和-Integer-应用中具体会产生哪些差异" class="headerlink" title="int 和 Integer 应用中具体会产生哪些差异"></a>int 和 Integer 应用中具体会产生哪些差异</h2><p>int 是直接存储在堆内存中的，大量使用对象类型会消耗大量的系统资源。int 在性能极度敏感的场景往往具有比较大的优势。</p>
+<h2 id="Integer-的源码分析"><a href="#Integer-的源码分析" class="headerlink" title="Integer 的源码分析"></a>Integer 的源码分析</h2><h3 id="缓冲区的调整"><a href="#缓冲区的调整" class="headerlink" title="缓冲区的调整"></a>缓冲区的调整</h3><p>JVM 提供了参数设置：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-XX:AutoBoxCacheMax=N</span><br></pre></td></tr></table></figure>
+
+<h3 id="Integer-的数值保存"><a href="#Integer-的数值保存" class="headerlink" title="Integer 的数值保存"></a>Integer 的数值保存</h3><p>Integer 保存相应的数值时的变量是一个 final 变量，这是为了保证在使用的时候内存地址不变的情况下值也不会发生变化。</p>
+<h2 id="关于-int-和-Integer-的问题区别分析"><a href="#关于-int-和-Integer-的问题区别分析" class="headerlink" title="关于 int 和 Integer 的问题区别分析"></a>关于 int 和 Integer 的问题区别分析</h2><h3 id="自动装箱-x2F-自动拆箱"><a href="#自动装箱-x2F-自动拆箱" class="headerlink" title="自动装箱&#x2F;自动拆箱"></a>自动装箱&#x2F;自动拆箱</h3><ul>
+<li>自动装箱时编译器调用 valueOf() 将原始类型值转换成对象，同时自动拆箱时，编译器通过调用类似intValue(),doubleValue()这类的方法将对象转换成原始类型值。</li>
+<li>自动装箱是将boolean值转换成Boolean对象，byte值转换成Byte对象，char转换成Character对象，float值转换成Float对象，int转换成Integer，long转换成Long，short转换成Short，自动拆箱则是相反的操作。</li>
+</ul>
+<p>自动装箱&#x2F;拆箱是发生在编译阶段，当接受的一个原始类型值，那么Java 会自动将这个原始类型值转换为与之对应的对象，反之拆箱亦然。</p>
+<h2 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h2><p>原始数据类型并不能保证县城安全，要保证多线程安全必须使用类似 AtomicInteger、AtomicLong 这样的线程安全类。</p>
+<h3 id="AtomicInteger-的实现"><a href="#AtomicInteger-的实现" class="headerlink" title="AtomicInteger 的实现"></a>AtomicInteger 的实现</h3><ul>
+<li>AtomicInteger类中有有一个变量valueOffset，用来描述AtomicInteger类中value的内存位置 。</li>
+<li>当需要变量的值改变的时候，先通过get（）得到valueOffset位置的值，也即当前value的值.给该值进行增加，并赋给next</li>
+<li>compareAndSet（）比较之前取到的value的值当前有没有改变，若没有改变的话，就将next的值赋给value，倘若和之前的值相比的话发生变化的话，则重新一次循环，直到存取成功，通过这样的方式能够保证该变量是线程安全的</li>
+<li>value使用了volatile关键字，使得多个线程可以共享变量，使用volatile将使得VM优化失去作用，在线程数特别大时，效率会较低。</li>
+</ul>
+<h2 id="泛型的使用"><a href="#泛型的使用" class="headerlink" title="泛型的使用"></a>泛型的使用</h2><p>Java 的原始数据类型并不能与泛型搭配使用，因为Java 的泛型是一种在编译阶段会自动将类型转换为对应的特定类型，这就决定了使用泛型，必须保证相应类型可以转换为 Object。而原始数据类型并不是对象类型。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
   </entry>
   <entry>
     <title>MarkDown 语法学习笔记</title>
@@ -2106,6 +2157,33 @@
       </categories>
       <tags>
         <tag>MarkDown</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>try、catch、finally、throw和throws</title>
+    <url>/Java/try%E3%80%81catch%E3%80%81finally%E3%80%81throw%E5%92%8Cthrows/</url>
+    <content><![CDATA[<p>try、catch、finally 是 Java 中处理异常的一套机制。</p>
+<span id="more"></span>
+
+<p>完整的代码流程如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">    //尝试执行的代码</span><br><span class="line">&#125; catch (Exception e)&#123;</span><br><span class="line">    //捕获的异常</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">    //最后总是会执行的代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 try 代码块中执行尝试的代码，在 catch 中捕获可能在 try 代码块会出现的异常并做相应的处理，最后在 finally 代码块执行总会执行的代码。这是简单的行文，当在这些代码块中出现了 return 时会按照什么顺序执行呢？</p>
+<ol>
+<li>在不抛出异常的情况下，程序执行完 try 里面的代码块之后，该方法并不会立即结束，而是继续试图去寻找该方法有没有 finally 的代码块；</li>
+<li>如果没有 finally 代码块，整个方法在执行完 try 代码块后返回相应的值来结束整个方法；</li>
+<li>如果有 finally 代码块，此时程序执行到 try 代码块里的 return 语句之时并不会立即执行 return，而是先去执行 finally 代码块里的代码；</li>
+<li>若 finally 代码块里没有 return 或没有能够终止程序的代码，程序将在执行完 finally 代码块代码之后再返回 try 代码块执行 return 语句来结束整个方法；</li>
+<li>若 finally 代码块里有 return 或含有能够终止程序的代码，方法将在执行完 finally 之后被结束，不再跳回 try 代码块执行 return；</li>
+</ol>
+<p>有异常时将上述 try 代码块替换成 catch 即可。</p>
+<p>当程序遇见 <code>System.exit(0);</code> 时不管执行到什么地方都会立即执行推出当前进程。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -2188,84 +2266,6 @@
 ]]></content>
       <tags>
         <tag>OMAndroid</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>int 与 Integer</title>
-    <url>/Java/int-%E4%B8%8E-Integer/</url>
-    <content><![CDATA[<ul>
-<li>Integer是int的包装类，int则是java的一种基本数据类型</li>
-<li>Integer变量必须实例化后才能使用，而int变量不需要</li>
-<li>Integer实际是对象的引用，当new一个Integer时，实际上是生成一个指针指向此对象；而int则是直接存储数据值</li>
-<li>Integer的默认值是null，int的默认值是0</li>
-</ul>
-<span id="more"></span>
-
-
-<h2 id="关于int和Integer的值的比较"><a href="#关于int和Integer的值的比较" class="headerlink" title="关于int和Integer的值的比较"></a>关于int和Integer的值的比较</h2><ul>
-<li>两个通过new生成的Integer变量永远是不相等的。因为 new 出来的对象永远是两个对象，内存地址不同。</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Integer i = new Integer(100);</span><br><span class="line">Integer j = new Integer(100);</span><br><span class="line">System.out.print(i == j); //false</span><br></pre></td></tr></table></figure>
-<ul>
-<li>非new生成的Integer变量和new Integer()生成的变量比较时，结果为false。因为非new生成的Integer变量指向的是java常量池中的对象，而new Integer()生成的变量指向堆中新建的对象，两者在内存中的地址不同。</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Integer i = new Integer(100);</span><br><span class="line">Integer j = 100;</span><br><span class="line">System.out.print(i == j); //false</span><br></pre></td></tr></table></figure>
-<ul>
-<li>对于两个非new生成的Integer对象，进行比较时，如果两个变量的值在区间-128到127之间，则比较结果为true，如果两个变量的值不在此区间，则比较结果为false。因为在Integer 自动装箱的时候会调用<code>Integer valueOf(int i)</code>函数，判断值是否在缓冲区内。自动装箱请看后文。</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Integer i = 100;</span><br><span class="line">Integer j = 100;</span><br><span class="line">System.out.print(i == j); //true</span><br><span class="line"></span><br><span class="line">Integer i = 128;</span><br><span class="line">Integer j = 128;</span><br><span class="line">System.out.print(i == j); //false</span><br></pre></td></tr></table></figure>
-
-<h2 id="int-和-Integer-应用中具体会产生哪些差异"><a href="#int-和-Integer-应用中具体会产生哪些差异" class="headerlink" title="int 和 Integer 应用中具体会产生哪些差异"></a>int 和 Integer 应用中具体会产生哪些差异</h2><p>int 是直接存储在堆内存中的，大量使用对象类型会消耗大量的系统资源。int 在性能极度敏感的场景往往具有比较大的优势。</p>
-<h2 id="Integer-的源码分析"><a href="#Integer-的源码分析" class="headerlink" title="Integer 的源码分析"></a>Integer 的源码分析</h2><h3 id="缓冲区的调整"><a href="#缓冲区的调整" class="headerlink" title="缓冲区的调整"></a>缓冲区的调整</h3><p>JVM 提供了参数设置：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-XX:AutoBoxCacheMax=N</span><br></pre></td></tr></table></figure>
-
-<h3 id="Integer-的数值保存"><a href="#Integer-的数值保存" class="headerlink" title="Integer 的数值保存"></a>Integer 的数值保存</h3><p>Integer 保存相应的数值时的变量是一个 final 变量，这是为了保证在使用的时候内存地址不变的情况下值也不会发生变化。</p>
-<h2 id="关于-int-和-Integer-的问题区别分析"><a href="#关于-int-和-Integer-的问题区别分析" class="headerlink" title="关于 int 和 Integer 的问题区别分析"></a>关于 int 和 Integer 的问题区别分析</h2><h3 id="自动装箱-x2F-自动拆箱"><a href="#自动装箱-x2F-自动拆箱" class="headerlink" title="自动装箱&#x2F;自动拆箱"></a>自动装箱&#x2F;自动拆箱</h3><ul>
-<li>自动装箱时编译器调用 valueOf() 将原始类型值转换成对象，同时自动拆箱时，编译器通过调用类似intValue(),doubleValue()这类的方法将对象转换成原始类型值。</li>
-<li>自动装箱是将boolean值转换成Boolean对象，byte值转换成Byte对象，char转换成Character对象，float值转换成Float对象，int转换成Integer，long转换成Long，short转换成Short，自动拆箱则是相反的操作。</li>
-</ul>
-<p>自动装箱&#x2F;拆箱是发生在编译阶段，当接受的一个原始类型值，那么Java 会自动将这个原始类型值转换为与之对应的对象，反之拆箱亦然。</p>
-<h2 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h2><p>原始数据类型并不能保证县城安全，要保证多线程安全必须使用类似 AtomicInteger、AtomicLong 这样的线程安全类。</p>
-<h3 id="AtomicInteger-的实现"><a href="#AtomicInteger-的实现" class="headerlink" title="AtomicInteger 的实现"></a>AtomicInteger 的实现</h3><ul>
-<li>AtomicInteger类中有有一个变量valueOffset，用来描述AtomicInteger类中value的内存位置 。</li>
-<li>当需要变量的值改变的时候，先通过get（）得到valueOffset位置的值，也即当前value的值.给该值进行增加，并赋给next</li>
-<li>compareAndSet（）比较之前取到的value的值当前有没有改变，若没有改变的话，就将next的值赋给value，倘若和之前的值相比的话发生变化的话，则重新一次循环，直到存取成功，通过这样的方式能够保证该变量是线程安全的</li>
-<li>value使用了volatile关键字，使得多个线程可以共享变量，使用volatile将使得VM优化失去作用，在线程数特别大时，效率会较低。</li>
-</ul>
-<h2 id="泛型的使用"><a href="#泛型的使用" class="headerlink" title="泛型的使用"></a>泛型的使用</h2><p>Java 的原始数据类型并不能与泛型搭配使用，因为Java 的泛型是一种在编译阶段会自动将类型转换为对应的特定类型，这就决定了使用泛型，必须保证相应类型可以转换为 Object。而原始数据类型并不是对象类型。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>try、catch、finally、throw和throws</title>
-    <url>/Java/try%E3%80%81catch%E3%80%81finally%E3%80%81throw%E5%92%8Cthrows/</url>
-    <content><![CDATA[<p>try、catch、finally 是 Java 中处理异常的一套机制。</p>
-<span id="more"></span>
-
-<p>完整的代码流程如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">    //尝试执行的代码</span><br><span class="line">&#125; catch (Exception e)&#123;</span><br><span class="line">    //捕获的异常</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">    //最后总是会执行的代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 try 代码块中执行尝试的代码，在 catch 中捕获可能在 try 代码块会出现的异常并做相应的处理，最后在 finally 代码块执行总会执行的代码。这是简单的行文，当在这些代码块中出现了 return 时会按照什么顺序执行呢？</p>
-<ol>
-<li>在不抛出异常的情况下，程序执行完 try 里面的代码块之后，该方法并不会立即结束，而是继续试图去寻找该方法有没有 finally 的代码块；</li>
-<li>如果没有 finally 代码块，整个方法在执行完 try 代码块后返回相应的值来结束整个方法；</li>
-<li>如果有 finally 代码块，此时程序执行到 try 代码块里的 return 语句之时并不会立即执行 return，而是先去执行 finally 代码块里的代码；</li>
-<li>若 finally 代码块里没有 return 或没有能够终止程序的代码，程序将在执行完 finally 代码块代码之后再返回 try 代码块执行 return 语句来结束整个方法；</li>
-<li>若 finally 代码块里有 return 或含有能够终止程序的代码，方法将在执行完 finally 之后被结束，不再跳回 try 代码块执行 return；</li>
-</ol>
-<p>有异常时将上述 try 代码块替换成 catch 即可。</p>
-<p>当程序遇见 <code>System.exit(0);</code> 时不管执行到什么地方都会立即执行推出当前进程。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -2530,6 +2530,65 @@
       </tags>
   </entry>
   <entry>
+    <title>数据结构——线性表</title>
+    <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E8%A1%A8/</url>
+    <content><![CDATA[<p><strong>线性表</strong>属于数据结构中的线性结构，<strong>线性结构</strong>具体有以下特征：</p>
+<ul>
+<li>集合中必存在唯一的一个<strong>第一个元素</strong>；</li>
+<li>集合中必存在唯一的一个<strong>最后的元素</strong>；</li>
+<li>除最后元素之外，其它数据元素均有唯一的<strong>后继</strong>；</li>
+<li>除第一元素之外，其它数据元素均有唯一的<strong>前驱</strong>；</li>
+</ul>
+<span id="more"></span>
+
+<p><strong>线性表</strong>是一个含有<code>n ≥ 0</code>个结点的有限序列，对于其中的结点，有且仅有一个开始结点没有前驱但有一个后继结点，有且仅有一个终端结点没有后继但有一个前驱结点，其它的结点都有且仅有一个前驱和一个后继结点。一般地，一个线性表可以表示成一个线性序列：<code>k1，k2，…，kn</code>，其中<code>k1</code>是开始结点，<code>kn</code>是终端结点。</p>
+<p>线性表包含下列基本操作：初始化、销毁、重置为空表、判断是否为空、获取长度、根据位置获取对应元素、查找元素、获取指定元素的前驱和后继元素、插入元素、删除元素、遍历元素。</p>
+<h4 id="线性表的顺序表示和实现"><a href="#线性表的顺序表示和实现" class="headerlink" title="线性表的顺序表示和实现"></a>线性表的顺序表示和实现</h4><p>线性表的顺序表示指的是用物理上的一段连续的地址来存储数据元素，如下图所示。如果第一个元素的在内存上的地址为a1，每个元素占用的空间是l，那么第n个元素的地址就是a1+(n-1) x l。</p>
+<table>
+<thead>
+<tr>
+<th align="left">内存中的存储位置</th>
+<th align="center">Row 1 is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">a1</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="left">a1 + l</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="left">a1 + 2l</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="left">…</td>
+<td align="center">…</td>
+</tr>
+<tr>
+<td align="left">…</td>
+<td align="center">…</td>
+</tr>
+<tr>
+<td align="left">…</td>
+<td align="center">…</td>
+</tr>
+<tr>
+<td align="left">a1+(n-1) x l</td>
+<td align="center">n</td>
+</tr>
+</tbody></table>
+<h4 id="线性表的链式表示和实现"><a href="#线性表的链式表示和实现" class="headerlink" title="线性表的链式表示和实现"></a>线性表的链式表示和实现</h4><p>线性表的顺序存储结构是逻辑位置和物理位置都相邻，而链式存储结构是逻辑位置相邻，但物理位置不一定相邻，相比顺序存储结构，它不能随机存取，但在插入和删除操作时不需要移动元素，大大提高了增加和删除元素的效率。</p>
+<p>通常链式存储结构会有一个个结点组成，结点中包含两个域一个是数据域，一个是指针域，数据域中存储数据，指针域中存储下一个后继元素的地址，如下图所示，这一个个结点组成链表，也称<strong>线性链表</strong>或<strong>单链表</strong>。</p>
+<p>除此之外，还有<strong>循环链表</strong>和<strong>双向链表</strong>。</p>
+]]></content>
+      <tags>
+        <tag>数据结构</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据结构——栈和队列</title>
     <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/</url>
     <content><![CDATA[<p>栈和队列是线性表的一种，只是它们是操作受限的线性表。</p>
@@ -2612,65 +2671,6 @@
 <td align="left">如果队列为空，则阻塞</td>
 </tr>
 </tbody></table>
-]]></content>
-      <tags>
-        <tag>数据结构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据结构——线性表</title>
-    <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E8%A1%A8/</url>
-    <content><![CDATA[<p><strong>线性表</strong>属于数据结构中的线性结构，<strong>线性结构</strong>具体有以下特征：</p>
-<ul>
-<li>集合中必存在唯一的一个<strong>第一个元素</strong>；</li>
-<li>集合中必存在唯一的一个<strong>最后的元素</strong>；</li>
-<li>除最后元素之外，其它数据元素均有唯一的<strong>后继</strong>；</li>
-<li>除第一元素之外，其它数据元素均有唯一的<strong>前驱</strong>；</li>
-</ul>
-<span id="more"></span>
-
-<p><strong>线性表</strong>是一个含有<code>n ≥ 0</code>个结点的有限序列，对于其中的结点，有且仅有一个开始结点没有前驱但有一个后继结点，有且仅有一个终端结点没有后继但有一个前驱结点，其它的结点都有且仅有一个前驱和一个后继结点。一般地，一个线性表可以表示成一个线性序列：<code>k1，k2，…，kn</code>，其中<code>k1</code>是开始结点，<code>kn</code>是终端结点。</p>
-<p>线性表包含下列基本操作：初始化、销毁、重置为空表、判断是否为空、获取长度、根据位置获取对应元素、查找元素、获取指定元素的前驱和后继元素、插入元素、删除元素、遍历元素。</p>
-<h4 id="线性表的顺序表示和实现"><a href="#线性表的顺序表示和实现" class="headerlink" title="线性表的顺序表示和实现"></a>线性表的顺序表示和实现</h4><p>线性表的顺序表示指的是用物理上的一段连续的地址来存储数据元素，如下图所示。如果第一个元素的在内存上的地址为a1，每个元素占用的空间是l，那么第n个元素的地址就是a1+(n-1) x l。</p>
-<table>
-<thead>
-<tr>
-<th align="left">内存中的存储位置</th>
-<th align="center">Row 1 is</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">a1</td>
-<td align="center">1</td>
-</tr>
-<tr>
-<td align="left">a1 + l</td>
-<td align="center">2</td>
-</tr>
-<tr>
-<td align="left">a1 + 2l</td>
-<td align="center">3</td>
-</tr>
-<tr>
-<td align="left">…</td>
-<td align="center">…</td>
-</tr>
-<tr>
-<td align="left">…</td>
-<td align="center">…</td>
-</tr>
-<tr>
-<td align="left">…</td>
-<td align="center">…</td>
-</tr>
-<tr>
-<td align="left">a1+(n-1) x l</td>
-<td align="center">n</td>
-</tr>
-</tbody></table>
-<h4 id="线性表的链式表示和实现"><a href="#线性表的链式表示和实现" class="headerlink" title="线性表的链式表示和实现"></a>线性表的链式表示和实现</h4><p>线性表的顺序存储结构是逻辑位置和物理位置都相邻，而链式存储结构是逻辑位置相邻，但物理位置不一定相邻，相比顺序存储结构，它不能随机存取，但在插入和删除操作时不需要移动元素，大大提高了增加和删除元素的效率。</p>
-<p>通常链式存储结构会有一个个结点组成，结点中包含两个域一个是数据域，一个是指针域，数据域中存储数据，指针域中存储下一个后继元素的地址，如下图所示，这一个个结点组成链表，也称<strong>线性链表</strong>或<strong>单链表</strong>。</p>
-<p>除此之外，还有<strong>循环链表</strong>和<strong>双向链表</strong>。</p>
 ]]></content>
       <tags>
         <tag>数据结构</tag>
