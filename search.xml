@@ -1,6 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Android 线程池的使用</title>
+    <url>/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        // do sth.</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br></pre></td></tr></table></figure>
+
+<p>创造线程时，编译器会报告如下警告：<br><img src="http://img.artaris.cn/android_thread/thread_warning.png"><br>带着这些疑问，让我去学习了一下直接创造线程有什么缺点，及线程池的优点和使用。</p>
+<span id="more"></span>
+
+<h3 id="使用new-Thread-创造显式线程的缺点"><a href="#使用new-Thread-创造显式线程的缺点" class="headerlink" title="使用new Thread()创造显式线程的缺点"></a>使用<code>new Thread()</code>创造显式线程的缺点</h3><ul>
+<li>在大量任务都在创建线程时，会频繁创建线程，而后这些线程使用完成之后又会被收回，导致频繁的GC，这种情况在多个列表 item 异步加载时极为常见;</li>
+<li>多个线程之间互相竞争，缺乏统一的管理，降低了程序的运行效率，甚至卡顿；</li>
+<li>当显式线程需要停止时，必须要保留每个线程的实例对象，在多个列表 item 异步加载时管理不便；</li>
+</ul>
+<h3 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h3><p>使用线程池可以给我们带来很多好处，首先通过线程池中线程的重用，减少创建和销毁线程的性能开销。其次，能控制线程池中的并发数，否则会因为大量的线程争夺 CPU 资源造成阻塞。最后，线程池能够对线程进行管理，比如使用 ScheduledThreadPool 来设置延迟N秒后执行任务，并且每隔 M 秒循环执行一次。</p>
+<p>Android中常用的线程池都是通过对 ThreadPoolExecutor 进行不同配置来实现的，那么我们今天就从这这个 ThreadPoolExecutor 来开始吧！</p>
+<h4 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h4><p>ThreadPoolExecutor 的构造方法中各个参数如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ThreadPoolExecutor(int corePoolSize,</span><br><span class="line">                          int maximumPoolSize,</span><br><span class="line">                          long keepAliveTime,</span><br><span class="line">                          TimeUnit unit,</span><br><span class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                          ThreadFactory threadFactory,</span><br><span class="line">                          RejectedExecutionHandler handler)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>corePoolSize</code>:线程池中核心线程的数量;</li>
+<li><code>maximumPoolSize</code>:线程池中最大线程数量;</li>
+<li><code>keepAliveTime</code>:非核心线程的超时时长。当系统中非核心线程闲置时间超过keepAliveTime之后，则会被回收。如果ThreadPoolExecutor的allowCoreThreadTimeOut属性设置为true，则该参数也表示核心线程的超时时长;</li>
+<li><code>unit</code>:非核心线程的超时时长参数的单位。有纳秒、微秒、毫秒、秒、分、时、天等.eg.<code>TimeUnit.SECONDS</code>、<code>TimeUnit.MILLISECONDS</code>;</li>
+<li><code>workQueue</code>:线程池中的任务队列。该队列主要用来存储已经被提交但是尚未执行的任务。存储在这里的任务是由ThreadPoolExecutor的execute方法提交来的。workQueue 是一个 BlockingQueue 类型，BlockingQueue 是一个特殊的队列，当我们从 BlockingQueue 中取数据时，如果 BlockingQueue 是空的，则取数据的操作会进入到阻塞状态，当 BlockingQueue 中有了新数据时，这个取数据的操作又会被重新唤醒。同理，如果 BlockingQueue 中的数据已经满了，往 BlockingQueue 中存数据的操作又会进入阻塞状态，直到 BlockingQueue 中又有新的空间，存数据的操作又会被冲洗唤醒。<br>BlockingQueue 常用的实现类如下几种：</li>
+</ul>
+<ol>
+<li><p><code>ArrayBlockingQueue</code>:这个表示一个规定了大小的 BlockingQueue ， ArrayBlockingQueue 的构造函数接受一个 int 类型的数据，该数据表示 BlockingQueue 的大小，存储在 ArrayBlockingQueue 中的元素按照 FIFO （先进先出）的方式来进行存取。</p>
+</li>
+<li><p><code>LinkedBlockingQueue</code>:这个表示一个大小不确定的 BlockingQueue ，在 LinkedBlockingQueue 的构造方法中可以传一个int类型的数据，这样创建出来的 LinkedBlockingQueue 是有大小的，也可以不传，不传的话， LinkedBlockingQueue 的大小就为 Integer.MAX_VALUE，源码如下：</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with a capacity of</span><br><span class="line"> * &#123;@link Integer#MAX_VALUE&#125;.</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue() &#123;</span><br><span class="line">    this(Integer.MAX_VALUE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with the given (fixed) capacity.</span><br><span class="line"> *</span><br><span class="line"> * @param capacity the capacity of this queue</span><br><span class="line"> * @throws IllegalArgumentException if &#123;@code capacity&#125; is not greater</span><br><span class="line"> *         than zero</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue(int capacity) &#123;</span><br><span class="line">    if (capacity &lt;= 0) throw new IllegalArgumentException();</span><br><span class="line">    this.capacity = capacity;</span><br><span class="line">    last = head = new Node&lt;E&gt;(null);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p><code>PriorityBlockingQueue</code>:这个队列和LinkedBlockingQueue类似，不同的是PriorityBlockingQueue中的元素不是按照FIFO来排序的，而是按照元素的Comparator来决定存取顺序的（这个功能也反映了存入PriorityBlockingQueue中的数据必须实现了Comparator接口）。</p>
+</li>
+<li><p><code>SynchronousQueue</code>:这个是同步Queue，属于线程安全的BlockingQueue的一种，在SynchronousQueue中，生产者线程的插入操作必须要等待消费者线程的移除操作，Synchronous内部没有数据缓存空间，因此我们无法对SynchronousQueue进行读取或者遍历其中的数据，元素只有在你试图取走的时候才有可能存在。我们可以理解为生产者和消费者互相等待，等到对方之后然后再一起离开。</p>
+</li>
+</ol>
+<ul>
+<li><p><code>threadFactory</code>:为线程池提供创建新线程的功能，这个我们一般使用默认即可</p>
+</li>
+<li><p><code>handler</code>:拒绝策略。当线程无法执行新任务时（一般是由于线程池中的线程数量已经达到最大数或者线程池关闭导致的），默认情况下，当线程池无法处理新线程时，会抛出一个RejectedExecutionException。<br>默认如下:</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static class AbortPolicy implements RejectedExecutionHandler &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Creates an &#123;@code AbortPolicy&#125;.</span><br><span class="line">     */</span><br><span class="line">    public AbortPolicy() &#123; &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Always throws RejectedExecutionException.</span><br><span class="line">     *</span><br><span class="line">     * @param r the runnable task requested to be executed</span><br><span class="line">     * @param e the executor attempting to execute this task</span><br><span class="line">     * @throws RejectedExecutionException always</span><br><span class="line">     */</span><br><span class="line">    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) &#123;</span><br><span class="line">        throw new RejectedExecutionException(&quot;Task &quot; + r.toString() +</span><br><span class="line">                                             &quot; rejected from &quot; +</span><br><span class="line">                                             e.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上则是线程池的构造参数的解释。</p>
+<p>那么对于核心线程数和最大线程数，可以参考<code>AsyncTask</code>，如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public abstract class AsyncTask&lt;Params, Progress, Result&gt; &#123;</span><br><span class="line">    private static final String LOG_TAG = &quot;AsyncTask&quot;;</span><br><span class="line"></span><br><span class="line">    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();</span><br><span class="line">    // We want at least 2 threads and at most 4 threads in the core pool,</span><br><span class="line">    // preferring to have 1 less than the CPU count to avoid saturating</span><br><span class="line">    // the CPU with background work</span><br><span class="line">    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));</span><br><span class="line">    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;</span><br><span class="line">    private static final int KEEP_ALIVE_SECONDS = 30;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private static final BlockingQueue&lt;Runnable&gt; sPoolWorkQueue =</span><br><span class="line">            new LinkedBlockingQueue&lt;Runnable&gt;(128);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * An &#123;@link Executor&#125; that can be used to execute tasks in parallel.</span><br><span class="line">     */</span><br><span class="line">    public static final Executor THREAD_POOL_EXECUTOR;</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(</span><br><span class="line">                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,</span><br><span class="line">                sPoolWorkQueue, sThreadFactory);</span><br><span class="line">        threadPoolExecutor.allowCoreThreadTimeOut(true);</span><br><span class="line">        THREAD_POOL_EXECUTOR = threadPoolExecutor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>核心线程数为手机 CPU 数 +1（ CPU 数量获取方式<code>Runtime.getRuntime().availableProcessors()</code>），最大线程数为手机 CPU 数 × 2 + 1，线程队列的大小为 128</p>
+<h4 id="ThreadPoolExecutor-的执行规则"><a href="#ThreadPoolExecutor-的执行规则" class="headerlink" title="ThreadPoolExecutor 的执行规则"></a>ThreadPoolExecutor 的执行规则</h4><p>当任务提交到线程池中以后，则会按照一下规则进行处理：</p>
+<ol>
+<li><p>execute 一个线程之后，如果线程池中的线程数未达到核心线程数，则会立马启用一个核心线程去执行；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数，且 workQueue 未满，则将新线程放入 workQueue 中等待执行；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数但未超过非核心线程数，且workQueue已满，则开启一个非核心线程来执行任务；</p>
+</li>
+<li><p>execute 一个线程之后，如果线程池中的线程数已经超过非核心线程数，则拒绝执行该任务；</p>
+</li>
+</ol>
+<h4 id="系统配置的-ThreadPoolExecutor"><a href="#系统配置的-ThreadPoolExecutor" class="headerlink" title="系统配置的 ThreadPoolExecutor"></a>系统配置的 ThreadPoolExecutor</h4><ul>
+<li>FixedThreadPool<br>FixedThreadPool是一个核心线程数量固定的线程池，创建方式如下：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);  </span><br><span class="line"></span><br><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到核心线程数和最大线程数一样，说明在 FixedThreadPool 中没有非核心线程，所有的线程都是核心线程，且线程的超时时间为0，说明核心线程即使在没有任务可执行的时候也不会被销毁（这样可让 FixedThreadPool 更快速的响应请求），最后的线程队列是一个 LinkedBlockingQueue ，但是 LinkedBlockingQueue 却没有参数，这说明线程队列的大小为 Integer.MAX_VALUE（2的31次方减1），OK，看完参数，我们大概也就知道了 FixedThreadPool 的工作特点了，当所有的核心线程都在执行任务的时候，新的任务只能进入线程队列中进行等待，直到有线程被空闲出来.</p>
+<ul>
+<li>SingleThreadExecutor</li>
+</ul>
+<p>SingleThreadExecutor 和 FixedThreadPool 很像，不同的就是 SingleThreadExecutor 的核心线程数只有 1。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 SingleThreadExecutor 的一个最大好处就是可以避免我们去处理线程同步问题，其实如果我们把 FixedThreadPool 的参数传个1，效果就和SingleThreadExecutor一致了.</p>
+<ul>
+<li>CachedThreadPool</li>
+</ul>
+<p>CachedTreadPool一个最大的优势是它可以根据程序的运行情况自动来调整线程池中的线程数量。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newCachedThreadPool() &#123;</span><br><span class="line">    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,</span><br><span class="line">                                  60L, TimeUnit.SECONDS,</span><br><span class="line">                                  new SynchronousQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到， CachedThreadPool 中是没有核心线程的，但是它的最大线程数却为 Integer.MAX_VALUE ，另外，它是有线程超时机制的，超时时间为60秒，这里它使用了 SynchronousQueue 作为线程队列， SynchronousQueue 的特点上文已经说过了，这里不再赘述。那么我们提交到 CachedThreadPool 消息队列中的任务在执行的过程中有什么特点呢？由于最大线程数为无限大，所以每当我们添加一个新任务进来的时候，如果线程池中有空闲的线程，则由该空闲的线程执行新任务，如果没有空闲线程，则创建新线程来执行任务。根据 CachedThreadPool 的特点，我们可以在有大量任务请求的时候使用 CachedThreadPool ，因为当 CachedThreadPool 中没有新任务的时候，它里边所有的线程都会因为超时而被终止。</p>
+<ul>
+<li>ScheduledThreadPool</li>
+</ul>
+<p>ScheduledThreadPool是一个具有定时定期执行任务功能的线程池，源码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledThreadPoolExecutor(int corePoolSize) &#123;</span><br><span class="line">    super(corePoolSize, Integer.MAX_VALUE,</span><br><span class="line">          DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,</span><br><span class="line">          new DelayedWorkQueue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，它的核心线程数量是固定的（我们在构造的时候传入的），但是非核心线程是无穷大，当非核心线程闲置时，则会被立即回收。</p>
+<p>使用ScheduledThreadPool时，我们可以通过如下几个方法来添加任务：</p>
+<ol>
+<li>延迟启动任务</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>延迟定时执行循环任务</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
+
+<p>延迟 initialDelay 秒后每个 period 秒执行一次任务。</p>
+<ol start="3">
+<li>延迟执行任务</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command,</span><br><span class="line">                                                 long initialDelay,</span><br><span class="line">                                                 long delay,</span><br><span class="line">                                                 TimeUnit unit)</span><br></pre></td></tr></table></figure>
+
+<p>第一次延迟 initialDelay 秒，以后每次延迟 delay 秒执行一个任务。</p>
+<h4 id="ThreadPoolExecutor-其他常用功能"><a href="#ThreadPoolExecutor-其他常用功能" class="headerlink" title="ThreadPoolExecutor 其他常用功能"></a>ThreadPoolExecutor 其他常用功能</h4><ul>
+<li><code>shutDown()</code> 关闭线程池，不影响已经提交的任务;</li>
+<li><code>shutDownNow()</code> 关闭线程池，并尝试去终止正在执行的线程;</li>
+<li><code>allowCoreThreadTimeOut(boolean value)</code> 允许核心线程闲置超时时被回收</li>
+<li><code>submit()</code></li>
+<li>ThreadPoolExecutor 执行任务回调：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void beforeExecute(Thread t, Runnable r) &#123;</span><br><span class="line">    super.beforeExecute(t, r);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 开始执行任务！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void afterExecute(Runnable r, Throwable t) &#123;</span><br><span class="line">    super.afterExecute(r, t);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 任务执行结束！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void terminated() &#123;</span><br><span class="line">    super.terminated();</span><br><span class="line">    //当调用shutDown()或者shutDownNow()时会触发该方法  </span><br><span class="line">    Log.d(TAG, &quot;terminated: 线程池关闭！&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当线程池中的任务被执行的时候会回调此方法。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Activity 的加载模式</title>
+    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
+<span id="more"></span>
+
+<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
+<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+
+<p>新开的页面继续重复其生命周期</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
+<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
+<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
+<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
+<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
+<li>不同程序之间</li>
+</ul>
+<ol>
+<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
+<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
+<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
+</ol>
+<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
+<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ADB 使用指南</title>
     <url>/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
     <content><![CDATA[<p>ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能</p>
@@ -1069,51 +1242,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Activity 的加载模式</title>
-    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
-<span id="more"></span>
-
-<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
-<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
-<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-
-<p>新开的页面继续重复其生命周期</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
-<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
-<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
-<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
-<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
-<li>不同程序之间</li>
-</ul>
-<ol>
-<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
-<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
-<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
-</ol>
-<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
-<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android  7.1 新特性——Shortcuts</title>
     <url>/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
     <content><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
@@ -1238,6 +1366,101 @@
 <blockquote>
 <p>应用内广播现在还有人用吗？已经被EventBus类似的事件替换了吧？<br>emmmm……</p>
 </blockquote>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/MicroBlog/Hello%20World/</url>
+    <content><![CDATA[<p><code>sudo apt-get install GirlFriend</code><br>正在读取软件包列表… <br>完成正在分析软件包的依赖关系树… <br>完成有一些软件包无法被安装。<br>下列的信息可能会对解决问题有所帮助：<br>下列的软件包有不能满足的依赖关系：<br><code>GirlFriend</code>: 依赖: <code>House</code> 但是它将不会被安装<br><code>GirlFriend</code>: 依赖: <code>Car</code> 但是它将不会被安装<br><code>House</code> ,<code>Car</code> : 依赖: <code>Money</code> 但是它将不会被安装<br><code>Error</code>: 无法安装的软件包</p>
+]]></content>
+      <categories>
+        <category>MicroBlog</category>
+      </categories>
+      <tags>
+        <tag>戏说</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>EventBus 源码分析与踩坑指南</title>
+    <url>/Android/EventBus-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%B8%A9%E5%9D%91%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<p>EventBus是一个使用发布者&#x2F;订阅者模式 并且低耦合的Android开源库。 EventBus只需几行代码即可实现中央通信解耦类：简化代码，删除依赖关系，加快应用程序开发速度。</p>
+<span id="more"></span>
+
+<h2 id="EventBus-源码分析"><a href="#EventBus-源码分析" class="headerlink" title="EventBus 源码分析"></a>EventBus 源码分析</h2><h3 id="EventBus-构造器"><a href="#EventBus-构造器" class="headerlink" title="EventBus 构造器"></a>EventBus 构造器</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static EventBus getDefault() &#123;</span><br><span class="line">    if (defaultInstance == null) &#123;</span><br><span class="line">        synchronized (EventBus.class) &#123;</span><br><span class="line">            if (defaultInstance == null) &#123;</span><br><span class="line">                defaultInstance = new EventBus();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return defaultInstance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用的是传统双重检查构造的方法，使得在任意线程中调用构造器都是线程安全的。</p>
+<p>默认构造器</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public EventBus() &#123;</span><br><span class="line">    this(DEFAULT_BUILDER);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中传入的默认构造器为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">EventBus(EventBusBuilder builder) &#123;</span><br><span class="line">    logger = builder.getLogger();</span><br><span class="line">    //以被订阅事件类为名为 key 记录注册了哪些 onEvent() 方法</span><br><span class="line">    subscriptionsByEventType = new HashMap&lt;&gt;();</span><br><span class="line">    //以注册的类为键值，记录该类所注册的所有事件类型，值为一个Event的class对象的列表</span><br><span class="line">    typesBySubscriber = new HashMap&lt;&gt;();</span><br><span class="line">    //记录了所有粘性事件</span><br><span class="line">    stickyEvents = new ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    //三个Poster, 负责在不同的线程中调用订阅者的方法</span><br><span class="line">    mainThreadSupport = builder.getMainThreadSupport();</span><br><span class="line">    mainThreadPoster = mainThreadSupport != null ? mainThreadSupport.createPoster(this) : null;</span><br><span class="line">    backgroundPoster = new BackgroundPoster(this);</span><br><span class="line">    asyncPoster = new AsyncPoster(this);</span><br><span class="line">    indexCount = builder.subscriberInfoIndexes != null ? builder.subscriberInfoIndexes.size() : 0;</span><br><span class="line">    //方法的查找类，用于查找某个订阅者类中有哪些注册的方法</span><br><span class="line">    subscriberMethodFinder = new SubscriberMethodFinder(builder.subscriberInfoIndexes,</span><br><span class="line">            builder.strictMethodVerification, builder.ignoreGeneratedIndex);</span><br><span class="line">    //一些开关       </span><br><span class="line">    logSubscriberExceptions = builder.logSubscriberExceptions;</span><br><span class="line">    logNoSubscriberMessages = builder.logNoSubscriberMessages;</span><br><span class="line">    sendSubscriberExceptionEvent = builder.sendSubscriberExceptionEvent;</span><br><span class="line">    sendNoSubscriberEvent = builder.sendNoSubscriberEvent;</span><br><span class="line">    throwSubscriberException = builder.throwSubscriberException;</span><br><span class="line">    eventInheritance = builder.eventInheritance;</span><br><span class="line">    //线程池</span><br><span class="line">    executorService = builder.executorService;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于一个类中会有的多个方法去监听事件，<code>Subscription</code>封装了一个注册信息，如下</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">final class Subscription &#123;</span><br><span class="line">    //订阅的类</span><br><span class="line">    final Object subscriber;</span><br><span class="line">    //订阅方法封装</span><br><span class="line">    final SubscriberMethod subscriberMethod;</span><br><span class="line">    /**</span><br><span class="line">     * Becomes false as soon as &#123;@link EventBus#unregister(Object)&#125; is called, which is checked by queued event delivery</span><br><span class="line">     * &#123;@link EventBus#invokeSubscriber(PendingPost)&#125; to prevent race conditions.</span><br><span class="line">     */</span><br><span class="line">    volatile boolean active;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class SubscriberMethod &#123;</span><br><span class="line">    //方法</span><br><span class="line">    final Method method;</span><br><span class="line">    //订阅线程</span><br><span class="line">    final ThreadMode threadMode;</span><br><span class="line">    //订阅的事件类的 class</span><br><span class="line">    final Class&lt;?&gt; eventType;</span><br><span class="line">    //事件优先级</span><br><span class="line">    final int priority;</span><br><span class="line">    //是否是粘性事件</span><br><span class="line">    final boolean sticky;</span><br><span class="line">    /** Used for efficient comparison */</span><br><span class="line">    //比较用到的字符串</span><br><span class="line">    String methodString;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>类和方法名唯一确定一条注册信息，Subscription.active 唯一确定该注册信息是否有效。<br><code>subscriptionsByEventType</code> 以事件的类名为 key ，value 为一个处理事件类型为该键值的 Subscription 的列表。<br><code>typesBySubscriber</code>根据一个订阅者记录了注册了哪些事件。<br>这二者从不同维度上记录的订阅事件和被订阅者之间的关系，在使用的注册，调度中更为高效。</p>
+<h3 id="注册"><a href="#注册" class="headerlink" title="注册"></a>注册</h3><p>注册的 <code>register()</code> 方法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void register(Object subscriber) &#123;</span><br><span class="line">    //订阅者的类名</span><br><span class="line">    Class&lt;?&gt; subscriberClass = subscriber.getClass();</span><br><span class="line">    //找到所有订阅者订阅的事件，并包装返回</span><br><span class="line">    List&lt;SubscriberMethod&gt; subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);</span><br><span class="line">    //遍历这些事件</span><br><span class="line">    synchronized (this) &#123;</span><br><span class="line">        for (SubscriberMethod subscriberMethod : subscriberMethods) &#123;</span><br><span class="line">            subscribe(subscriber, subscriberMethod);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>遍历之后的订阅方法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void subscribe(Object subscriber, SubscriberMethod subscriberMethod) &#123;</span><br><span class="line">    Class&lt;?&gt; eventType = subscriberMethod.eventType;</span><br><span class="line">    Subscription newSubscription = new Subscription(subscriber, subscriberMethod);</span><br><span class="line">    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);</span><br><span class="line">    if (subscriptions == null) &#123;</span><br><span class="line">        subscriptions = new CopyOnWriteArrayList&lt;&gt;();</span><br><span class="line">        subscriptionsByEventType.put(eventType, subscriptions);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (subscriptions.contains(newSubscription)) &#123;</span><br><span class="line">            throw new EventBusException(&quot;Subscriber &quot; + subscriber.getClass() + &quot; already registered to event &quot;</span><br><span class="line">                    + eventType);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int size = subscriptions.size();</span><br><span class="line">    for (int i = 0; i &lt;= size; i++) &#123;</span><br><span class="line">        if (i == size || subscriberMethod.priority &gt; subscriptions.get(i).subscriberMethod.priority) &#123;</span><br><span class="line">            subscriptions.add(i, newSubscription);</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    List&lt;Class&lt;?&gt;&gt; subscribedEvents = typesBySubscriber.get(subscriber);</span><br><span class="line">    if (subscribedEvents == null) &#123;</span><br><span class="line">        subscribedEvents = new ArrayList&lt;&gt;();</span><br><span class="line">        typesBySubscriber.put(subscriber, subscribedEvents);</span><br><span class="line">    &#125;</span><br><span class="line">    subscribedEvents.add(eventType);</span><br><span class="line"></span><br><span class="line">    if (subscriberMethod.sticky) &#123;</span><br><span class="line">        if (eventInheritance) &#123;</span><br><span class="line">            // Existing sticky events of all subclasses of eventType have to be considered.</span><br><span class="line">            // Note: Iterating over all events may be inefficient with lots of sticky events,</span><br><span class="line">            // thus data structure should be changed to allow a more efficient lookup</span><br><span class="line">            // (e.g. an additional map storing sub classes of super classes: Class -&gt; List&lt;Class&gt;).</span><br><span class="line">            Set&lt;Map.Entry&lt;Class&lt;?&gt;, Object&gt;&gt; entries = stickyEvents.entrySet();</span><br><span class="line">            for (Map.Entry&lt;Class&lt;?&gt;, Object&gt; entry : entries) &#123;</span><br><span class="line">                Class&lt;?&gt; candidateEventType = entry.getKey();</span><br><span class="line">                if (eventType.isAssignableFrom(candidateEventType)) &#123;</span><br><span class="line">                    Object stickyEvent = entry.getValue();</span><br><span class="line">                    checkPostStickyEventToSubscription(newSubscription, stickyEvent);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            Object stickyEvent = stickyEvents.get(eventType);</span><br><span class="line">            checkPostStickyEventToSubscription(newSubscription, stickyEvent);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码很长，逻辑很简单，先构建了<code>Subscription</code>了对象，分别放入两个数据结构里。<br>对于<code>subscriptionsByEventType</code>先查再加，如有重复说明一个类中有多个相同的订阅事件，注意事件的优先级，放入列表。如果添加过则抛出异常。<br>对于<code>typesBySubscriber</code>先查再加。<br>最后检查订阅者注册时是否已存在粘性事件，处理即可。</p>
+<h3 id="反注册"><a href="#反注册" class="headerlink" title="反注册"></a>反注册</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public synchronized void unregister(Object subscriber) &#123;</span><br><span class="line">    List&lt;Class&lt;?&gt;&gt; subscribedTypes = typesBySubscriber.get(subscriber);</span><br><span class="line">    if (subscribedTypes != null) &#123;</span><br><span class="line">        for (Class&lt;?&gt; eventType : subscribedTypes) &#123;</span><br><span class="line">            unsubscribeByEventType(subscriber, eventType);</span><br><span class="line">        &#125;</span><br><span class="line">        typesBySubscriber.remove(subscriber);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        logger.log(Level.WARNING, &quot;Subscriber to unregister was not registered before: &quot; + subscriber.getClass());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到其中最主要的是<code>unsubscribeByEventType</code>这个方法，继续查看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void unsubscribeByEventType(Object subscriber, Class&lt;?&gt; eventType) &#123;</span><br><span class="line">    List&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);</span><br><span class="line">    if (subscriptions != null) &#123;</span><br><span class="line">        int size = subscriptions.size();</span><br><span class="line">        for (int i = 0; i &lt; size; i++) &#123;</span><br><span class="line">            Subscription subscription = subscriptions.get(i);</span><br><span class="line">            if (subscription.subscriber == subscriber) &#123;</span><br><span class="line">                subscription.active = false;</span><br><span class="line">                subscriptions.remove(i);</span><br><span class="line">                i--;</span><br><span class="line">                size--;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>即从 <code>subscriptionsByEventType</code>找到所有的订阅事件包装类，分别更新这些包装类。</p>
+<h4 id="事件分发"><a href="#事件分发" class="headerlink" title="事件分发"></a>事件分发</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void post(Object event) &#123;</span><br><span class="line">    PostingThreadState postingState = currentPostingThreadState.get();</span><br><span class="line">    List&lt;Object&gt; eventQueue = postingState.eventQueue;</span><br><span class="line">    eventQueue.add(event);</span><br><span class="line"></span><br><span class="line">    if (!postingState.isPosting) &#123;</span><br><span class="line">        postingState.isMainThread = isMainThread();</span><br><span class="line">        postingState.isPosting = true;</span><br><span class="line">        if (postingState.canceled) &#123;</span><br><span class="line">            throw new EventBusException(&quot;Internal error. Abort state was not reset&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        try &#123;</span><br><span class="line">            while (!eventQueue.isEmpty()) &#123;</span><br><span class="line">                postSingleEvent(eventQueue.remove(0), postingState);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            postingState.isPosting = false;</span><br><span class="line">            postingState.isMainThread = false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如注释所说，<code>post()</code>是将事件发送到 EventBus ,具体什么时候调用时由 EventBus 调度，我们继续查看原理。<br>因为发布事件的线程即调用<code>post()</code>的线程与调用订阅者方法的线程不同，所以设计了一个<code>PostingThreadState</code>来保存发送的状态。<br><code>PostingThreadState</code>的结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">final static class PostingThreadState &#123;</span><br><span class="line">    //用来保存当前线程需要发送的事件</span><br><span class="line">    final List&lt;Object&gt; eventQueue = new ArrayList&lt;&gt;();</span><br><span class="line">    boolean isPosting;</span><br><span class="line">    boolean isMainThread;</span><br><span class="line">    Subscription subscription;</span><br><span class="line">    Object event;</span><br><span class="line">    boolean canceled;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>故发送事件中最重要的步骤是<code>postSingleEvent()</code>:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void postSingleEvent(Object event, PostingThreadState postingState) throws Error &#123;</span><br><span class="line">    Class&lt;?&gt; eventClass = event.getClass();</span><br><span class="line">    boolean subscriptionFound = false;</span><br><span class="line">    if (eventInheritance) &#123;</span><br><span class="line">        List&lt;Class&lt;?&gt;&gt; eventTypes = lookupAllEventTypes(eventClass);</span><br><span class="line">        int countTypes = eventTypes.size();</span><br><span class="line">        for (int h = 0; h &lt; countTypes; h++) &#123;</span><br><span class="line">        Class&lt;?&gt; clazz = eventTypes.get(h);</span><br><span class="line">            subscriptionFound |= postSingleEventForEventType(event, postingState, clazz);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        subscriptionFound = postSingleEventForEventType(event, postingState, eventClass);</span><br><span class="line">    &#125;</span><br><span class="line">    if (!subscriptionFound) &#123;</span><br><span class="line">        if (logNoSubscriberMessages) &#123;</span><br><span class="line">            logger.log(Level.FINE, &quot;No subscribers registered for event &quot; + eventClass);</span><br><span class="line">        &#125;</span><br><span class="line">        if (sendNoSubscriberEvent &amp;&amp; eventClass != NoSubscriberEvent.class &amp;&amp;</span><br><span class="line">                eventClass != SubscriberExceptionEvent.class) &#123;</span><br><span class="line">            post(new NoSubscriberEvent(this, event));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>eventInheritance</code>这个开关是表明是否考虑时间类型的继承关系，默认为true，然后调用<code>lookupAllEventTypes()</code>去查找所有订阅了这个时间的Class，最后调用<code>postSingleEventForEventType()</code>来判断是否查找到对应的订阅方法，最后将事件通过<code>postSingleEventForEventType()</code>方法继续处理：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private boolean postSingleEventForEventType(Object event, PostingThreadState postingState, Class&lt;?&gt; eventClass) &#123;</span><br><span class="line">    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions;</span><br><span class="line">    synchronized (this) &#123;</span><br><span class="line">        subscriptions = subscriptionsByEventType.get(eventClass);</span><br><span class="line">    &#125;</span><br><span class="line">    if (subscriptions != null &amp;&amp; !subscriptions.isEmpty()) &#123;</span><br><span class="line">        for (Subscription subscription : subscriptions) &#123;</span><br><span class="line">            postingState.event = event;</span><br><span class="line">            postingState.subscription = subscription;</span><br><span class="line">            boolean aborted = false;</span><br><span class="line">            try &#123;</span><br><span class="line">                postToSubscription(subscription, event, postingState.isMainThread);</span><br><span class="line">                aborted = postingState.canceled;</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                postingState.event = null;</span><br><span class="line">                postingState.subscription = null;</span><br><span class="line">                postingState.canceled = false;</span><br><span class="line">            &#125;</span><br><span class="line">            if (aborted) &#123;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先通过一次 CopyOnWriteArrayList ，每次对List 的修改都会立即同步一份。在这里找到每一个包装类，通过方法<code>postToSubscription()</code>来进行分发，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void postToSubscription(Subscription subscription, Object event, boolean isMainThread) &#123;</span><br><span class="line">    switch (subscription.subscriberMethod.threadMode) &#123;</span><br><span class="line">        case POSTING:</span><br><span class="line">            invokeSubscriber(subscription, event);</span><br><span class="line">            break;</span><br><span class="line">        case MAIN:</span><br><span class="line">            if (isMainThread) &#123;</span><br><span class="line">                invokeSubscriber(subscription, event);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, event);</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        case MAIN_ORDERED:</span><br><span class="line">            if (mainThreadPoster != null) &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, event);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                // temporary: technically not correct as poster not decoupled from subscriber</span><br><span class="line">                invokeSubscriber(subscription, event);</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        case BACKGROUND:</span><br><span class="line">            if (isMainThread) &#123;</span><br><span class="line">                backgroundPoster.enqueue(subscription, event);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                invokeSubscriber(subscription, event);</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        case ASYNC:</span><br><span class="line">            asyncPoster.enqueue(subscription, event);</span><br><span class="line">            break;</span><br><span class="line">        default:</span><br><span class="line">            throw new IllegalStateException(&quot;Unknown thread mode: &quot; + subscription.subscriberMethod.threadMode);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里到了最后的分发事件，在构造方法中构造的四个线程池，加入响应的队列，异步执行，</p>
+<p>执行方法为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">void invokeSubscriber(Subscription subscription, Object event) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        subscription.subscriberMethod.method.invoke(subscription.subscriber, event);</span><br><span class="line">    &#125; catch (InvocationTargetException e) &#123;</span><br><span class="line">        handleSubscriberException(subscription, event, e.getCause());</span><br><span class="line">    &#125; catch (IllegalAccessException e) &#123;</span><br><span class="line">        throw new IllegalStateException(&quot;Unexpected exception&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里使用了反射，反射调用订阅者的方法，方法存储在subsription的subsribeMethod变量中。</p>
+<h2 id="优缺点分析"><a href="#优缺点分析" class="headerlink" title="优缺点分析"></a>优缺点分析</h2><ul>
+<li>优点：洒脱的解藕，在多个界面传递时省去了层层的值传递。</li>
+<li>缺点：EventBus 直译为事件总线，但是其实总线就是 Bus 也就是公交车。而 RxJava 更像一个滴滴。他直接链接你的两个或多个需要通信的类。传输数据，当然你可以做一个很大的专车，穿梭在所有类之间。<ul>
+<li>对于 RxJava， Subscriber 明确的知道他 Subscribe 的是谁明确知道要做出什么反应；而对于 EventBus 在项目复杂之后，每个 Observaber 不知道会有什事件下发下来。</li>
+<li>不方便调试，对于后续维护来说，如果你没有文档，靠自己找事件被传递到哪里去了还是挺不方便的。</li>
+</ul>
+</li>
+</ul>
+<h2 id="踩坑纪要"><a href="#踩坑纪要" class="headerlink" title="踩坑纪要"></a>踩坑纪要</h2><h3 id="register-和-unregister-方法"><a href="#register-和-unregister-方法" class="headerlink" title="register() 和 unregister() 方法"></a><code>register()</code> 和 <code>unregister()</code> 方法</h3><ul>
+<li><p>调用时机：</p>
+<p>  <code>register()</code> 和 <code>unregister()</code> 方法的不正确调用是 EventBus 使用中遇到的问题的多数原因，包括且不限于<strong>重复注册</strong>、<strong>注册未收回</strong>、<strong>提前收回</strong>等情况。<br>  多数情况下，<code>register()</code> 方法是伴随着 Activity&#x2F;Fragment 的生命周期从 onCreate 开始到 onDestroy 结束。如果将 <code>register()</code> 和 <code>unregister()</code>放在 onStart&#x2F;onStop 中执行，那就不要怪页面切到后台&#x2F;不可见时订阅的事件不执行了。有时需要控制不可见的页面不接受事件，则需要放在 onStart&#x2F;onStop 中执行。<br>  如果不需要后台的页面立即执行事件，也可以使用粘性广播，当页面重新切回前台时，在 onStart 重新执行额时候会注册订阅者，会立马收到之前发送的粘性广播并执行。<br>  放在 onCreate 方法中就一定可行么？也不尽然，因为 onCreate 也有可能执行多次，如果一个页面已经存在，多次 startActivity 会创建多个 Activity 实例，就会执行多次，所以调用的时候要注意。</p>
+</li>
+<li><p>收取粘性广播更新 UI 的时候注意页面控件是否初始化完成，先初始化控件，再注册粘性广播执行。</p>
+</li>
+</ul>
+<h3 id="对象生成多次"><a href="#对象生成多次" class="headerlink" title="对象生成多次"></a>对象生成多次</h3><p>订阅者是对象的实例，当程序中通过种种情况使用的实例不是当时注册 EventBus 的那个实例了（包括且不限于<strong>序列化于反序列化造成另外对象</strong>、<strong>Activity&#x2F;Fragment 销毁后重建导致前后不一致</strong>、**多级传递把自己传晕了导致对象变了(本人亲历)**等等，遇事不决打一下 Log 看看是否是同一个对象吧。</p>
+<h3 id="订阅事件的执行线程"><a href="#订阅事件的执行线程" class="headerlink" title="订阅事件的执行线程"></a>订阅事件的执行线程</h3><p>订阅事件的时候会判断订阅者的 ThreadMode ，从而决定在什么线程下执行事件响应函数。</p>
+<ul>
+<li>PostThread：默认的 ThreadMode，表示在执行 Post 操作的线程直接调用订阅者的事件响应方法，不论该线程是否为主线程（UI 线程）。当该线程为主线程时，响应方法中不能有耗时操作，否则有卡主线程的风险。适用场景：对于是否在主线程执行无要求，但若 Post 线程为主线程，不能耗时的操作；</li>
+<li>MainThread：在主线程中执行响应方法。如果发布线程就是主线程，则直接调用订阅者的事件响应方法，否则通过主线程的 Handler 发送消息在主线程中处理——调用订阅者的事件响应函数。显然，MainThread类的方法也不能有耗时操作，以避免卡主线程。适用场景：必须在主线程执行的操作；</li>
+<li>BackgroundThread：在后台线程中执行响应方法。如果发布线程不是主线程，则直接调用订阅者的事件响应函数，否则启动唯一的后台线程去处理。由于后台线程是唯一的，当事件超过一个的时候，它们会被放在队列中依次执行，因此该类响应方法虽然没有PostThread类和MainThread类方法对性能敏感，但最好不要有重度耗时的操作或太频繁的轻度耗时操作，以造成其他操作等待。适用场景：操作轻微耗时且不会过于频繁，即一般的耗时操作都可以放在这里；</li>
+<li>Async：不论发布线程是否为主线程，都使用一个空闲线程来处理。和BackgroundThread不同的是，Async类的所有线程是相互独立的，因此不会出现卡线程的问题。适用场景：长耗时操作，例如网络访问。</li>
+</ul>
+<h3 id="注意-EventBus-事件的混淆"><a href="#注意-EventBus-事件的混淆" class="headerlink" title="注意 EventBus 事件的混淆"></a>注意 EventBus 事件的混淆</h3><p>EventBus是采用反射机制调用的绑定的方法，如果混淆则无法找到了。</p>
 ]]></content>
       <categories>
         <category>Android</category>
@@ -1472,217 +1695,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Android 线程池的使用</title>
-    <url>/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        // do sth.</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br></pre></td></tr></table></figure>
-
-<p>创造线程时，编译器会报告如下警告：<br><img src="http://img.artaris.cn/android_thread/thread_warning.png"><br>带着这些疑问，让我去学习了一下直接创造线程有什么缺点，及线程池的优点和使用。</p>
-<span id="more"></span>
-
-<h3 id="使用new-Thread-创造显式线程的缺点"><a href="#使用new-Thread-创造显式线程的缺点" class="headerlink" title="使用new Thread()创造显式线程的缺点"></a>使用<code>new Thread()</code>创造显式线程的缺点</h3><ul>
-<li>在大量任务都在创建线程时，会频繁创建线程，而后这些线程使用完成之后又会被收回，导致频繁的GC，这种情况在多个列表 item 异步加载时极为常见;</li>
-<li>多个线程之间互相竞争，缺乏统一的管理，降低了程序的运行效率，甚至卡顿；</li>
-<li>当显式线程需要停止时，必须要保留每个线程的实例对象，在多个列表 item 异步加载时管理不便；</li>
-</ul>
-<h3 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h3><p>使用线程池可以给我们带来很多好处，首先通过线程池中线程的重用，减少创建和销毁线程的性能开销。其次，能控制线程池中的并发数，否则会因为大量的线程争夺 CPU 资源造成阻塞。最后，线程池能够对线程进行管理，比如使用 ScheduledThreadPool 来设置延迟N秒后执行任务，并且每隔 M 秒循环执行一次。</p>
-<p>Android中常用的线程池都是通过对 ThreadPoolExecutor 进行不同配置来实现的，那么我们今天就从这这个 ThreadPoolExecutor 来开始吧！</p>
-<h4 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h4><p>ThreadPoolExecutor 的构造方法中各个参数如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ThreadPoolExecutor(int corePoolSize,</span><br><span class="line">                          int maximumPoolSize,</span><br><span class="line">                          long keepAliveTime,</span><br><span class="line">                          TimeUnit unit,</span><br><span class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                          ThreadFactory threadFactory,</span><br><span class="line">                          RejectedExecutionHandler handler)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>corePoolSize</code>:线程池中核心线程的数量;</li>
-<li><code>maximumPoolSize</code>:线程池中最大线程数量;</li>
-<li><code>keepAliveTime</code>:非核心线程的超时时长。当系统中非核心线程闲置时间超过keepAliveTime之后，则会被回收。如果ThreadPoolExecutor的allowCoreThreadTimeOut属性设置为true，则该参数也表示核心线程的超时时长;</li>
-<li><code>unit</code>:非核心线程的超时时长参数的单位。有纳秒、微秒、毫秒、秒、分、时、天等.eg.<code>TimeUnit.SECONDS</code>、<code>TimeUnit.MILLISECONDS</code>;</li>
-<li><code>workQueue</code>:线程池中的任务队列。该队列主要用来存储已经被提交但是尚未执行的任务。存储在这里的任务是由ThreadPoolExecutor的execute方法提交来的。workQueue 是一个 BlockingQueue 类型，BlockingQueue 是一个特殊的队列，当我们从 BlockingQueue 中取数据时，如果 BlockingQueue 是空的，则取数据的操作会进入到阻塞状态，当 BlockingQueue 中有了新数据时，这个取数据的操作又会被重新唤醒。同理，如果 BlockingQueue 中的数据已经满了，往 BlockingQueue 中存数据的操作又会进入阻塞状态，直到 BlockingQueue 中又有新的空间，存数据的操作又会被冲洗唤醒。<br>BlockingQueue 常用的实现类如下几种：</li>
-</ul>
-<ol>
-<li><p><code>ArrayBlockingQueue</code>:这个表示一个规定了大小的 BlockingQueue ， ArrayBlockingQueue 的构造函数接受一个 int 类型的数据，该数据表示 BlockingQueue 的大小，存储在 ArrayBlockingQueue 中的元素按照 FIFO （先进先出）的方式来进行存取。</p>
-</li>
-<li><p><code>LinkedBlockingQueue</code>:这个表示一个大小不确定的 BlockingQueue ，在 LinkedBlockingQueue 的构造方法中可以传一个int类型的数据，这样创建出来的 LinkedBlockingQueue 是有大小的，也可以不传，不传的话， LinkedBlockingQueue 的大小就为 Integer.MAX_VALUE，源码如下：</p>
-</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with a capacity of</span><br><span class="line"> * &#123;@link Integer#MAX_VALUE&#125;.</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue() &#123;</span><br><span class="line">    this(Integer.MAX_VALUE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Creates a &#123;@code LinkedBlockingQueue&#125; with the given (fixed) capacity.</span><br><span class="line"> *</span><br><span class="line"> * @param capacity the capacity of this queue</span><br><span class="line"> * @throws IllegalArgumentException if &#123;@code capacity&#125; is not greater</span><br><span class="line"> *         than zero</span><br><span class="line"> */</span><br><span class="line">public LinkedBlockingQueue(int capacity) &#123;</span><br><span class="line">    if (capacity &lt;= 0) throw new IllegalArgumentException();</span><br><span class="line">    this.capacity = capacity;</span><br><span class="line">    last = head = new Node&lt;E&gt;(null);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li><p><code>PriorityBlockingQueue</code>:这个队列和LinkedBlockingQueue类似，不同的是PriorityBlockingQueue中的元素不是按照FIFO来排序的，而是按照元素的Comparator来决定存取顺序的（这个功能也反映了存入PriorityBlockingQueue中的数据必须实现了Comparator接口）。</p>
-</li>
-<li><p><code>SynchronousQueue</code>:这个是同步Queue，属于线程安全的BlockingQueue的一种，在SynchronousQueue中，生产者线程的插入操作必须要等待消费者线程的移除操作，Synchronous内部没有数据缓存空间，因此我们无法对SynchronousQueue进行读取或者遍历其中的数据，元素只有在你试图取走的时候才有可能存在。我们可以理解为生产者和消费者互相等待，等到对方之后然后再一起离开。</p>
-</li>
-</ol>
-<ul>
-<li><p><code>threadFactory</code>:为线程池提供创建新线程的功能，这个我们一般使用默认即可</p>
-</li>
-<li><p><code>handler</code>:拒绝策略。当线程无法执行新任务时（一般是由于线程池中的线程数量已经达到最大数或者线程池关闭导致的），默认情况下，当线程池无法处理新线程时，会抛出一个RejectedExecutionException。<br>默认如下:</p>
-</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static class AbortPolicy implements RejectedExecutionHandler &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Creates an &#123;@code AbortPolicy&#125;.</span><br><span class="line">     */</span><br><span class="line">    public AbortPolicy() &#123; &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Always throws RejectedExecutionException.</span><br><span class="line">     *</span><br><span class="line">     * @param r the runnable task requested to be executed</span><br><span class="line">     * @param e the executor attempting to execute this task</span><br><span class="line">     * @throws RejectedExecutionException always</span><br><span class="line">     */</span><br><span class="line">    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) &#123;</span><br><span class="line">        throw new RejectedExecutionException(&quot;Task &quot; + r.toString() +</span><br><span class="line">                                             &quot; rejected from &quot; +</span><br><span class="line">                                             e.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>以上则是线程池的构造参数的解释。</p>
-<p>那么对于核心线程数和最大线程数，可以参考<code>AsyncTask</code>，如下所示：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public abstract class AsyncTask&lt;Params, Progress, Result&gt; &#123;</span><br><span class="line">    private static final String LOG_TAG = &quot;AsyncTask&quot;;</span><br><span class="line"></span><br><span class="line">    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();</span><br><span class="line">    // We want at least 2 threads and at most 4 threads in the core pool,</span><br><span class="line">    // preferring to have 1 less than the CPU count to avoid saturating</span><br><span class="line">    // the CPU with background work</span><br><span class="line">    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));</span><br><span class="line">    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;</span><br><span class="line">    private static final int KEEP_ALIVE_SECONDS = 30;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private static final BlockingQueue&lt;Runnable&gt; sPoolWorkQueue =</span><br><span class="line">            new LinkedBlockingQueue&lt;Runnable&gt;(128);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * An &#123;@link Executor&#125; that can be used to execute tasks in parallel.</span><br><span class="line">     */</span><br><span class="line">    public static final Executor THREAD_POOL_EXECUTOR;</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(</span><br><span class="line">                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,</span><br><span class="line">                sPoolWorkQueue, sThreadFactory);</span><br><span class="line">        threadPoolExecutor.allowCoreThreadTimeOut(true);</span><br><span class="line">        THREAD_POOL_EXECUTOR = threadPoolExecutor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>核心线程数为手机 CPU 数 +1（ CPU 数量获取方式<code>Runtime.getRuntime().availableProcessors()</code>），最大线程数为手机 CPU 数 × 2 + 1，线程队列的大小为 128</p>
-<h4 id="ThreadPoolExecutor-的执行规则"><a href="#ThreadPoolExecutor-的执行规则" class="headerlink" title="ThreadPoolExecutor 的执行规则"></a>ThreadPoolExecutor 的执行规则</h4><p>当任务提交到线程池中以后，则会按照一下规则进行处理：</p>
-<ol>
-<li><p>execute 一个线程之后，如果线程池中的线程数未达到核心线程数，则会立马启用一个核心线程去执行；</p>
-</li>
-<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数，且 workQueue 未满，则将新线程放入 workQueue 中等待执行；</p>
-</li>
-<li><p>execute 一个线程之后，如果线程池中的线程数已经达到核心线程数但未超过非核心线程数，且workQueue已满，则开启一个非核心线程来执行任务；</p>
-</li>
-<li><p>execute 一个线程之后，如果线程池中的线程数已经超过非核心线程数，则拒绝执行该任务；</p>
-</li>
-</ol>
-<h4 id="系统配置的-ThreadPoolExecutor"><a href="#系统配置的-ThreadPoolExecutor" class="headerlink" title="系统配置的 ThreadPoolExecutor"></a>系统配置的 ThreadPoolExecutor</h4><ul>
-<li>FixedThreadPool<br>FixedThreadPool是一个核心线程数量固定的线程池，创建方式如下：</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);  </span><br><span class="line"></span><br><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看到核心线程数和最大线程数一样，说明在 FixedThreadPool 中没有非核心线程，所有的线程都是核心线程，且线程的超时时间为0，说明核心线程即使在没有任务可执行的时候也不会被销毁（这样可让 FixedThreadPool 更快速的响应请求），最后的线程队列是一个 LinkedBlockingQueue ，但是 LinkedBlockingQueue 却没有参数，这说明线程队列的大小为 Integer.MAX_VALUE（2的31次方减1），OK，看完参数，我们大概也就知道了 FixedThreadPool 的工作特点了，当所有的核心线程都在执行任务的时候，新的任务只能进入线程队列中进行等待，直到有线程被空闲出来.</p>
-<ul>
-<li>SingleThreadExecutor</li>
-</ul>
-<p>SingleThreadExecutor 和 FixedThreadPool 很像，不同的就是 SingleThreadExecutor 的核心线程数只有 1。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newFixedThreadPool(int nThreads) &#123;</span><br><span class="line">    return new ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  new LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用 SingleThreadExecutor 的一个最大好处就是可以避免我们去处理线程同步问题，其实如果我们把 FixedThreadPool 的参数传个1，效果就和SingleThreadExecutor一致了.</p>
-<ul>
-<li>CachedThreadPool</li>
-</ul>
-<p>CachedTreadPool一个最大的优势是它可以根据程序的运行情况自动来调整线程池中的线程数量。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static ExecutorService newCachedThreadPool() &#123;</span><br><span class="line">    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,</span><br><span class="line">                                  60L, TimeUnit.SECONDS,</span><br><span class="line">                                  new SynchronousQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看到， CachedThreadPool 中是没有核心线程的，但是它的最大线程数却为 Integer.MAX_VALUE ，另外，它是有线程超时机制的，超时时间为60秒，这里它使用了 SynchronousQueue 作为线程队列， SynchronousQueue 的特点上文已经说过了，这里不再赘述。那么我们提交到 CachedThreadPool 消息队列中的任务在执行的过程中有什么特点呢？由于最大线程数为无限大，所以每当我们添加一个新任务进来的时候，如果线程池中有空闲的线程，则由该空闲的线程执行新任务，如果没有空闲线程，则创建新线程来执行任务。根据 CachedThreadPool 的特点，我们可以在有大量任务请求的时候使用 CachedThreadPool ，因为当 CachedThreadPool 中没有新任务的时候，它里边所有的线程都会因为超时而被终止。</p>
-<ul>
-<li>ScheduledThreadPool</li>
-</ul>
-<p>ScheduledThreadPool是一个具有定时定期执行任务功能的线程池，源码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledThreadPoolExecutor(int corePoolSize) &#123;</span><br><span class="line">    super(corePoolSize, Integer.MAX_VALUE,</span><br><span class="line">          DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,</span><br><span class="line">          new DelayedWorkQueue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们可以看到，它的核心线程数量是固定的（我们在构造的时候传入的），但是非核心线程是无穷大，当非核心线程闲置时，则会被立即回收。</p>
-<p>使用ScheduledThreadPool时，我们可以通过如下几个方法来添加任务：</p>
-<ol>
-<li>延迟启动任务</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
-
-
-<ol start="2">
-<li>延迟定时执行循环任务</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command,long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
-
-<p>延迟 initialDelay 秒后每个 period 秒执行一次任务。</p>
-<ol start="3">
-<li>延迟执行任务</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command,</span><br><span class="line">                                                 long initialDelay,</span><br><span class="line">                                                 long delay,</span><br><span class="line">                                                 TimeUnit unit)</span><br></pre></td></tr></table></figure>
-
-<p>第一次延迟 initialDelay 秒，以后每次延迟 delay 秒执行一个任务。</p>
-<h4 id="ThreadPoolExecutor-其他常用功能"><a href="#ThreadPoolExecutor-其他常用功能" class="headerlink" title="ThreadPoolExecutor 其他常用功能"></a>ThreadPoolExecutor 其他常用功能</h4><ul>
-<li><code>shutDown()</code> 关闭线程池，不影响已经提交的任务;</li>
-<li><code>shutDownNow()</code> 关闭线程池，并尝试去终止正在执行的线程;</li>
-<li><code>allowCoreThreadTimeOut(boolean value)</code> 允许核心线程闲置超时时被回收</li>
-<li><code>submit()</code></li>
-<li>ThreadPoolExecutor 执行任务回调：</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void beforeExecute(Thread t, Runnable r) &#123;</span><br><span class="line">    super.beforeExecute(t, r);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 开始执行任务！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void afterExecute(Runnable r, Throwable t) &#123;</span><br><span class="line">    super.afterExecute(r, t);</span><br><span class="line">    Log.d(TAG, &quot;beforeExecute: 任务执行结束！&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">protected void terminated() &#123;</span><br><span class="line">    super.terminated();</span><br><span class="line">    //当调用shutDown()或者shutDownNow()时会触发该方法  </span><br><span class="line">    Log.d(TAG, &quot;terminated: 线程池关闭！&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当线程池中的任务被执行的时候会回调此方法。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EventBus 源码分析与踩坑指南</title>
-    <url>/Android/EventBus-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%B8%A9%E5%9D%91%E6%8C%87%E5%8D%97/</url>
-    <content><![CDATA[<p>EventBus是一个使用发布者&#x2F;订阅者模式 并且低耦合的Android开源库。 EventBus只需几行代码即可实现中央通信解耦类：简化代码，删除依赖关系，加快应用程序开发速度。</p>
-<span id="more"></span>
-
-<h2 id="EventBus-源码分析"><a href="#EventBus-源码分析" class="headerlink" title="EventBus 源码分析"></a>EventBus 源码分析</h2><h3 id="EventBus-构造器"><a href="#EventBus-构造器" class="headerlink" title="EventBus 构造器"></a>EventBus 构造器</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public static EventBus getDefault() &#123;</span><br><span class="line">    if (defaultInstance == null) &#123;</span><br><span class="line">        synchronized (EventBus.class) &#123;</span><br><span class="line">            if (defaultInstance == null) &#123;</span><br><span class="line">                defaultInstance = new EventBus();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return defaultInstance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用的是传统双重检查构造的方法，使得在任意线程中调用构造器都是线程安全的。</p>
-<p>默认构造器</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public EventBus() &#123;</span><br><span class="line">    this(DEFAULT_BUILDER);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其中传入的默认构造器为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">EventBus(EventBusBuilder builder) &#123;</span><br><span class="line">    logger = builder.getLogger();</span><br><span class="line">    //以被订阅事件类为名为 key 记录注册了哪些 onEvent() 方法</span><br><span class="line">    subscriptionsByEventType = new HashMap&lt;&gt;();</span><br><span class="line">    //以注册的类为键值，记录该类所注册的所有事件类型，值为一个Event的class对象的列表</span><br><span class="line">    typesBySubscriber = new HashMap&lt;&gt;();</span><br><span class="line">    //记录了所有粘性事件</span><br><span class="line">    stickyEvents = new ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    //三个Poster, 负责在不同的线程中调用订阅者的方法</span><br><span class="line">    mainThreadSupport = builder.getMainThreadSupport();</span><br><span class="line">    mainThreadPoster = mainThreadSupport != null ? mainThreadSupport.createPoster(this) : null;</span><br><span class="line">    backgroundPoster = new BackgroundPoster(this);</span><br><span class="line">    asyncPoster = new AsyncPoster(this);</span><br><span class="line">    indexCount = builder.subscriberInfoIndexes != null ? builder.subscriberInfoIndexes.size() : 0;</span><br><span class="line">    //方法的查找类，用于查找某个订阅者类中有哪些注册的方法</span><br><span class="line">    subscriberMethodFinder = new SubscriberMethodFinder(builder.subscriberInfoIndexes,</span><br><span class="line">            builder.strictMethodVerification, builder.ignoreGeneratedIndex);</span><br><span class="line">    //一些开关       </span><br><span class="line">    logSubscriberExceptions = builder.logSubscriberExceptions;</span><br><span class="line">    logNoSubscriberMessages = builder.logNoSubscriberMessages;</span><br><span class="line">    sendSubscriberExceptionEvent = builder.sendSubscriberExceptionEvent;</span><br><span class="line">    sendNoSubscriberEvent = builder.sendNoSubscriberEvent;</span><br><span class="line">    throwSubscriberException = builder.throwSubscriberException;</span><br><span class="line">    eventInheritance = builder.eventInheritance;</span><br><span class="line">    //线程池</span><br><span class="line">    executorService = builder.executorService;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>对于一个类中会有的多个方法去监听事件，<code>Subscription</code>封装了一个注册信息，如下</p>
- <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">final class Subscription &#123;</span><br><span class="line">    //订阅的类</span><br><span class="line">    final Object subscriber;</span><br><span class="line">    //订阅方法封装</span><br><span class="line">    final SubscriberMethod subscriberMethod;</span><br><span class="line">    /**</span><br><span class="line">     * Becomes false as soon as &#123;@link EventBus#unregister(Object)&#125; is called, which is checked by queued event delivery</span><br><span class="line">     * &#123;@link EventBus#invokeSubscriber(PendingPost)&#125; to prevent race conditions.</span><br><span class="line">     */</span><br><span class="line">    volatile boolean active;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class SubscriberMethod &#123;</span><br><span class="line">    //方法</span><br><span class="line">    final Method method;</span><br><span class="line">    //订阅线程</span><br><span class="line">    final ThreadMode threadMode;</span><br><span class="line">    //订阅的事件类的 class</span><br><span class="line">    final Class&lt;?&gt; eventType;</span><br><span class="line">    //事件优先级</span><br><span class="line">    final int priority;</span><br><span class="line">    //是否是粘性事件</span><br><span class="line">    final boolean sticky;</span><br><span class="line">    /** Used for efficient comparison */</span><br><span class="line">    //比较用到的字符串</span><br><span class="line">    String methodString;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>类和方法名唯一确定一条注册信息，Subscription.active 唯一确定该注册信息是否有效。<br><code>subscriptionsByEventType</code> 以事件的类名为 key ，value 为一个处理事件类型为该键值的 Subscription 的列表。<br><code>typesBySubscriber</code>根据一个订阅者记录了注册了哪些事件。<br>这二者从不同维度上记录的订阅事件和被订阅者之间的关系，在使用的注册，调度中更为高效。</p>
-<h3 id="注册"><a href="#注册" class="headerlink" title="注册"></a>注册</h3><p>注册的 <code>register()</code> 方法如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void register(Object subscriber) &#123;</span><br><span class="line">    //订阅者的类名</span><br><span class="line">    Class&lt;?&gt; subscriberClass = subscriber.getClass();</span><br><span class="line">    //找到所有订阅者订阅的事件，并包装返回</span><br><span class="line">    List&lt;SubscriberMethod&gt; subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);</span><br><span class="line">    //遍历这些事件</span><br><span class="line">    synchronized (this) &#123;</span><br><span class="line">        for (SubscriberMethod subscriberMethod : subscriberMethods) &#123;</span><br><span class="line">            subscribe(subscriber, subscriberMethod);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>遍历之后的订阅方法如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void subscribe(Object subscriber, SubscriberMethod subscriberMethod) &#123;</span><br><span class="line">    Class&lt;?&gt; eventType = subscriberMethod.eventType;</span><br><span class="line">    Subscription newSubscription = new Subscription(subscriber, subscriberMethod);</span><br><span class="line">    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);</span><br><span class="line">    if (subscriptions == null) &#123;</span><br><span class="line">        subscriptions = new CopyOnWriteArrayList&lt;&gt;();</span><br><span class="line">        subscriptionsByEventType.put(eventType, subscriptions);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (subscriptions.contains(newSubscription)) &#123;</span><br><span class="line">            throw new EventBusException(&quot;Subscriber &quot; + subscriber.getClass() + &quot; already registered to event &quot;</span><br><span class="line">                    + eventType);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int size = subscriptions.size();</span><br><span class="line">    for (int i = 0; i &lt;= size; i++) &#123;</span><br><span class="line">        if (i == size || subscriberMethod.priority &gt; subscriptions.get(i).subscriberMethod.priority) &#123;</span><br><span class="line">            subscriptions.add(i, newSubscription);</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    List&lt;Class&lt;?&gt;&gt; subscribedEvents = typesBySubscriber.get(subscriber);</span><br><span class="line">    if (subscribedEvents == null) &#123;</span><br><span class="line">        subscribedEvents = new ArrayList&lt;&gt;();</span><br><span class="line">        typesBySubscriber.put(subscriber, subscribedEvents);</span><br><span class="line">    &#125;</span><br><span class="line">    subscribedEvents.add(eventType);</span><br><span class="line"></span><br><span class="line">    if (subscriberMethod.sticky) &#123;</span><br><span class="line">        if (eventInheritance) &#123;</span><br><span class="line">            // Existing sticky events of all subclasses of eventType have to be considered.</span><br><span class="line">            // Note: Iterating over all events may be inefficient with lots of sticky events,</span><br><span class="line">            // thus data structure should be changed to allow a more efficient lookup</span><br><span class="line">            // (e.g. an additional map storing sub classes of super classes: Class -&gt; List&lt;Class&gt;).</span><br><span class="line">            Set&lt;Map.Entry&lt;Class&lt;?&gt;, Object&gt;&gt; entries = stickyEvents.entrySet();</span><br><span class="line">            for (Map.Entry&lt;Class&lt;?&gt;, Object&gt; entry : entries) &#123;</span><br><span class="line">                Class&lt;?&gt; candidateEventType = entry.getKey();</span><br><span class="line">                if (eventType.isAssignableFrom(candidateEventType)) &#123;</span><br><span class="line">                    Object stickyEvent = entry.getValue();</span><br><span class="line">                    checkPostStickyEventToSubscription(newSubscription, stickyEvent);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            Object stickyEvent = stickyEvents.get(eventType);</span><br><span class="line">            checkPostStickyEventToSubscription(newSubscription, stickyEvent);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>代码很长，逻辑很简单，先构建了<code>Subscription</code>了对象，分别放入两个数据结构里。<br>对于<code>subscriptionsByEventType</code>先查再加，如有重复说明一个类中有多个相同的订阅事件，注意事件的优先级，放入列表。如果添加过则抛出异常。<br>对于<code>typesBySubscriber</code>先查再加。<br>最后检查订阅者注册时是否已存在粘性事件，处理即可。</p>
-<h3 id="反注册"><a href="#反注册" class="headerlink" title="反注册"></a>反注册</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public synchronized void unregister(Object subscriber) &#123;</span><br><span class="line">    List&lt;Class&lt;?&gt;&gt; subscribedTypes = typesBySubscriber.get(subscriber);</span><br><span class="line">    if (subscribedTypes != null) &#123;</span><br><span class="line">        for (Class&lt;?&gt; eventType : subscribedTypes) &#123;</span><br><span class="line">            unsubscribeByEventType(subscriber, eventType);</span><br><span class="line">        &#125;</span><br><span class="line">        typesBySubscriber.remove(subscriber);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        logger.log(Level.WARNING, &quot;Subscriber to unregister was not registered before: &quot; + subscriber.getClass());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看到其中最主要的是<code>unsubscribeByEventType</code>这个方法，继续查看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void unsubscribeByEventType(Object subscriber, Class&lt;?&gt; eventType) &#123;</span><br><span class="line">    List&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);</span><br><span class="line">    if (subscriptions != null) &#123;</span><br><span class="line">        int size = subscriptions.size();</span><br><span class="line">        for (int i = 0; i &lt; size; i++) &#123;</span><br><span class="line">            Subscription subscription = subscriptions.get(i);</span><br><span class="line">            if (subscription.subscriber == subscriber) &#123;</span><br><span class="line">                subscription.active = false;</span><br><span class="line">                subscriptions.remove(i);</span><br><span class="line">                i--;</span><br><span class="line">                size--;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>即从 <code>subscriptionsByEventType</code>找到所有的订阅事件包装类，分别更新这些包装类。</p>
-<h4 id="事件分发"><a href="#事件分发" class="headerlink" title="事件分发"></a>事件分发</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void post(Object event) &#123;</span><br><span class="line">    PostingThreadState postingState = currentPostingThreadState.get();</span><br><span class="line">    List&lt;Object&gt; eventQueue = postingState.eventQueue;</span><br><span class="line">    eventQueue.add(event);</span><br><span class="line"></span><br><span class="line">    if (!postingState.isPosting) &#123;</span><br><span class="line">        postingState.isMainThread = isMainThread();</span><br><span class="line">        postingState.isPosting = true;</span><br><span class="line">        if (postingState.canceled) &#123;</span><br><span class="line">            throw new EventBusException(&quot;Internal error. Abort state was not reset&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        try &#123;</span><br><span class="line">            while (!eventQueue.isEmpty()) &#123;</span><br><span class="line">                postSingleEvent(eventQueue.remove(0), postingState);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            postingState.isPosting = false;</span><br><span class="line">            postingState.isMainThread = false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如注释所说，<code>post()</code>是将事件发送到 EventBus ,具体什么时候调用时由 EventBus 调度，我们继续查看原理。<br>因为发布事件的线程即调用<code>post()</code>的线程与调用订阅者方法的线程不同，所以设计了一个<code>PostingThreadState</code>来保存发送的状态。<br><code>PostingThreadState</code>的结构如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">final static class PostingThreadState &#123;</span><br><span class="line">    //用来保存当前线程需要发送的事件</span><br><span class="line">    final List&lt;Object&gt; eventQueue = new ArrayList&lt;&gt;();</span><br><span class="line">    boolean isPosting;</span><br><span class="line">    boolean isMainThread;</span><br><span class="line">    Subscription subscription;</span><br><span class="line">    Object event;</span><br><span class="line">    boolean canceled;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>故发送事件中最重要的步骤是<code>postSingleEvent()</code>:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void postSingleEvent(Object event, PostingThreadState postingState) throws Error &#123;</span><br><span class="line">    Class&lt;?&gt; eventClass = event.getClass();</span><br><span class="line">    boolean subscriptionFound = false;</span><br><span class="line">    if (eventInheritance) &#123;</span><br><span class="line">        List&lt;Class&lt;?&gt;&gt; eventTypes = lookupAllEventTypes(eventClass);</span><br><span class="line">        int countTypes = eventTypes.size();</span><br><span class="line">        for (int h = 0; h &lt; countTypes; h++) &#123;</span><br><span class="line">        Class&lt;?&gt; clazz = eventTypes.get(h);</span><br><span class="line">            subscriptionFound |= postSingleEventForEventType(event, postingState, clazz);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        subscriptionFound = postSingleEventForEventType(event, postingState, eventClass);</span><br><span class="line">    &#125;</span><br><span class="line">    if (!subscriptionFound) &#123;</span><br><span class="line">        if (logNoSubscriberMessages) &#123;</span><br><span class="line">            logger.log(Level.FINE, &quot;No subscribers registered for event &quot; + eventClass);</span><br><span class="line">        &#125;</span><br><span class="line">        if (sendNoSubscriberEvent &amp;&amp; eventClass != NoSubscriberEvent.class &amp;&amp;</span><br><span class="line">                eventClass != SubscriberExceptionEvent.class) &#123;</span><br><span class="line">            post(new NoSubscriberEvent(this, event));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>eventInheritance</code>这个开关是表明是否考虑时间类型的继承关系，默认为true，然后调用<code>lookupAllEventTypes()</code>去查找所有订阅了这个时间的Class，最后调用<code>postSingleEventForEventType()</code>来判断是否查找到对应的订阅方法，最后将事件通过<code>postSingleEventForEventType()</code>方法继续处理：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private boolean postSingleEventForEventType(Object event, PostingThreadState postingState, Class&lt;?&gt; eventClass) &#123;</span><br><span class="line">    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions;</span><br><span class="line">    synchronized (this) &#123;</span><br><span class="line">        subscriptions = subscriptionsByEventType.get(eventClass);</span><br><span class="line">    &#125;</span><br><span class="line">    if (subscriptions != null &amp;&amp; !subscriptions.isEmpty()) &#123;</span><br><span class="line">        for (Subscription subscription : subscriptions) &#123;</span><br><span class="line">            postingState.event = event;</span><br><span class="line">            postingState.subscription = subscription;</span><br><span class="line">            boolean aborted = false;</span><br><span class="line">            try &#123;</span><br><span class="line">                postToSubscription(subscription, event, postingState.isMainThread);</span><br><span class="line">                aborted = postingState.canceled;</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                postingState.event = null;</span><br><span class="line">                postingState.subscription = null;</span><br><span class="line">                postingState.canceled = false;</span><br><span class="line">            &#125;</span><br><span class="line">            if (aborted) &#123;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>首先通过一次 CopyOnWriteArrayList ，每次对List 的修改都会立即同步一份。在这里找到每一个包装类，通过方法<code>postToSubscription()</code>来进行分发，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private void postToSubscription(Subscription subscription, Object event, boolean isMainThread) &#123;</span><br><span class="line">    switch (subscription.subscriberMethod.threadMode) &#123;</span><br><span class="line">        case POSTING:</span><br><span class="line">            invokeSubscriber(subscription, event);</span><br><span class="line">            break;</span><br><span class="line">        case MAIN:</span><br><span class="line">            if (isMainThread) &#123;</span><br><span class="line">                invokeSubscriber(subscription, event);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, event);</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        case MAIN_ORDERED:</span><br><span class="line">            if (mainThreadPoster != null) &#123;</span><br><span class="line">                mainThreadPoster.enqueue(subscription, event);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                // temporary: technically not correct as poster not decoupled from subscriber</span><br><span class="line">                invokeSubscriber(subscription, event);</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        case BACKGROUND:</span><br><span class="line">            if (isMainThread) &#123;</span><br><span class="line">                backgroundPoster.enqueue(subscription, event);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                invokeSubscriber(subscription, event);</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        case ASYNC:</span><br><span class="line">            asyncPoster.enqueue(subscription, event);</span><br><span class="line">            break;</span><br><span class="line">        default:</span><br><span class="line">            throw new IllegalStateException(&quot;Unknown thread mode: &quot; + subscription.subscriberMethod.threadMode);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里到了最后的分发事件，在构造方法中构造的四个线程池，加入响应的队列，异步执行，</p>
-<p>执行方法为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">void invokeSubscriber(Subscription subscription, Object event) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        subscription.subscriberMethod.method.invoke(subscription.subscriber, event);</span><br><span class="line">    &#125; catch (InvocationTargetException e) &#123;</span><br><span class="line">        handleSubscriberException(subscription, event, e.getCause());</span><br><span class="line">    &#125; catch (IllegalAccessException e) &#123;</span><br><span class="line">        throw new IllegalStateException(&quot;Unexpected exception&quot;, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里使用了反射，反射调用订阅者的方法，方法存储在subsription的subsribeMethod变量中。</p>
-<h2 id="优缺点分析"><a href="#优缺点分析" class="headerlink" title="优缺点分析"></a>优缺点分析</h2><ul>
-<li>优点：洒脱的解藕，在多个界面传递时省去了层层的值传递。</li>
-<li>缺点：EventBus 直译为事件总线，但是其实总线就是 Bus 也就是公交车。而 RxJava 更像一个滴滴。他直接链接你的两个或多个需要通信的类。传输数据，当然你可以做一个很大的专车，穿梭在所有类之间。<ul>
-<li>对于 RxJava， Subscriber 明确的知道他 Subscribe 的是谁明确知道要做出什么反应；而对于 EventBus 在项目复杂之后，每个 Observaber 不知道会有什事件下发下来。</li>
-<li>不方便调试，对于后续维护来说，如果你没有文档，靠自己找事件被传递到哪里去了还是挺不方便的。</li>
-</ul>
-</li>
-</ul>
-<h2 id="踩坑纪要"><a href="#踩坑纪要" class="headerlink" title="踩坑纪要"></a>踩坑纪要</h2><h3 id="register-和-unregister-方法"><a href="#register-和-unregister-方法" class="headerlink" title="register() 和 unregister() 方法"></a><code>register()</code> 和 <code>unregister()</code> 方法</h3><ul>
-<li><p>调用时机：</p>
-<p>  <code>register()</code> 和 <code>unregister()</code> 方法的不正确调用是 EventBus 使用中遇到的问题的多数原因，包括且不限于<strong>重复注册</strong>、<strong>注册未收回</strong>、<strong>提前收回</strong>等情况。<br>  多数情况下，<code>register()</code> 方法是伴随着 Activity&#x2F;Fragment 的生命周期从 onCreate 开始到 onDestroy 结束。如果将 <code>register()</code> 和 <code>unregister()</code>放在 onStart&#x2F;onStop 中执行，那就不要怪页面切到后台&#x2F;不可见时订阅的事件不执行了。有时需要控制不可见的页面不接受事件，则需要放在 onStart&#x2F;onStop 中执行。<br>  如果不需要后台的页面立即执行事件，也可以使用粘性广播，当页面重新切回前台时，在 onStart 重新执行额时候会注册订阅者，会立马收到之前发送的粘性广播并执行。<br>  放在 onCreate 方法中就一定可行么？也不尽然，因为 onCreate 也有可能执行多次，如果一个页面已经存在，多次 startActivity 会创建多个 Activity 实例，就会执行多次，所以调用的时候要注意。</p>
-</li>
-<li><p>收取粘性广播更新 UI 的时候注意页面控件是否初始化完成，先初始化控件，再注册粘性广播执行。</p>
-</li>
-</ul>
-<h3 id="对象生成多次"><a href="#对象生成多次" class="headerlink" title="对象生成多次"></a>对象生成多次</h3><p>订阅者是对象的实例，当程序中通过种种情况使用的实例不是当时注册 EventBus 的那个实例了（包括且不限于<strong>序列化于反序列化造成另外对象</strong>、<strong>Activity&#x2F;Fragment 销毁后重建导致前后不一致</strong>、**多级传递把自己传晕了导致对象变了(本人亲历)**等等，遇事不决打一下 Log 看看是否是同一个对象吧。</p>
-<h3 id="订阅事件的执行线程"><a href="#订阅事件的执行线程" class="headerlink" title="订阅事件的执行线程"></a>订阅事件的执行线程</h3><p>订阅事件的时候会判断订阅者的 ThreadMode ，从而决定在什么线程下执行事件响应函数。</p>
-<ul>
-<li>PostThread：默认的 ThreadMode，表示在执行 Post 操作的线程直接调用订阅者的事件响应方法，不论该线程是否为主线程（UI 线程）。当该线程为主线程时，响应方法中不能有耗时操作，否则有卡主线程的风险。适用场景：对于是否在主线程执行无要求，但若 Post 线程为主线程，不能耗时的操作；</li>
-<li>MainThread：在主线程中执行响应方法。如果发布线程就是主线程，则直接调用订阅者的事件响应方法，否则通过主线程的 Handler 发送消息在主线程中处理——调用订阅者的事件响应函数。显然，MainThread类的方法也不能有耗时操作，以避免卡主线程。适用场景：必须在主线程执行的操作；</li>
-<li>BackgroundThread：在后台线程中执行响应方法。如果发布线程不是主线程，则直接调用订阅者的事件响应函数，否则启动唯一的后台线程去处理。由于后台线程是唯一的，当事件超过一个的时候，它们会被放在队列中依次执行，因此该类响应方法虽然没有PostThread类和MainThread类方法对性能敏感，但最好不要有重度耗时的操作或太频繁的轻度耗时操作，以造成其他操作等待。适用场景：操作轻微耗时且不会过于频繁，即一般的耗时操作都可以放在这里；</li>
-<li>Async：不论发布线程是否为主线程，都使用一个空闲线程来处理。和BackgroundThread不同的是，Async类的所有线程是相互独立的，因此不会出现卡线程的问题。适用场景：长耗时操作，例如网络访问。</li>
-</ul>
-<h3 id="注意-EventBus-事件的混淆"><a href="#注意-EventBus-事件的混淆" class="headerlink" title="注意 EventBus 事件的混淆"></a>注意 EventBus 事件的混淆</h3><p>EventBus是采用反射机制调用的绑定的方法，如果混淆则无法找到了。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hexo 建站笔记</title>
     <url>/Hexo/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h3 id="建站流程"><a href="#建站流程" class="headerlink" title="建站流程"></a>建站流程</h3><span id="more"></span>
@@ -1717,86 +1729,9 @@
       </tags>
   </entry>
   <entry>
-    <title>Hello World</title>
-    <url>/MicroBlog/Hello%20World/</url>
-    <content><![CDATA[<p><code>sudo apt-get install GirlFriend</code><br>正在读取软件包列表… <br>完成正在分析软件包的依赖关系树… <br>完成有一些软件包无法被安装。<br>下列的信息可能会对解决问题有所帮助：<br>下列的软件包有不能满足的依赖关系：<br><code>GirlFriend</code>: 依赖: <code>House</code> 但是它将不会被安装<br><code>GirlFriend</code>: 依赖: <code>Car</code> 但是它将不会被安装<br><code>House</code> ,<code>Car</code> : 依赖: <code>Money</code> 但是它将不会被安装<br><code>Error</code>: 无法安装的软件包</p>
-]]></content>
-      <categories>
-        <category>MicroBlog</category>
-      </categories>
-      <tags>
-        <tag>戏说</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>容器-HashMap 实现原理</title>
     <url>/uncategorized/Java%20%E5%AE%B9%E5%99%A8%20HashMap%20%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title>Java 中单例的实现与线程安全</title>
-    <url>/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
-    <content><![CDATA[<h1 id="Java-中单例的实现与线程安全"><a href="#Java-中单例的实现与线程安全" class="headerlink" title="Java 中单例的实现与线程安全"></a>Java 中单例的实现与线程安全</h1><p>单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：</p>
-<ol>
-<li>单例功能：基本功能</li>
-<li>延迟加载：避免不必要的资源消耗</li>
-<li>线程安全：多个线程同时创建对象时为同一个对象</li>
-<li>没有性能问题：创建函数不能影响效率</li>
-<li>防止序列化产生新对象：安全</li>
-<li>防止反射攻击：安全</li>
-</ol>
-<span id="more"></span>
-
-<h2 id="饿汉式（类加载时就完成初始化）"><a href="#饿汉式（类加载时就完成初始化）" class="headerlink" title="饿汉式（类加载时就完成初始化）"></a>饿汉式（类加载时就完成初始化）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：简单粗暴，加载类的时候就初始化完成了，线程安全。<br>缺点：消耗资源，如果使用时机较晚或不使用，浪费内存。</p>
-<h2 id="懒汉式-线程不安全"><a href="#懒汉式-线程不安全" class="headerlink" title="懒汉式(线程不安全)"></a>懒汉式(线程不安全)</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：延迟初始化，避免了不必要的内存开销；<br>缺点：线程不安全。</p>
-<h2 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h2><p>使用<code>synchronized</code>修饰获取方法。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：延迟初始化，避免了不必要的内存开销；线程安全；<br>缺点：每次获取实例都需要同步，其实只需要第一次同步就可以了。</p>
-<h2 id="懒汉式（线程安全，同步代码块-DCL-double-check-lock）"><a href="#懒汉式（线程安全，同步代码块-DCL-double-check-lock）" class="headerlink" title="懒汉式（线程安全，同步代码块 DCL:double check lock）"></a>懒汉式（线程安全，同步代码块 DCL:double check lock）</h2><p>使用<code>synchronized</code>同步 new 方法，内外加双重判断，volatile 修饰实例。<br>synchronized 能保证每次只有一个线程访问代码块，volatile 保证了 instance 创建的原子性。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static volatile Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if (instance == null) &#123;</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 如果实现了Serializable, 必须重写这个方法</span><br><span class="line">     */</span><br><span class="line">    private Object readResolve() throws ObjectStreamException &#123;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line">    /**</span><br><span class="line">     * 私有化构造方法</span><br><span class="line">     */</span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        return SingletonHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 类级的内部类，也就是静态的成员式内部类，该内部类的实例与外部类的实例没有绑定关系，</span><br><span class="line">     * 而且只有被调用到才会装载，从而实现了延迟加载</span><br><span class="line">     */</span><br><span class="line">    private static class SingletonHolder &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 静态初始化器，由JVM来保证线程安全</span><br><span class="line">         */</span><br><span class="line">        private static final Singleton INSTANCE = new Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public enum Singleton &#123;</span><br><span class="line"></span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：简单粗暴，线程安全，高效，自动避免序列化&#x2F;反序列化攻击、反射攻击(枚举类不能通过反射生成)<br>缺点：可读性差</p>
-<p>关联阅读</p>
-<blockquote>
-<h2 id="synchronized-关键字"><a href="#synchronized-关键字" class="headerlink" title="synchronized 关键字"></a>synchronized 关键字</h2><p>synchronized 是 Java 中的关键字，是利用锁的机制来控制多线程同步的关键字.<br>锁的性质：</p>
-<ol>
-<li>互斥性&#x2F;原子性：同一时间只允许一个线程持有某个对象锁，通过对锁的持有来保证同一时间只有一个线程对需同步的代码块(复合操作)进行访问；</li>
-<li>可见性：当一个线程释放锁之后，对共享变量所做的更改对之后获取该锁的另一个线程可见；<br>锁的分类:</li>
-<li>对象锁: 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”。类的对象可以有多个，所以每个对象有其独立的对象锁，互不干扰。</li>
-<li>类锁:在 Java 中，针对每个类也有一个锁，可以称为“类锁”，类锁实际上是通过对象锁实现的，即类的 Class 对象锁。每个类只有一个 Class 对象，所以每个类只有一个类锁。</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th align="center"></th>
-<th align="center">修饰代码块</th>
-<th align="center">修饰代码块</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">获取对象锁</td>
-<td align="center">synchronized(this|object) {}</td>
-<td align="center">修饰非静态方法</td>
-</tr>
-<tr>
-<td align="center">获取类锁</td>
-<td align="center">synchronized(类.class) {}</td>
-<td align="center">修饰静态方法</td>
-</tr>
-</tbody></table>
-<p><strong>对于同一种锁的访问是同步的</strong></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
   </entry>
   <entry>
     <title>Java 容器篇：容器总结</title>
@@ -1968,6 +1903,71 @@
       </tags>
   </entry>
   <entry>
+    <title>Java 中单例的实现与线程安全</title>
+    <url>/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
+    <content><![CDATA[<h1 id="Java-中单例的实现与线程安全"><a href="#Java-中单例的实现与线程安全" class="headerlink" title="Java 中单例的实现与线程安全"></a>Java 中单例的实现与线程安全</h1><p>单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：</p>
+<ol>
+<li>单例功能：基本功能</li>
+<li>延迟加载：避免不必要的资源消耗</li>
+<li>线程安全：多个线程同时创建对象时为同一个对象</li>
+<li>没有性能问题：创建函数不能影响效率</li>
+<li>防止序列化产生新对象：安全</li>
+<li>防止反射攻击：安全</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="饿汉式（类加载时就完成初始化）"><a href="#饿汉式（类加载时就完成初始化）" class="headerlink" title="饿汉式（类加载时就完成初始化）"></a>饿汉式（类加载时就完成初始化）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，加载类的时候就初始化完成了，线程安全。<br>缺点：消耗资源，如果使用时机较晚或不使用，浪费内存。</p>
+<h2 id="懒汉式-线程不安全"><a href="#懒汉式-线程不安全" class="headerlink" title="懒汉式(线程不安全)"></a>懒汉式(线程不安全)</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：延迟初始化，避免了不必要的内存开销；<br>缺点：线程不安全。</p>
+<h2 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h2><p>使用<code>synchronized</code>修饰获取方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：延迟初始化，避免了不必要的内存开销；线程安全；<br>缺点：每次获取实例都需要同步，其实只需要第一次同步就可以了。</p>
+<h2 id="懒汉式（线程安全，同步代码块-DCL-double-check-lock）"><a href="#懒汉式（线程安全，同步代码块-DCL-double-check-lock）" class="headerlink" title="懒汉式（线程安全，同步代码块 DCL:double check lock）"></a>懒汉式（线程安全，同步代码块 DCL:double check lock）</h2><p>使用<code>synchronized</code>同步 new 方法，内外加双重判断，volatile 修饰实例。<br>synchronized 能保证每次只有一个线程访问代码块，volatile 保证了 instance 创建的原子性。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static volatile Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if (instance == null) &#123;</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 如果实现了Serializable, 必须重写这个方法</span><br><span class="line">     */</span><br><span class="line">    private Object readResolve() throws ObjectStreamException &#123;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line">    /**</span><br><span class="line">     * 私有化构造方法</span><br><span class="line">     */</span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        return SingletonHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 类级的内部类，也就是静态的成员式内部类，该内部类的实例与外部类的实例没有绑定关系，</span><br><span class="line">     * 而且只有被调用到才会装载，从而实现了延迟加载</span><br><span class="line">     */</span><br><span class="line">    private static class SingletonHolder &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 静态初始化器，由JVM来保证线程安全</span><br><span class="line">         */</span><br><span class="line">        private static final Singleton INSTANCE = new Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public enum Singleton &#123;</span><br><span class="line"></span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，线程安全，高效，自动避免序列化&#x2F;反序列化攻击、反射攻击(枚举类不能通过反射生成)<br>缺点：可读性差</p>
+<p>关联阅读</p>
+<blockquote>
+<h2 id="synchronized-关键字"><a href="#synchronized-关键字" class="headerlink" title="synchronized 关键字"></a>synchronized 关键字</h2><p>synchronized 是 Java 中的关键字，是利用锁的机制来控制多线程同步的关键字.<br>锁的性质：</p>
+<ol>
+<li>互斥性&#x2F;原子性：同一时间只允许一个线程持有某个对象锁，通过对锁的持有来保证同一时间只有一个线程对需同步的代码块(复合操作)进行访问；</li>
+<li>可见性：当一个线程释放锁之后，对共享变量所做的更改对之后获取该锁的另一个线程可见；<br>锁的分类:</li>
+<li>对象锁: 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”。类的对象可以有多个，所以每个对象有其独立的对象锁，互不干扰。</li>
+<li>类锁:在 Java 中，针对每个类也有一个锁，可以称为“类锁”，类锁实际上是通过对象锁实现的，即类的 Class 对象锁。每个类只有一个 Class 对象，所以每个类只有一个类锁。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">修饰代码块</th>
+<th align="center">修饰代码块</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">获取对象锁</td>
+<td align="center">synchronized(this|object) {}</td>
+<td align="center">修饰非静态方法</td>
+</tr>
+<tr>
+<td align="center">获取类锁</td>
+<td align="center">synchronized(类.class) {}</td>
+<td align="center">修饰静态方法</td>
+</tr>
+</tbody></table>
+<p><strong>对于同一种锁的访问是同步的</strong></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java 的内存模型与 volatile 关键字</title>
     <url>/Java/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/</url>
     <content><![CDATA[<h2 id="Java-的内存模型"><a href="#Java-的内存模型" class="headerlink" title="Java 的内存模型"></a>Java 的内存模型</h2><p>Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。</p>
@@ -2007,6 +2007,71 @@
       </categories>
       <tags>
         <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MarkDown 语法学习笔记</title>
+    <url>/MarkDown/MarkDown-%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h5 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h5><span id="more"></span>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br></pre></td></tr></table></figure>
+<h5 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h5><p>无序列表</p>
+<ul>
+<li>选项1</li>
+<li>选项2</li>
+<li>选项3</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">- 选项1</span><br><span class="line">- 选项2</span><br><span class="line">- 选项3</span><br></pre></td></tr></table></figure>
+<p>有序列表</p>
+<ol>
+<li>选项1</li>
+<li>选项2</li>
+<li>选项3</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. 选项1</span><br><span class="line">2. 选项2</span><br><span class="line">3. 选项3</span><br></pre></td></tr></table></figure>
+
+<h5 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h5><p><a href="http://artaris.cn/">Aratis.CN</a></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[Aratis.CN](http://artaris.cn)</span><br></pre></td></tr></table></figure>
+
+<h5 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h5><p><img src="http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">![示例图片](http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg)</span><br></pre></td></tr></table></figure>
+<h5 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h5><blockquote>
+<p>一失足成千古风流人物。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; 一失足成千古风流人物。</span><br></pre></td></tr></table></figure>
+<h5 id="斜体和粗体"><a href="#斜体和粗体" class="headerlink" title="斜体和粗体"></a>斜体和粗体</h5><p><em>直到相思了无益</em>，<strong>未妨惆怅是轻狂</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">*直到相思了无益*，**未妨惆怅是轻狂**。</span><br></pre></td></tr></table></figure>
+<h5 id="表格"><a href="#表格" class="headerlink" title="表格"></a>表格</h5><table>
+<thead>
+<tr>
+<th align="left">Tables</th>
+<th align="center">Row  1 is</th>
+<th align="right">Row  2 is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">col 3 is</td>
+<td align="center">A</td>
+<td align="right">D</td>
+</tr>
+<tr>
+<td align="left">col 2 is</td>
+<td align="center">B</td>
+<td align="right">E</td>
+</tr>
+<tr>
+<td align="left">col 1 is</td>
+<td align="center">C</td>
+<td align="right">F</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">| Tables        | Row  1 is     |  Row  2 is  |</span><br><span class="line">|:------------- |:-------------:| -----------:|</span><br><span class="line">| col 3 is      | A             | D           |</span><br><span class="line">| col 2 is      | B             | E           |</span><br><span class="line">| col 1 is      | C             | F           |</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>MarkDown</category>
+      </categories>
+      <tags>
+        <tag>MarkDown</tag>
       </tags>
   </entry>
   <entry>
@@ -2086,98 +2151,6 @@
 <li>value使用了volatile关键字，使得多个线程可以共享变量，使用volatile将使得VM优化失去作用，在线程数特别大时，效率会较低。</li>
 </ul>
 <h2 id="泛型的使用"><a href="#泛型的使用" class="headerlink" title="泛型的使用"></a>泛型的使用</h2><p>Java 的原始数据类型并不能与泛型搭配使用，因为Java 的泛型是一种在编译阶段会自动将类型转换为对应的特定类型，这就决定了使用泛型，必须保证相应类型可以转换为 Object。而原始数据类型并不是对象类型。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MarkDown 语法学习笔记</title>
-    <url>/MarkDown/MarkDown-%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h5 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h5><span id="more"></span>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br></pre></td></tr></table></figure>
-<h5 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h5><p>无序列表</p>
-<ul>
-<li>选项1</li>
-<li>选项2</li>
-<li>选项3</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">- 选项1</span><br><span class="line">- 选项2</span><br><span class="line">- 选项3</span><br></pre></td></tr></table></figure>
-<p>有序列表</p>
-<ol>
-<li>选项1</li>
-<li>选项2</li>
-<li>选项3</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. 选项1</span><br><span class="line">2. 选项2</span><br><span class="line">3. 选项3</span><br></pre></td></tr></table></figure>
-
-<h5 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h5><p><a href="http://artaris.cn/">Aratis.CN</a></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[Aratis.CN](http://artaris.cn)</span><br></pre></td></tr></table></figure>
-
-<h5 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h5><p><img src="http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">![示例图片](http://ww4.sinaimg.cn/bmiddle/aa397b7fjw1dzplsgpdw5j.jpg)</span><br></pre></td></tr></table></figure>
-<h5 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h5><blockquote>
-<p>一失足成千古风流人物。</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; 一失足成千古风流人物。</span><br></pre></td></tr></table></figure>
-<h5 id="斜体和粗体"><a href="#斜体和粗体" class="headerlink" title="斜体和粗体"></a>斜体和粗体</h5><p><em>直到相思了无益</em>，<strong>未妨惆怅是轻狂</strong>。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">*直到相思了无益*，**未妨惆怅是轻狂**。</span><br></pre></td></tr></table></figure>
-<h5 id="表格"><a href="#表格" class="headerlink" title="表格"></a>表格</h5><table>
-<thead>
-<tr>
-<th align="left">Tables</th>
-<th align="center">Row  1 is</th>
-<th align="right">Row  2 is</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">col 3 is</td>
-<td align="center">A</td>
-<td align="right">D</td>
-</tr>
-<tr>
-<td align="left">col 2 is</td>
-<td align="center">B</td>
-<td align="right">E</td>
-</tr>
-<tr>
-<td align="left">col 1 is</td>
-<td align="center">C</td>
-<td align="right">F</td>
-</tr>
-</tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">| Tables        | Row  1 is     |  Row  2 is  |</span><br><span class="line">|:------------- |:-------------:| -----------:|</span><br><span class="line">| col 3 is      | A             | D           |</span><br><span class="line">| col 2 is      | B             | E           |</span><br><span class="line">| col 1 is      | C             | F           |</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>MarkDown</category>
-      </categories>
-      <tags>
-        <tag>MarkDown</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>try、catch、finally、throw和throws</title>
-    <url>/Java/try%E3%80%81catch%E3%80%81finally%E3%80%81throw%E5%92%8Cthrows/</url>
-    <content><![CDATA[<p>try、catch、finally 是 Java 中处理异常的一套机制。</p>
-<span id="more"></span>
-
-<p>完整的代码流程如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">    //尝试执行的代码</span><br><span class="line">&#125; catch (Exception e)&#123;</span><br><span class="line">    //捕获的异常</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">    //最后总是会执行的代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 try 代码块中执行尝试的代码，在 catch 中捕获可能在 try 代码块会出现的异常并做相应的处理，最后在 finally 代码块执行总会执行的代码。这是简单的行文，当在这些代码块中出现了 return 时会按照什么顺序执行呢？</p>
-<ol>
-<li>在不抛出异常的情况下，程序执行完 try 里面的代码块之后，该方法并不会立即结束，而是继续试图去寻找该方法有没有 finally 的代码块；</li>
-<li>如果没有 finally 代码块，整个方法在执行完 try 代码块后返回相应的值来结束整个方法；</li>
-<li>如果有 finally 代码块，此时程序执行到 try 代码块里的 return 语句之时并不会立即执行 return，而是先去执行 finally 代码块里的代码；</li>
-<li>若 finally 代码块里没有 return 或没有能够终止程序的代码，程序将在执行完 finally 代码块代码之后再返回 try 代码块执行 return 语句来结束整个方法；</li>
-<li>若 finally 代码块里有 return 或含有能够终止程序的代码，方法将在执行完 finally 之后被结束，不再跳回 try 代码块执行 return；</li>
-</ol>
-<p>有异常时将上述 try 代码块替换成 catch 即可。</p>
-<p>当程序遇见 <code>System.exit(0);</code> 时不管执行到什么地方都会立即执行推出当前进程。</p>
 ]]></content>
       <categories>
         <category>Java</category>
@@ -2300,6 +2273,33 @@
       </tags>
   </entry>
   <entry>
+    <title>try、catch、finally、throw和throws</title>
+    <url>/Java/try%E3%80%81catch%E3%80%81finally%E3%80%81throw%E5%92%8Cthrows/</url>
+    <content><![CDATA[<p>try、catch、finally 是 Java 中处理异常的一套机制。</p>
+<span id="more"></span>
+
+<p>完整的代码流程如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">    //尝试执行的代码</span><br><span class="line">&#125; catch (Exception e)&#123;</span><br><span class="line">    //捕获的异常</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">    //最后总是会执行的代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 try 代码块中执行尝试的代码，在 catch 中捕获可能在 try 代码块会出现的异常并做相应的处理，最后在 finally 代码块执行总会执行的代码。这是简单的行文，当在这些代码块中出现了 return 时会按照什么顺序执行呢？</p>
+<ol>
+<li>在不抛出异常的情况下，程序执行完 try 里面的代码块之后，该方法并不会立即结束，而是继续试图去寻找该方法有没有 finally 的代码块；</li>
+<li>如果没有 finally 代码块，整个方法在执行完 try 代码块后返回相应的值来结束整个方法；</li>
+<li>如果有 finally 代码块，此时程序执行到 try 代码块里的 return 语句之时并不会立即执行 return，而是先去执行 finally 代码块里的代码；</li>
+<li>若 finally 代码块里没有 return 或没有能够终止程序的代码，程序将在执行完 finally 代码块代码之后再返回 try 代码块执行 return 语句来结束整个方法；</li>
+<li>若 finally 代码块里有 return 或含有能够终止程序的代码，方法将在执行完 finally 之后被结束，不再跳回 try 代码块执行 return；</li>
+</ol>
+<p>有异常时将上述 try 代码块替换成 catch 即可。</p>
+<p>当程序遇见 <code>System.exit(0);</code> 时不管执行到什么地方都会立即执行推出当前进程。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>[北京]出闲置</title>
     <url>/uncategorized/%E5%8C%97%E4%BA%AC-%E5%87%BA%E9%97%B2%E7%BD%AE/</url>
     <content><![CDATA[<h1 id="【北京】出闲置-坚果Pro2-一加3T-PS4-小米电视-紫米无线充电器-机械键盘-等，收二手-MIX-2S"><a href="#【北京】出闲置-坚果Pro2-一加3T-PS4-小米电视-紫米无线充电器-机械键盘-等，收二手-MIX-2S" class="headerlink" title="【北京】出闲置[坚果Pro2][一加3T][PS4][小米电视][紫米无线充电器][机械键盘]等，收二手[MIX 2S]"></a>【北京】出闲置[坚果Pro2][一加3T][PS4][小米电视][紫米无线充电器][机械键盘]等，收二手[MIX 2S]</h1><p>以下东西北京均可面交，外地走闲鱼(电视除外)。</p>
@@ -2340,93 +2340,6 @@
 ]]></content>
       <tags>
         <tag>生活</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据结构——二叉树</title>
-    <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E4%BA%8C%E5%8F%89%E6%A0%91/</url>
-    <content><![CDATA[<p>树形结构的基本概念：</p>
-<ul>
-<li><strong>根节点</strong>：</li>
-<li><strong>度</strong>：结点拥有的直接子节点数称为<strong>结点的度</strong></li>
-<li><strong>叶子</strong>：度为0的结点称为<strong>叶子</strong></li>
-<li><strong>树的度</strong>：所有结点的度中的最大值</li>
-<li><strong>孩子</strong>：一个结点的直接子结点称为它的<strong>孩子</strong></li>
-<li><strong>双亲</strong>：一个节点的父节点就是他的双亲节点</li>
-<li><strong>深度</strong>：树中最大的结点层</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h1><p>一个结点的直接子节点最多只能有两个，并且有左右之分，次序不能随意颠倒。</p>
-<h4 id="满二叉树"><a href="#满二叉树" class="headerlink" title="满二叉树"></a>满二叉树</h4><ol>
-<li>所有分支结点的度为２；</li>
-<li>所有叶子结点只能分布在最下层上；</li>
-<li>同样深度的二叉树中，满二叉树的结点数最多，叶子结点数最多；</li>
-</ol>
-<ul>
-<li>满二叉树的深度：log2(n+1)；</li>
-</ul>
-<h4 id="完全二叉树（只有最底下一层不满的满二叉树）"><a href="#完全二叉树（只有最底下一层不满的满二叉树）" class="headerlink" title="完全二叉树（只有最底下一层不满的满二叉树）"></a>完全二叉树（只有最底下一层不满的满二叉树）</h4><ol>
-<li>二叉树从根结点出发，按着层次从左到右遍历，第i个结点的位置与满二叉树中对应结点位置完全相同；</li>
-<li>所有叶子结点只能出现在最下两层；</li>
-<li>若结点度为1，则该结点只有左子树，不存在只有右子树的情况；</li>
-<li>结点分配<code>先左后右</code>；</li>
-</ol>
-<h4 id="遍历二叉树"><a href="#遍历二叉树" class="headerlink" title="遍历二叉树"></a>遍历二叉树</h4><ol>
-<li>先序遍历：先访问根节点；先序遍历左子树；先序遍历右子树；</li>
-<li>中序遍历：中序遍历左子树；访问根节点；中序遍历右子树；</li>
-<li>后序遍历：后序遍历左子树；后序遍历右子树；访问根节点；</li>
-</ol>
-<p>先序遍历——前缀表示——波兰式<br>后序遍历——后缀表示——逆波兰式</p>
-<h4 id="线索二叉树"><a href="#线索二叉树" class="headerlink" title="线索二叉树"></a>线索二叉树</h4><p>增加节点的左右指针一个标志位：是否为叶子节点。当为叶子节点的时候，其左右指针指向其某种遍历的前驱、后驱；否则指向其左右子树。</p>
-<ul>
-<li><strong>线索</strong>：指向节点前驱与后驱的指针叫做<strong>线索</strong></li>
-<li><strong>线索化</strong>：以某种次序遍历使其变为线索二叉树的过程</li>
-</ul>
-<h4 id="二叉排序树"><a href="#二叉排序树" class="headerlink" title="二叉排序树"></a>二叉排序树</h4><p>二叉排序树又称二叉查找树，亦称二叉搜索树，它主要用于查找。 它或者是一棵空树；或者是具有下列性质的二叉树：<br>（1）若左子树不空，则左子树上所有结点的值均小于它的根结点的值；<br>（2）若右子树不空，则右子树上所有结点的值均大于它的根结点的值；<br>（3）左、右子树也分别为二叉排序树；</p>
-<p>中序遍历二叉排序树可得到其有序序列，讲一个无序序列变为二叉排序树是一个排序过程。</p>
-<h4 id="平衡二叉树"><a href="#平衡二叉树" class="headerlink" title="平衡二叉树"></a>平衡二叉树</h4><p>平衡二叉树又被称为AVL树，且具有以下性质：它是一棵空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是一棵平衡二叉树，由它可以生成平衡二叉搜索树，查找效率会更高。构造与调整方法平衡二叉树的常用算法有红黑树、AVL、Treap等。最小二叉平衡树的节点的公式如下F(n)&#x3D;F(n-1)+F(n-2)+1这个类似于一个递归的数列，可以参考Fibonacci数列，1是根节点，F(n-1)是左子树的节点数量，F(n-2)是右子树的节点数量。</p>
-<ul>
-<li><strong>平衡因子</strong>：左子树的深度减去右子树的深度<br>平衡二叉树的平衡因子只会是-1，0，1</li>
-<li>在结点的左子树的左子树插入元素,LL 插入；<br><img src="https://ws4.sinaimg.cn/large/006tNbRwly1fwzn333ggzj30k405gaax.jpg"></li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> /**</span><br><span class="line"> * 右旋（顺时针旋转）</span><br><span class="line"> *</span><br><span class="line"> * @param node 失衡结点</span><br><span class="line"> * @return 旋转后根节点</span><br><span class="line"> */</span><br><span class="line">private TreeNode&lt;T&gt; rightRotate(TreeNode&lt;T&gt; node) &#123;</span><br><span class="line">    // 将失衡结点的左子树赋给一个临时结点，也就是将A的左子树B 赋给新的结点</span><br><span class="line">    TreeNode&lt;T&gt; newRoot = node.leftChild;</span><br><span class="line">    // 将B 被右子树BR 挂在A 的左子树上</span><br><span class="line">    node.leftChild = newRoot.rightChild;</span><br><span class="line">    // B 的右子树为失衡的结点即A</span><br><span class="line">    newRoot.rightChild = node;</span><br><span class="line">    // 结点A 的高度为左右子树高度最大值加1</span><br><span class="line">    node.height = getMax(height(node.leftChild), height(node.rightChild)) + 1;</span><br><span class="line">    // 结点B 的高度为左右子树高度最大值加1</span><br><span class="line">    newRoot.height = getMax(height(newRoot.leftChild), newRoot.height) + 1;</span><br><span class="line">    // 返回根节点</span><br><span class="line">    return newRoot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>在结点的左子树的右子树插入元素,LR 插入；</li>
-<li>在结点的右子树的左子树插入元素,RL 插入；</li>
-<li>在结点的右子树的右子树插入元素,RR 插入。</li>
-</ul>
-<ol>
-<li>如上所述的第3步，当插入元素后导致左边高，右边低，并且为4和3的平衡因子符号相同，则右旋。</li>
-<li>如上所诉的第5步，当插入节点9后，导致以4为根的树右边高，左边低，4和7的平衡因子符号相同，则左旋</li>
-<li>如上所述的第7步，当插入节点10后，导致以9为根的树右边高，左边低，由于9和11的平衡因子符号不同（也就是根和他的右孩子的平衡因子符号不同）不能进行左旋，正确操作：需要先右旋在左旋，要让根和根的右孩子平衡因子符号相同。</li>
-<li>第4种旋转和3相反，当左边高于右边的话，且根和他的左孩子，平衡因子符号不同，需要先左旋再右旋</li>
-</ol>
-<h4 id="哈夫曼树"><a href="#哈夫曼树" class="headerlink" title="哈夫曼树"></a>哈夫曼树</h4><p>哈夫曼树也称最优二叉树，它是带权路径长度最小的二叉树。</p>
-<p>哈夫曼树的构造规则为：<br>(1) 将w1、w2、…、wn看成是有n 棵树的集合(每棵树仅有一个结点)；<br>(2) 在集合中选出两个根结点的权值最小的树合并，作为一棵新树的左、右子树，且新树的根结点权值为其左、右子树根结点权值之和；<br>(3)从集合中删除选取的两棵树，并将新树加入集合；<br>(4)重复(2)、(3)步，直到集合中只剩一棵树为止，该树即为所求得的哈夫曼树。</p>
-<p><strong>为了使得到的哈夫曼树的结构尽量唯一，通常规定生成的哈夫曼树中每个结点的左子树根结点的权小于等于右子树根结点的权。</strong></p>
-<h5 id="哈夫曼编码"><a href="#哈夫曼编码" class="headerlink" title="哈夫曼编码"></a>哈夫曼编码</h5><p>电文是以二进制的0、1序列传送的，每个字符对应一个二进制编码，为了缩短电文的总长度，采用不等长编码方式，构造哈夫曼树，<br>将每个字符的出现频率作为字符结点的权值赋予叶子结点，每个分支结点的左右分支分别用0和1编码，从树根结点到每个叶子结点的路径上</p>
-<h4 id="B-树、B-树"><a href="#B-树、B-树" class="headerlink" title="B 树、B+ 树"></a>B 树、B+ 树</h4><p>这里的B树，也就是英文中的B-Tree，一个 m 阶的B树满足以下条件：</p>
-<ol>
-<li>每个结点至多拥有m棵子树；</li>
-<li>根结点至少拥有两颗子树（存在子树的情况下）；</li>
-<li>除了根结点以外，其余每个分支结点至少拥有 m&#x2F;2 棵子树；</li>
-<li>所有的叶结点都在同一层上；</li>
-<li>有 k 棵子树的分支结点则存在 k-1 个关键码，关键码按照递增次序进行排列；</li>
-<li>关键字数量需要满足ceil(m&#x2F;2)-1 &lt;&#x3D; n &lt;&#x3D; m-1；</li>
-</ol>
-<h4 id="红黑树RBTree"><a href="#红黑树RBTree" class="headerlink" title="红黑树RBTree"></a>红黑树<em>RBTree</em></h4><ol>
-<li>每个节点要么是黑的，要么是红的</li>
-<li>根节点是黑的</li>
-<li>叶节点是黑的</li>
-<li>如果一个节点是红的，他的两个儿子节点都是黑的</li>
-<li>对于任一节点而言，其到叶节点树尾端NIL指针的每一条路径都包含相同数目的黑节点</li>
-<li>新插入的节点总是设为红色的</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>数据结构</tag>
       </tags>
   </entry>
   <entry>
@@ -2589,6 +2502,178 @@
       </tags>
   </entry>
   <entry>
+    <title>进程之间的通信——AIDL</title>
+    <url>/Android/%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1%E2%80%94%E2%80%94AIDL/</url>
+    <content><![CDATA[<h1 id="进程之间的通信——AIDL（Android-Interface-Definition-Language"><a href="#进程之间的通信——AIDL（Android-Interface-Definition-Language" class="headerlink" title="进程之间的通信——AIDL（Android Interface Definition Language)"></a>进程之间的通信——AIDL（Android Interface Definition Language)</h1><p>AIDL 是 Android 提供的一种进程间通信 (IPC—— Inter-Process Communication) 机制。<br>在 Android 上，一个进程通常无法访问另一个进程的内存。 每一个进程都有自己的Dalvik VM实例，都有自己的一块独立的内存，都在自己的内存上存储自己的数据，执行着自己的操作，都在自己的那片狭小的空间里过完自己的一生。每个进程之间都你不知我，我不知你。尽管如此，进程需要将其对象分解成操作系统能够识别的原语，并将对象编组成跨越边界的对象。<br>AIDL 就是 Android 为我们提供的一种跨进程的通讯方式。通过这种机制，我们只需要写好 aidl 接口文件，编译时系统会帮我们生成 Binder 接口。</p>
+<span id="more"></span>
+
+<h3 id="AIDL-支持的数据类型"><a href="#AIDL-支持的数据类型" class="headerlink" title="AIDL 支持的数据类型"></a>AIDL 支持的数据类型</h3><ul>
+<li>Java 的基本数据类型</li>
+<li>String 类型，CharSequence类型。</li>
+<li>List 和 Map<ul>
+<li>元素必须是 AIDL 支持的数据类型</li>
+<li>Server 端具体的类里则必须是 ArrayList 或者 HashMap</li>
+</ul>
+</li>
+<li>其他 AIDL 生成的接口</li>
+<li>实现 Parcelable 的实体</li>
+</ul>
+<h3 id="AIDL-文件的分类"><a href="#AIDL-文件的分类" class="headerlink" title="AIDL 文件的分类"></a>AIDL 文件的分类</h3><p>AIDL 文件分为两种，<strong>一类</strong>是用来定义parcelable对象，以供其他AIDL文件使用AIDL中非默认支持的数据类型的。<strong>一类</strong>是用来定义方法接口，以供系统使用来完成跨进程通信的。可以看到，两类文件都是在“定义”些什么，而不涉及具体的实现，这就是为什么它叫做“Android接口定义语言”。</p>
+<h3 id="AIDL-如何编写"><a href="#AIDL-如何编写" class="headerlink" title="AIDL 如何编写"></a>AIDL 如何编写</h3><p>AIDL 的编写主要为以下三部分：</p>
+<ol>
+<li>创建 AIDL<ol>
+<li>创建要操作的实体类，实现 Parcelable 接口，以便序列化&#x2F;反序列化；</li>
+<li>新建 aidl 文件夹，在其中创建接口 aidl 文件以及实体类的映射 aidl 文件；</li>
+<li>Make project ，生成 Binder 的 Java 文件；</li>
+</ol>
+</li>
+<li>服务端<ol>
+<li>新建服务端工程，将在客户端定义的 aidl 接口文件拷贝至服务端并 Make project ，生成相同的 Stub 类；</li>
+<li>创建 Service，在其中创建上面生成的 Binder 对象实例，继承刚才生成的 Stub ，以实现接口定义的方法；</li>
+<li>在 onBind() 中返回刚才定时的 Binder；</li>
+<li>在 AndroidManifest.xml 中声名创造的 Service，提供外部 Action 供客户端调用；</li>
+</ol>
+</li>
+<li>客户端<ol>
+<li>实现 ServiceConnection 接口，在其中拿到 AIDL 类；</li>
+<li>bindService()，指定 Action 与 PackageName，启动相应的 Service;</li>
+<li>获取通过服务端返回的 Binder ，调用 AIDL 类中定义好的操作请求，进行数据传输；</li>
+</ol>
+</li>
+</ol>
+<h3 id="AIDL-的代码实例"><a href="#AIDL-的代码实例" class="headerlink" title="AIDL 的代码实例"></a>AIDL 的代码实例</h3><p>以下是关键代码演示：<br><strong>客户端</strong></p>
+<ol>
+<li>先定义要传输的实体数据类型，实现 Parcelable 接口</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Person implements Parcelable &#123;</span><br><span class="line">    private String mName;</span><br><span class="line"></span><br><span class="line">    public String getName() &#123;</span><br><span class="line">        return mName;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Person(String name) &#123;</span><br><span class="line">        mName = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected Person(Parcel in) &#123;</span><br><span class="line">        mName = in.readString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static final Creator&lt;Person&gt; CREATOR = new Creator&lt;Person&gt;() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public Person createFromParcel(Parcel in) &#123;</span><br><span class="line">            return new Person(in);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public Person[] newArray(int size) &#123;</span><br><span class="line">            return new Person[size];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public int describeContents() &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void writeToParcel(Parcel dest, int flags) &#123;</span><br><span class="line">        dest.writeString(mName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>新建 aidl 文件夹，在其中创建接口 aidl 文件以及实体类的映射 aidl 文件</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// PersonTransmissionInterface.aidl</span><br><span class="line">package cn.artaris.aidldemo;</span><br><span class="line"></span><br><span class="line">// Declare any non-default types here with import statements</span><br><span class="line">// 非基本类型的数据需要导入，需要导入它的全路径。</span><br><span class="line">import cn.artaris.aidldemo.Person;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">interface PersonTransmissionInterface &#123;</span><br><span class="line">    //方法参数中，除了基本数据类型，其他类型的参数都需要标上方向类型</span><br><span class="line">    //in(输入), out(输出), inout(输入输出)</span><br><span class="line">    void addPerson(in Person person);</span><br><span class="line"></span><br><span class="line">    List&lt;Person&gt; getPersonList();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// Person.aidl</span><br><span class="line">package cn.artaris.aidldemo;</span><br><span class="line">// Declare any non-default types here with import statements</span><br><span class="line">//通过 Person.aidl 接口找到真正的 实体类 Person.java</span><br><span class="line">parcelable Person;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>Make project ，生成 Binder 的 Java 文件；</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public interface PersonTransmissionInterface extends android.os.IInterface &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Local-side IPC implementation stub class.</span><br><span class="line">     */</span><br><span class="line">    public static abstract class Stub extends android.os.Binder implements cn.artaris.aidldemo.PersonTransmissionInterface &#123;</span><br><span class="line">        private static final java.lang.String DESCRIPTOR = &quot;cn.artaris.aidldemo.PersonTransmissionInterface&quot;;</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * Construct the stub at attach it to the interface.</span><br><span class="line">         */</span><br><span class="line">        public Stub() &#123;</span><br><span class="line">            this.attachInterface(this, DESCRIPTOR);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * Cast an IBinder object into an cn.artaris.aidldemo.PersonTransmissionInterface interface,</span><br><span class="line">         * generating a proxy if needed.</span><br><span class="line">         */</span><br><span class="line">         //转换 Binder 对象，判断是本地还是远程对象</span><br><span class="line">        public static cn.artaris.aidldemo.PersonTransmissionInterface asInterface(android.os.IBinder obj) &#123;</span><br><span class="line">            if ((obj == null)) &#123;</span><br><span class="line">                return null;</span><br><span class="line">            &#125;</span><br><span class="line">            android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);</span><br><span class="line">            if (((iin != null) &amp;&amp; (iin instanceof cn.artaris.aidldemo.PersonTransmissionInterface))) &#123;</span><br><span class="line">                return ((cn.artaris.aidldemo.PersonTransmissionInterface) iin);</span><br><span class="line">            &#125;</span><br><span class="line">            return new cn.artaris.aidldemo.PersonTransmissionInterface.Stub.Proxy(obj);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public android.os.IBinder asBinder() &#123;</span><br><span class="line">            return this;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        //服务器接收到数据时调用</span><br><span class="line">        @Override</span><br><span class="line">        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException &#123;</span><br><span class="line">            java.lang.String descriptor = DESCRIPTOR;</span><br><span class="line">            switch (code) &#123;</span><br><span class="line">                case INTERFACE_TRANSACTION: &#123;</span><br><span class="line">                    reply.writeString(descriptor);</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                case TRANSACTION_addPerson: &#123;</span><br><span class="line">                    data.enforceInterface(descriptor);</span><br><span class="line">                    cn.artaris.aidldemo.Person _arg0;</span><br><span class="line">                    if ((0 != data.readInt())) &#123;</span><br><span class="line">                        _arg0 = cn.artaris.aidldemo.Person.CREATOR.createFromParcel(data);</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        _arg0 = null;</span><br><span class="line">                    &#125;</span><br><span class="line">                    this.addPerson(_arg0);</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                case TRANSACTION_getPersonList: &#123;</span><br><span class="line">                    data.enforceInterface(descriptor);</span><br><span class="line">                    java.util.List&lt;cn.artaris.aidldemo.Person&gt; _result = this.getPersonList();</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    reply.writeTypedList(_result);</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                default: &#123;</span><br><span class="line">                    return super.onTransact(code, data, reply, flags);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        //Binder 的包装内部类，供远程传输使用</span><br><span class="line">        private static class Proxy implements cn.artaris.aidldemo.PersonTransmissionInterface &#123;</span><br><span class="line">            private android.os.IBinder mRemote;</span><br><span class="line"></span><br><span class="line">            Proxy(android.os.IBinder remote) &#123;</span><br><span class="line">                mRemote = remote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public android.os.IBinder asBinder() &#123;</span><br><span class="line">                return mRemote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            public java.lang.String getInterfaceDescriptor() &#123;</span><br><span class="line">                return DESCRIPTOR;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public void addPerson(cn.artaris.aidldemo.Person person) throws android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                try &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    if ((person != null)) &#123;</span><br><span class="line">                        _data.writeInt(1);</span><br><span class="line">                        person.writeToParcel(_data, 0);</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        _data.writeInt(0);</span><br><span class="line">                    &#125;</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_addPerson, _data, _reply, 0);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public java.util.List&lt;cn.artaris.aidldemo.Person&gt; getPersonList() throws android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                java.util.List&lt;cn.artaris.aidldemo.Person&gt; _result;</span><br><span class="line">                try &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_getPersonList, _data, _reply, 0);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                    _result = _reply.createTypedArrayList(cn.artaris.aidldemo.Person.CREATOR);</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">                return _result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        static final int TRANSACTION_addPerson = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);</span><br><span class="line">        static final int TRANSACTION_getPersonList = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    //实现 PersonTransmissionInterface 定义的两个接口</span><br><span class="line">    public void addPerson(cn.artaris.aidldemo.Person person) throws android.os.RemoteException;</span><br><span class="line"></span><br><span class="line">    public java.util.List&lt;cn.artaris.aidldemo.Person&gt; getPersonList() throws android.os.RemoteException;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>服务器</strong></p>
+<ol>
+<li>将在客户端定义的 aidl 接口文件拷贝至服务端并 Make project ，生成相同的 Stub 类<br><em>略</em></li>
+<li>创建 Service，在其中创建上面生成的 Binder 对象实例，继承刚才生成的 Stub ，以实现接口定义的方法，在 onBind() 中返回刚才定时的 Binder；</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class PersonTransmissionService extends Service &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    PersonTransmissionImpl mBinder = new PersonTransmissionImpl();</span><br><span class="line"></span><br><span class="line">    private List&lt;Person&gt; mPeople = new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onCreate() &#123;</span><br><span class="line">        super.onCreate();</span><br><span class="line">        Log.d(&quot;PersonService&quot;, &quot;### Transmission service created&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Nullable</span><br><span class="line">    @Override</span><br><span class="line">    public IBinder onBind(Intent intent) &#123;</span><br><span class="line">        return mBinder;</span><br><span class="line">    &#125;</span><br><span class="line">    // 定义实现 aidl 接口的实现句柄类。由于 Stub 继承了 IBinder，将在onBind(Intent intent)返回 该句柄</span><br><span class="line">    class PersonTransmissionImpl extends PersonTransmissionInterface.Stub &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void addPerson(Person person) throws RemoteException &#123;</span><br><span class="line">            mPeople.add(person);</span><br><span class="line">            Log.d(&quot;PersonService&quot;, person.getName());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public List&lt;Person&gt; getPersonList() throws RemoteException &#123;</span><br><span class="line">            return mPeople;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>在 AndroidManifest.xml 中声名创造的 Service，提供外部 Action 供客户端调用；</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;service android:name=&quot;.PersonTransmissionService&quot;</span><br><span class="line">    android:exported=&quot;true&quot;</span><br><span class="line">    //定义线程</span><br><span class="line">    android:process=&quot;:remote&quot;</span><br><span class="line">    android:label=&quot;@string/app_name&quot;&gt;</span><br><span class="line">    &lt;intent-filter&gt;</span><br><span class="line">        //提供 Action 供外部调用</span><br><span class="line">        &lt;action android:name=&quot;cn.artaris.aidi_server.PersonTransmissionService&quot;/&gt;</span><br><span class="line">        &lt;/intent-filter&gt;</span><br><span class="line">&lt;/service&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>客户端</strong></p>
+<ol>
+<li>实现 ServiceConnection 接口，在其中拿到 AIDL 类，通过 bindService()，指定 Action 与 PackageName，启动相应的 Service，获取通过服务端返回的 Binder ，调用 AIDL 类中定义好的操作请求，进行数据传输；</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class ScrollingActivity extends AppCompatActivity &#123;</span><br><span class="line"></span><br><span class="line">    PersonTransmissionInterface mBinder;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</span><br><span class="line">        super.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_scrolling);</span><br><span class="line"></span><br><span class="line">        Button add = findViewById(R.id.add_person);</span><br><span class="line">        add.setOnClickListener(new View.OnClickListener() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void onClick(View view) &#123;</span><br><span class="line">                if(mBinder == null)&#123;</span><br><span class="line">                    bindSsoAuthServices();</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    addPersion();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        Button get = findViewById(R.id.get_person);</span><br><span class="line">        get.setOnClickListener(new View.OnClickListener() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void onClick(View view) &#123;</span><br><span class="line">                if(mBinder == null)</span><br><span class="line">                    return;</span><br><span class="line"></span><br><span class="line">                getPerson();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private void bindSsoAuthServices()&#123;</span><br><span class="line">        //指定服务端的包名、Action名以找到对应的 Service</span><br><span class="line">        Intent intent = new Intent(&quot;cn.artaris.aidi_server.PersonTransmissionService&quot;);</span><br><span class="line">        intent.setPackage(&quot;cn.artaris.aidi_server&quot;);</span><br><span class="line">        bindService(intent,mServiceConnection,Context.BIND_AUTO_CREATE);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private ServiceConnection mServiceConnection = new ServiceConnection() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void onServiceConnected(ComponentName name, IBinder service) &#123;</span><br><span class="line">            //关键代码，通过</span><br><span class="line">            mBinder = PersonTransmissionInterface.Stub.asInterface(service);</span><br><span class="line">            addPersion();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void onServiceDisconnected(ComponentName name) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    String[] name = new String[]&#123;&quot;李一&quot;,&quot;李二&quot;,&quot;李三&quot;,&quot;李四&quot;,&quot;李五&quot;,&quot;李六&quot;,&quot;李七&quot;,&quot;李九&quot;,&quot;李十&quot;&#125;;</span><br><span class="line">    int count = 0;</span><br><span class="line">    private void addPersion()&#123;</span><br><span class="line">        Log.d(&quot;ScrollingActivity&quot;,&quot;### person client addPersion&quot;);</span><br><span class="line">        try &#123;</span><br><span class="line">            mBinder.addPerson(new Person(name[count++]));</span><br><span class="line">        &#125; catch (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void getPerson()&#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            Log.d(&quot;ScrollingActivity&quot;,String.valueOf(mBinder.getPersonList().size()));</span><br><span class="line">        &#125; catch (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void onDestroy() &#123;</span><br><span class="line">        super.onDestroy();</span><br><span class="line">        unbindService(mServiceConnection);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AIDL-原理分析"><a href="#AIDL-原理分析" class="headerlink" title="AIDL 原理分析"></a>AIDL 原理分析</h3><p>在 <code>PersonTransmissionInterface.java</code> 中自动生成了 <code>PersonTransmissionInterface</code> 接口，接口中包含了我们在<code>PersonTransmissionInterface.aidl</code> 定义的两个接口。<br>而最重要的生成了 <code>Stub</code> 类，该类继承了 Binder 类并实现了 <code>PersonTransmissionInterface</code> 接口。<br>Stub最重要的就是 <code>asInterface()</code> 这个函数，在这个函数中会自动判断参数 obj 的类型，如果 obj 是本地的接口类型，则 AIDL 会认为不是进程之间的通信，会直接返回一个本地的 <code>PersonTransmissionInterface</code> 对象；否则会转换成 <code>Stub</code> 类的一个内部类 Proxy 来包装 obj ，将其赋值给内部的 <code>mRemote</code> 字段，<code>Proxy</code> 也实现了 <code>PersonTransmissionInterface</code> 接口，不同的是他是通过 <code>Binder</code> 机制来与远程进行交互的，例如<code>mRemote.transact(Stub.TRANSACTION_addPerson, _data, _reply, 0);</code>，它请求的类型为 <code>Stub.TRANSACTION_addPerson</code>，参数为 <code>Parcel</code> 格式的 data。<br>对于服务端的代码来说，它是拥有同一份的 <code>PersonTransmissionInterface.aidl</code> 与 <code>PersonTransmissionInterface.java</code> 但不同的是服务端是指令的接口端，客户端的调用会通过 Binder 机制传递到服务端，最后到服务端调用的 <code>Stub</code> 的 <code>boolean onTransact()</code> 函数，通过 code 类型判断具体调用的函数，此时两端的传递就对应上了。<br>客户端调用了 <code>bindService(intent,mServiceConnection,Context.BIND_AUTO_CREATE);</code>之后，如果绑定成功则会调用 <code>void onServiceConnected(ComponentName name, IBinder service)</code>，这里的 <code>Service</code> 是 <code>BinderProxy</code> 经过 <code>asInterface()</code>转换以后，被包装成了 <code>Proxy</code> 对象，但是执行的时候，调用的是服务端的对应方法。即：<code>PersonTransmissionInterface</code> 的实例 <code>mBinder</code> 被服务端包装成 <code>BinderProxy</code> 类型，再经过客户端的 <code>Proxy</code> 进行包装，通过 <code>Binder</code> 机制进行包装，实现进程之间的调用。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据结构——二叉树</title>
+    <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E4%BA%8C%E5%8F%89%E6%A0%91/</url>
+    <content><![CDATA[<p>树形结构的基本概念：</p>
+<ul>
+<li><strong>根节点</strong>：</li>
+<li><strong>度</strong>：结点拥有的直接子节点数称为<strong>结点的度</strong></li>
+<li><strong>叶子</strong>：度为0的结点称为<strong>叶子</strong></li>
+<li><strong>树的度</strong>：所有结点的度中的最大值</li>
+<li><strong>孩子</strong>：一个结点的直接子结点称为它的<strong>孩子</strong></li>
+<li><strong>双亲</strong>：一个节点的父节点就是他的双亲节点</li>
+<li><strong>深度</strong>：树中最大的结点层</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h1><p>一个结点的直接子节点最多只能有两个，并且有左右之分，次序不能随意颠倒。</p>
+<h4 id="满二叉树"><a href="#满二叉树" class="headerlink" title="满二叉树"></a>满二叉树</h4><ol>
+<li>所有分支结点的度为２；</li>
+<li>所有叶子结点只能分布在最下层上；</li>
+<li>同样深度的二叉树中，满二叉树的结点数最多，叶子结点数最多；</li>
+</ol>
+<ul>
+<li>满二叉树的深度：log2(n+1)；</li>
+</ul>
+<h4 id="完全二叉树（只有最底下一层不满的满二叉树）"><a href="#完全二叉树（只有最底下一层不满的满二叉树）" class="headerlink" title="完全二叉树（只有最底下一层不满的满二叉树）"></a>完全二叉树（只有最底下一层不满的满二叉树）</h4><ol>
+<li>二叉树从根结点出发，按着层次从左到右遍历，第i个结点的位置与满二叉树中对应结点位置完全相同；</li>
+<li>所有叶子结点只能出现在最下两层；</li>
+<li>若结点度为1，则该结点只有左子树，不存在只有右子树的情况；</li>
+<li>结点分配<code>先左后右</code>；</li>
+</ol>
+<h4 id="遍历二叉树"><a href="#遍历二叉树" class="headerlink" title="遍历二叉树"></a>遍历二叉树</h4><ol>
+<li>先序遍历：先访问根节点；先序遍历左子树；先序遍历右子树；</li>
+<li>中序遍历：中序遍历左子树；访问根节点；中序遍历右子树；</li>
+<li>后序遍历：后序遍历左子树；后序遍历右子树；访问根节点；</li>
+</ol>
+<p>先序遍历——前缀表示——波兰式<br>后序遍历——后缀表示——逆波兰式</p>
+<h4 id="线索二叉树"><a href="#线索二叉树" class="headerlink" title="线索二叉树"></a>线索二叉树</h4><p>增加节点的左右指针一个标志位：是否为叶子节点。当为叶子节点的时候，其左右指针指向其某种遍历的前驱、后驱；否则指向其左右子树。</p>
+<ul>
+<li><strong>线索</strong>：指向节点前驱与后驱的指针叫做<strong>线索</strong></li>
+<li><strong>线索化</strong>：以某种次序遍历使其变为线索二叉树的过程</li>
+</ul>
+<h4 id="二叉排序树"><a href="#二叉排序树" class="headerlink" title="二叉排序树"></a>二叉排序树</h4><p>二叉排序树又称二叉查找树，亦称二叉搜索树，它主要用于查找。 它或者是一棵空树；或者是具有下列性质的二叉树：<br>（1）若左子树不空，则左子树上所有结点的值均小于它的根结点的值；<br>（2）若右子树不空，则右子树上所有结点的值均大于它的根结点的值；<br>（3）左、右子树也分别为二叉排序树；</p>
+<p>中序遍历二叉排序树可得到其有序序列，讲一个无序序列变为二叉排序树是一个排序过程。</p>
+<h4 id="平衡二叉树"><a href="#平衡二叉树" class="headerlink" title="平衡二叉树"></a>平衡二叉树</h4><p>平衡二叉树又被称为AVL树，且具有以下性质：它是一棵空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是一棵平衡二叉树，由它可以生成平衡二叉搜索树，查找效率会更高。构造与调整方法平衡二叉树的常用算法有红黑树、AVL、Treap等。最小二叉平衡树的节点的公式如下F(n)&#x3D;F(n-1)+F(n-2)+1这个类似于一个递归的数列，可以参考Fibonacci数列，1是根节点，F(n-1)是左子树的节点数量，F(n-2)是右子树的节点数量。</p>
+<ul>
+<li><strong>平衡因子</strong>：左子树的深度减去右子树的深度<br>平衡二叉树的平衡因子只会是-1，0，1</li>
+<li>在结点的左子树的左子树插入元素,LL 插入；<br><img src="https://ws4.sinaimg.cn/large/006tNbRwly1fwzn333ggzj30k405gaax.jpg"></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> /**</span><br><span class="line"> * 右旋（顺时针旋转）</span><br><span class="line"> *</span><br><span class="line"> * @param node 失衡结点</span><br><span class="line"> * @return 旋转后根节点</span><br><span class="line"> */</span><br><span class="line">private TreeNode&lt;T&gt; rightRotate(TreeNode&lt;T&gt; node) &#123;</span><br><span class="line">    // 将失衡结点的左子树赋给一个临时结点，也就是将A的左子树B 赋给新的结点</span><br><span class="line">    TreeNode&lt;T&gt; newRoot = node.leftChild;</span><br><span class="line">    // 将B 被右子树BR 挂在A 的左子树上</span><br><span class="line">    node.leftChild = newRoot.rightChild;</span><br><span class="line">    // B 的右子树为失衡的结点即A</span><br><span class="line">    newRoot.rightChild = node;</span><br><span class="line">    // 结点A 的高度为左右子树高度最大值加1</span><br><span class="line">    node.height = getMax(height(node.leftChild), height(node.rightChild)) + 1;</span><br><span class="line">    // 结点B 的高度为左右子树高度最大值加1</span><br><span class="line">    newRoot.height = getMax(height(newRoot.leftChild), newRoot.height) + 1;</span><br><span class="line">    // 返回根节点</span><br><span class="line">    return newRoot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在结点的左子树的右子树插入元素,LR 插入；</li>
+<li>在结点的右子树的左子树插入元素,RL 插入；</li>
+<li>在结点的右子树的右子树插入元素,RR 插入。</li>
+</ul>
+<ol>
+<li>如上所述的第3步，当插入元素后导致左边高，右边低，并且为4和3的平衡因子符号相同，则右旋。</li>
+<li>如上所诉的第5步，当插入节点9后，导致以4为根的树右边高，左边低，4和7的平衡因子符号相同，则左旋</li>
+<li>如上所述的第7步，当插入节点10后，导致以9为根的树右边高，左边低，由于9和11的平衡因子符号不同（也就是根和他的右孩子的平衡因子符号不同）不能进行左旋，正确操作：需要先右旋在左旋，要让根和根的右孩子平衡因子符号相同。</li>
+<li>第4种旋转和3相反，当左边高于右边的话，且根和他的左孩子，平衡因子符号不同，需要先左旋再右旋</li>
+</ol>
+<h4 id="哈夫曼树"><a href="#哈夫曼树" class="headerlink" title="哈夫曼树"></a>哈夫曼树</h4><p>哈夫曼树也称最优二叉树，它是带权路径长度最小的二叉树。</p>
+<p>哈夫曼树的构造规则为：<br>(1) 将w1、w2、…、wn看成是有n 棵树的集合(每棵树仅有一个结点)；<br>(2) 在集合中选出两个根结点的权值最小的树合并，作为一棵新树的左、右子树，且新树的根结点权值为其左、右子树根结点权值之和；<br>(3)从集合中删除选取的两棵树，并将新树加入集合；<br>(4)重复(2)、(3)步，直到集合中只剩一棵树为止，该树即为所求得的哈夫曼树。</p>
+<p><strong>为了使得到的哈夫曼树的结构尽量唯一，通常规定生成的哈夫曼树中每个结点的左子树根结点的权小于等于右子树根结点的权。</strong></p>
+<h5 id="哈夫曼编码"><a href="#哈夫曼编码" class="headerlink" title="哈夫曼编码"></a>哈夫曼编码</h5><p>电文是以二进制的0、1序列传送的，每个字符对应一个二进制编码，为了缩短电文的总长度，采用不等长编码方式，构造哈夫曼树，<br>将每个字符的出现频率作为字符结点的权值赋予叶子结点，每个分支结点的左右分支分别用0和1编码，从树根结点到每个叶子结点的路径上</p>
+<h4 id="B-树、B-树"><a href="#B-树、B-树" class="headerlink" title="B 树、B+ 树"></a>B 树、B+ 树</h4><p>这里的B树，也就是英文中的B-Tree，一个 m 阶的B树满足以下条件：</p>
+<ol>
+<li>每个结点至多拥有m棵子树；</li>
+<li>根结点至少拥有两颗子树（存在子树的情况下）；</li>
+<li>除了根结点以外，其余每个分支结点至少拥有 m&#x2F;2 棵子树；</li>
+<li>所有的叶结点都在同一层上；</li>
+<li>有 k 棵子树的分支结点则存在 k-1 个关键码，关键码按照递增次序进行排列；</li>
+<li>关键字数量需要满足ceil(m&#x2F;2)-1 &lt;&#x3D; n &lt;&#x3D; m-1；</li>
+</ol>
+<h4 id="红黑树RBTree"><a href="#红黑树RBTree" class="headerlink" title="红黑树RBTree"></a>红黑树<em>RBTree</em></h4><ol>
+<li>每个节点要么是黑的，要么是红的</li>
+<li>根节点是黑的</li>
+<li>叶节点是黑的</li>
+<li>如果一个节点是红的，他的两个儿子节点都是黑的</li>
+<li>对于任一节点而言，其到叶节点树尾端NIL指针的每一条路径都包含相同数目的黑节点</li>
+<li>新插入的节点总是设为红色的</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>数据结构</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据结构——栈和队列</title>
     <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/</url>
     <content><![CDATA[<p>栈和队列是线性表的一种，只是它们是操作受限的线性表。</p>
@@ -2688,91 +2773,6 @@
 <li>在 onDestroy 中让 Handler.removeMessage，removeRunnable handle &#x3D; null<br>在 onDestroy 取消 Handle 执行的所有任务，释放对外的引用也是不错的办法，不过要注意的是 onDestroy 方法不一定会被调用，这种方法并不能万无一失</li>
 <li>可以设 Handler 对 Activity 的弱引用<br>方法一虽然可以保证内部静态类不持有外部引用了，但是当自线程需要发消息更新主界面的时候还是需要Activity的对象引用，这时候使用弱引用可以避免内存的泄漏，当系统需要回收 Activity 的时候并不会因为 Handler 的持有而失败，使用代码如下：  <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private static class StaticHandle extends Handler&#123;</span><br><span class="line">    WeakReference&lt;Activity&gt; mActivityReference;</span><br><span class="line"></span><br><span class="line">    public StaticHandle(Activity activity) &#123;</span><br><span class="line">        mActivityReference= new WeakReference&lt;Activity&gt;(activity);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void handleMessage(Message msg) &#123;</span><br><span class="line">        Activity activity = mActivityReference.get();</span><br><span class="line">        if(activity != null&#123;</span><br><span class="line">            mTextView.setText((String)msg.obj);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>进程之间的通信——AIDL</title>
-    <url>/Android/%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1%E2%80%94%E2%80%94AIDL/</url>
-    <content><![CDATA[<h1 id="进程之间的通信——AIDL（Android-Interface-Definition-Language"><a href="#进程之间的通信——AIDL（Android-Interface-Definition-Language" class="headerlink" title="进程之间的通信——AIDL（Android Interface Definition Language)"></a>进程之间的通信——AIDL（Android Interface Definition Language)</h1><p>AIDL 是 Android 提供的一种进程间通信 (IPC—— Inter-Process Communication) 机制。<br>在 Android 上，一个进程通常无法访问另一个进程的内存。 每一个进程都有自己的Dalvik VM实例，都有自己的一块独立的内存，都在自己的内存上存储自己的数据，执行着自己的操作，都在自己的那片狭小的空间里过完自己的一生。每个进程之间都你不知我，我不知你。尽管如此，进程需要将其对象分解成操作系统能够识别的原语，并将对象编组成跨越边界的对象。<br>AIDL 就是 Android 为我们提供的一种跨进程的通讯方式。通过这种机制，我们只需要写好 aidl 接口文件，编译时系统会帮我们生成 Binder 接口。</p>
-<span id="more"></span>
-
-<h3 id="AIDL-支持的数据类型"><a href="#AIDL-支持的数据类型" class="headerlink" title="AIDL 支持的数据类型"></a>AIDL 支持的数据类型</h3><ul>
-<li>Java 的基本数据类型</li>
-<li>String 类型，CharSequence类型。</li>
-<li>List 和 Map<ul>
-<li>元素必须是 AIDL 支持的数据类型</li>
-<li>Server 端具体的类里则必须是 ArrayList 或者 HashMap</li>
-</ul>
-</li>
-<li>其他 AIDL 生成的接口</li>
-<li>实现 Parcelable 的实体</li>
-</ul>
-<h3 id="AIDL-文件的分类"><a href="#AIDL-文件的分类" class="headerlink" title="AIDL 文件的分类"></a>AIDL 文件的分类</h3><p>AIDL 文件分为两种，<strong>一类</strong>是用来定义parcelable对象，以供其他AIDL文件使用AIDL中非默认支持的数据类型的。<strong>一类</strong>是用来定义方法接口，以供系统使用来完成跨进程通信的。可以看到，两类文件都是在“定义”些什么，而不涉及具体的实现，这就是为什么它叫做“Android接口定义语言”。</p>
-<h3 id="AIDL-如何编写"><a href="#AIDL-如何编写" class="headerlink" title="AIDL 如何编写"></a>AIDL 如何编写</h3><p>AIDL 的编写主要为以下三部分：</p>
-<ol>
-<li>创建 AIDL<ol>
-<li>创建要操作的实体类，实现 Parcelable 接口，以便序列化&#x2F;反序列化；</li>
-<li>新建 aidl 文件夹，在其中创建接口 aidl 文件以及实体类的映射 aidl 文件；</li>
-<li>Make project ，生成 Binder 的 Java 文件；</li>
-</ol>
-</li>
-<li>服务端<ol>
-<li>新建服务端工程，将在客户端定义的 aidl 接口文件拷贝至服务端并 Make project ，生成相同的 Stub 类；</li>
-<li>创建 Service，在其中创建上面生成的 Binder 对象实例，继承刚才生成的 Stub ，以实现接口定义的方法；</li>
-<li>在 onBind() 中返回刚才定时的 Binder；</li>
-<li>在 AndroidManifest.xml 中声名创造的 Service，提供外部 Action 供客户端调用；</li>
-</ol>
-</li>
-<li>客户端<ol>
-<li>实现 ServiceConnection 接口，在其中拿到 AIDL 类；</li>
-<li>bindService()，指定 Action 与 PackageName，启动相应的 Service;</li>
-<li>获取通过服务端返回的 Binder ，调用 AIDL 类中定义好的操作请求，进行数据传输；</li>
-</ol>
-</li>
-</ol>
-<h3 id="AIDL-的代码实例"><a href="#AIDL-的代码实例" class="headerlink" title="AIDL 的代码实例"></a>AIDL 的代码实例</h3><p>以下是关键代码演示：<br><strong>客户端</strong></p>
-<ol>
-<li>先定义要传输的实体数据类型，实现 Parcelable 接口</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Person implements Parcelable &#123;</span><br><span class="line">    private String mName;</span><br><span class="line"></span><br><span class="line">    public String getName() &#123;</span><br><span class="line">        return mName;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Person(String name) &#123;</span><br><span class="line">        mName = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected Person(Parcel in) &#123;</span><br><span class="line">        mName = in.readString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static final Creator&lt;Person&gt; CREATOR = new Creator&lt;Person&gt;() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public Person createFromParcel(Parcel in) &#123;</span><br><span class="line">            return new Person(in);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public Person[] newArray(int size) &#123;</span><br><span class="line">            return new Person[size];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public int describeContents() &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void writeToParcel(Parcel dest, int flags) &#123;</span><br><span class="line">        dest.writeString(mName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>新建 aidl 文件夹，在其中创建接口 aidl 文件以及实体类的映射 aidl 文件</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// PersonTransmissionInterface.aidl</span><br><span class="line">package cn.artaris.aidldemo;</span><br><span class="line"></span><br><span class="line">// Declare any non-default types here with import statements</span><br><span class="line">// 非基本类型的数据需要导入，需要导入它的全路径。</span><br><span class="line">import cn.artaris.aidldemo.Person;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">interface PersonTransmissionInterface &#123;</span><br><span class="line">    //方法参数中，除了基本数据类型，其他类型的参数都需要标上方向类型</span><br><span class="line">    //in(输入), out(输出), inout(输入输出)</span><br><span class="line">    void addPerson(in Person person);</span><br><span class="line"></span><br><span class="line">    List&lt;Person&gt; getPersonList();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// Person.aidl</span><br><span class="line">package cn.artaris.aidldemo;</span><br><span class="line">// Declare any non-default types here with import statements</span><br><span class="line">//通过 Person.aidl 接口找到真正的 实体类 Person.java</span><br><span class="line">parcelable Person;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>Make project ，生成 Binder 的 Java 文件；</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public interface PersonTransmissionInterface extends android.os.IInterface &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Local-side IPC implementation stub class.</span><br><span class="line">     */</span><br><span class="line">    public static abstract class Stub extends android.os.Binder implements cn.artaris.aidldemo.PersonTransmissionInterface &#123;</span><br><span class="line">        private static final java.lang.String DESCRIPTOR = &quot;cn.artaris.aidldemo.PersonTransmissionInterface&quot;;</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * Construct the stub at attach it to the interface.</span><br><span class="line">         */</span><br><span class="line">        public Stub() &#123;</span><br><span class="line">            this.attachInterface(this, DESCRIPTOR);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * Cast an IBinder object into an cn.artaris.aidldemo.PersonTransmissionInterface interface,</span><br><span class="line">         * generating a proxy if needed.</span><br><span class="line">         */</span><br><span class="line">         //转换 Binder 对象，判断是本地还是远程对象</span><br><span class="line">        public static cn.artaris.aidldemo.PersonTransmissionInterface asInterface(android.os.IBinder obj) &#123;</span><br><span class="line">            if ((obj == null)) &#123;</span><br><span class="line">                return null;</span><br><span class="line">            &#125;</span><br><span class="line">            android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);</span><br><span class="line">            if (((iin != null) &amp;&amp; (iin instanceof cn.artaris.aidldemo.PersonTransmissionInterface))) &#123;</span><br><span class="line">                return ((cn.artaris.aidldemo.PersonTransmissionInterface) iin);</span><br><span class="line">            &#125;</span><br><span class="line">            return new cn.artaris.aidldemo.PersonTransmissionInterface.Stub.Proxy(obj);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public android.os.IBinder asBinder() &#123;</span><br><span class="line">            return this;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        //服务器接收到数据时调用</span><br><span class="line">        @Override</span><br><span class="line">        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException &#123;</span><br><span class="line">            java.lang.String descriptor = DESCRIPTOR;</span><br><span class="line">            switch (code) &#123;</span><br><span class="line">                case INTERFACE_TRANSACTION: &#123;</span><br><span class="line">                    reply.writeString(descriptor);</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                case TRANSACTION_addPerson: &#123;</span><br><span class="line">                    data.enforceInterface(descriptor);</span><br><span class="line">                    cn.artaris.aidldemo.Person _arg0;</span><br><span class="line">                    if ((0 != data.readInt())) &#123;</span><br><span class="line">                        _arg0 = cn.artaris.aidldemo.Person.CREATOR.createFromParcel(data);</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        _arg0 = null;</span><br><span class="line">                    &#125;</span><br><span class="line">                    this.addPerson(_arg0);</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                case TRANSACTION_getPersonList: &#123;</span><br><span class="line">                    data.enforceInterface(descriptor);</span><br><span class="line">                    java.util.List&lt;cn.artaris.aidldemo.Person&gt; _result = this.getPersonList();</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    reply.writeTypedList(_result);</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                default: &#123;</span><br><span class="line">                    return super.onTransact(code, data, reply, flags);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        //Binder 的包装内部类，供远程传输使用</span><br><span class="line">        private static class Proxy implements cn.artaris.aidldemo.PersonTransmissionInterface &#123;</span><br><span class="line">            private android.os.IBinder mRemote;</span><br><span class="line"></span><br><span class="line">            Proxy(android.os.IBinder remote) &#123;</span><br><span class="line">                mRemote = remote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public android.os.IBinder asBinder() &#123;</span><br><span class="line">                return mRemote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            public java.lang.String getInterfaceDescriptor() &#123;</span><br><span class="line">                return DESCRIPTOR;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public void addPerson(cn.artaris.aidldemo.Person person) throws android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                try &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    if ((person != null)) &#123;</span><br><span class="line">                        _data.writeInt(1);</span><br><span class="line">                        person.writeToParcel(_data, 0);</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        _data.writeInt(0);</span><br><span class="line">                    &#125;</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_addPerson, _data, _reply, 0);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public java.util.List&lt;cn.artaris.aidldemo.Person&gt; getPersonList() throws android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                java.util.List&lt;cn.artaris.aidldemo.Person&gt; _result;</span><br><span class="line">                try &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_getPersonList, _data, _reply, 0);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                    _result = _reply.createTypedArrayList(cn.artaris.aidldemo.Person.CREATOR);</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">                return _result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        static final int TRANSACTION_addPerson = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);</span><br><span class="line">        static final int TRANSACTION_getPersonList = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    //实现 PersonTransmissionInterface 定义的两个接口</span><br><span class="line">    public void addPerson(cn.artaris.aidldemo.Person person) throws android.os.RemoteException;</span><br><span class="line"></span><br><span class="line">    public java.util.List&lt;cn.artaris.aidldemo.Person&gt; getPersonList() throws android.os.RemoteException;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>服务器</strong></p>
-<ol>
-<li>将在客户端定义的 aidl 接口文件拷贝至服务端并 Make project ，生成相同的 Stub 类<br><em>略</em></li>
-<li>创建 Service，在其中创建上面生成的 Binder 对象实例，继承刚才生成的 Stub ，以实现接口定义的方法，在 onBind() 中返回刚才定时的 Binder；</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class PersonTransmissionService extends Service &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    PersonTransmissionImpl mBinder = new PersonTransmissionImpl();</span><br><span class="line"></span><br><span class="line">    private List&lt;Person&gt; mPeople = new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onCreate() &#123;</span><br><span class="line">        super.onCreate();</span><br><span class="line">        Log.d(&quot;PersonService&quot;, &quot;### Transmission service created&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Nullable</span><br><span class="line">    @Override</span><br><span class="line">    public IBinder onBind(Intent intent) &#123;</span><br><span class="line">        return mBinder;</span><br><span class="line">    &#125;</span><br><span class="line">    // 定义实现 aidl 接口的实现句柄类。由于 Stub 继承了 IBinder，将在onBind(Intent intent)返回 该句柄</span><br><span class="line">    class PersonTransmissionImpl extends PersonTransmissionInterface.Stub &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void addPerson(Person person) throws RemoteException &#123;</span><br><span class="line">            mPeople.add(person);</span><br><span class="line">            Log.d(&quot;PersonService&quot;, person.getName());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public List&lt;Person&gt; getPersonList() throws RemoteException &#123;</span><br><span class="line">            return mPeople;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>在 AndroidManifest.xml 中声名创造的 Service，提供外部 Action 供客户端调用；</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;service android:name=&quot;.PersonTransmissionService&quot;</span><br><span class="line">    android:exported=&quot;true&quot;</span><br><span class="line">    //定义线程</span><br><span class="line">    android:process=&quot;:remote&quot;</span><br><span class="line">    android:label=&quot;@string/app_name&quot;&gt;</span><br><span class="line">    &lt;intent-filter&gt;</span><br><span class="line">        //提供 Action 供外部调用</span><br><span class="line">        &lt;action android:name=&quot;cn.artaris.aidi_server.PersonTransmissionService&quot;/&gt;</span><br><span class="line">        &lt;/intent-filter&gt;</span><br><span class="line">&lt;/service&gt;</span><br></pre></td></tr></table></figure>
-
-<p><strong>客户端</strong></p>
-<ol>
-<li>实现 ServiceConnection 接口，在其中拿到 AIDL 类，通过 bindService()，指定 Action 与 PackageName，启动相应的 Service，获取通过服务端返回的 Binder ，调用 AIDL 类中定义好的操作请求，进行数据传输；</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class ScrollingActivity extends AppCompatActivity &#123;</span><br><span class="line"></span><br><span class="line">    PersonTransmissionInterface mBinder;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</span><br><span class="line">        super.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_scrolling);</span><br><span class="line"></span><br><span class="line">        Button add = findViewById(R.id.add_person);</span><br><span class="line">        add.setOnClickListener(new View.OnClickListener() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void onClick(View view) &#123;</span><br><span class="line">                if(mBinder == null)&#123;</span><br><span class="line">                    bindSsoAuthServices();</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    addPersion();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        Button get = findViewById(R.id.get_person);</span><br><span class="line">        get.setOnClickListener(new View.OnClickListener() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void onClick(View view) &#123;</span><br><span class="line">                if(mBinder == null)</span><br><span class="line">                    return;</span><br><span class="line"></span><br><span class="line">                getPerson();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private void bindSsoAuthServices()&#123;</span><br><span class="line">        //指定服务端的包名、Action名以找到对应的 Service</span><br><span class="line">        Intent intent = new Intent(&quot;cn.artaris.aidi_server.PersonTransmissionService&quot;);</span><br><span class="line">        intent.setPackage(&quot;cn.artaris.aidi_server&quot;);</span><br><span class="line">        bindService(intent,mServiceConnection,Context.BIND_AUTO_CREATE);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private ServiceConnection mServiceConnection = new ServiceConnection() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void onServiceConnected(ComponentName name, IBinder service) &#123;</span><br><span class="line">            //关键代码，通过</span><br><span class="line">            mBinder = PersonTransmissionInterface.Stub.asInterface(service);</span><br><span class="line">            addPersion();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void onServiceDisconnected(ComponentName name) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    String[] name = new String[]&#123;&quot;李一&quot;,&quot;李二&quot;,&quot;李三&quot;,&quot;李四&quot;,&quot;李五&quot;,&quot;李六&quot;,&quot;李七&quot;,&quot;李九&quot;,&quot;李十&quot;&#125;;</span><br><span class="line">    int count = 0;</span><br><span class="line">    private void addPersion()&#123;</span><br><span class="line">        Log.d(&quot;ScrollingActivity&quot;,&quot;### person client addPersion&quot;);</span><br><span class="line">        try &#123;</span><br><span class="line">            mBinder.addPerson(new Person(name[count++]));</span><br><span class="line">        &#125; catch (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void getPerson()&#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            Log.d(&quot;ScrollingActivity&quot;,String.valueOf(mBinder.getPersonList().size()));</span><br><span class="line">        &#125; catch (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void onDestroy() &#123;</span><br><span class="line">        super.onDestroy();</span><br><span class="line">        unbindService(mServiceConnection);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="AIDL-原理分析"><a href="#AIDL-原理分析" class="headerlink" title="AIDL 原理分析"></a>AIDL 原理分析</h3><p>在 <code>PersonTransmissionInterface.java</code> 中自动生成了 <code>PersonTransmissionInterface</code> 接口，接口中包含了我们在<code>PersonTransmissionInterface.aidl</code> 定义的两个接口。<br>而最重要的生成了 <code>Stub</code> 类，该类继承了 Binder 类并实现了 <code>PersonTransmissionInterface</code> 接口。<br>Stub最重要的就是 <code>asInterface()</code> 这个函数，在这个函数中会自动判断参数 obj 的类型，如果 obj 是本地的接口类型，则 AIDL 会认为不是进程之间的通信，会直接返回一个本地的 <code>PersonTransmissionInterface</code> 对象；否则会转换成 <code>Stub</code> 类的一个内部类 Proxy 来包装 obj ，将其赋值给内部的 <code>mRemote</code> 字段，<code>Proxy</code> 也实现了 <code>PersonTransmissionInterface</code> 接口，不同的是他是通过 <code>Binder</code> 机制来与远程进行交互的，例如<code>mRemote.transact(Stub.TRANSACTION_addPerson, _data, _reply, 0);</code>，它请求的类型为 <code>Stub.TRANSACTION_addPerson</code>，参数为 <code>Parcel</code> 格式的 data。<br>对于服务端的代码来说，它是拥有同一份的 <code>PersonTransmissionInterface.aidl</code> 与 <code>PersonTransmissionInterface.java</code> 但不同的是服务端是指令的接口端，客户端的调用会通过 Binder 机制传递到服务端，最后到服务端调用的 <code>Stub</code> 的 <code>boolean onTransact()</code> 函数，通过 code 类型判断具体调用的函数，此时两端的传递就对应上了。<br>客户端调用了 <code>bindService(intent,mServiceConnection,Context.BIND_AUTO_CREATE);</code>之后，如果绑定成功则会调用 <code>void onServiceConnected(ComponentName name, IBinder service)</code>，这里的 <code>Service</code> 是 <code>BinderProxy</code> 经过 <code>asInterface()</code>转换以后，被包装成了 <code>Proxy</code> 对象，但是执行的时候，调用的是服务端的对应方法。即：<code>PersonTransmissionInterface</code> 的实例 <code>mBinder</code> 被服务端包装成 <code>BinderProxy</code> 类型，再经过客户端的 <code>Proxy</code> 进行包装，通过 <code>Binder</code> 机制进行包装，实现进程之间的调用。</p>
 ]]></content>
       <categories>
         <category>Android</category>
