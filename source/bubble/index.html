@@ -1,0 +1,122 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>A Love Letter to Bubble</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style type="text/css">
+		@font-face {
+			font-family: digit;
+			src: url('digital-7_mono.ttf') format("truetype");
+		}
+        @font-face {
+            font-family: Delius Swash Caps;
+            src: url('DeliusSwashCaps-Regular.ttf') format("truetype");
+        }
+        @font-face {
+            font-family: Great Vibes;
+            src: url('GreatVibes-Regular.ttf') format("truetype");
+        }
+	</style>
+	<link href="css/default.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/garden.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="applicable-device"content="pc,mobile"/>
+</head>
+
+<body>
+	<div id="mainDiv">
+		<div id="content">
+			<div id="note">
+				<span>
+					<h3>泡泡：</h3>
+					<p>人生之间，生命中大多数的相遇，只在互通姓名，互相了解从没听过的故事。又或者促膝长谈，从诗词歌赋到人生哲学，匆匆相识之后在命运的安排下，只消几个月了便可以隐匿下去，再也见不到。</p>
+					<p>好险，差点我们就错过，好险。</p>
+					<p>每当想起这个总是忍不住偷笑，总以为相遇要披星戴月，披荆斩棘，披肝沥胆，披头散发，但是你就是没有道理的，突然出现在这里，突然我就收到了这一生，等了半世未拆的礼物。</p>
+					<p>脑子里有很多很多浪漫的想法：想带你去第一个冲进一夜大雪后的故宫；想带你看看绚烂的绣球花；想在教你学会游泳前推你到水里；想在你不想吃饭的时候喂你吃两勺冰激凌然后在你没注意到的时候换成暗黑炒饭。 </p>
+					<p>说起来有些顽劣，所以你一定要有些耐心。</p>
+					<p>不知道一起的时候你喜不喜欢多说话呢？还是安安静静的各自做各自的事情，心有灵犀的相视一眼再继续心无旁骛的做事情，只会在心里偷笑。不过我都喜欢，只要是和你在一起。</p>
+					<p>在你被生活工作烦扰的时候送你一些小礼物：造型很②的挂件、很烂的字写得情话、倒着画的你的画。厚脸皮占用你的一点点时间，但是绝不多占，不然你完不成工作岂不是要发脾气。</p>
+					<p>所以你开心的时候一定要来找我，给我讲过期的笑话，给我讲你做的毫无逻辑的梦，和你昨晚又偷吃了一块蛋糕。</p>
+					<p>那么不开心的时候呢，我想你会爱听我给你唱歌，我可以用我五音不全的嗓子为你唱歌：</p>
+					<br>
+					<p><i>我要，你在我身旁。</i></p>
+					<p><i>我要，看着你梳妆。</i></p>
+					<p><i>这夜的风儿吹。</i></p>
+					<p><i>吹得心痒痒，我的姑娘。</i></p>
+					<p><i>我在身旁，陪你天亮。</i></p>
+					<br>
+					<p>我们已经承诺彼此，就让我用剩下的时间来兑现，在以后的很多、很多年。</p>
+					<p>怎么样，已经开始有些想我了么？</<p>
+					<p>阳光和你一起映入我的眼帘，我和你一同走向未来的世界。</p>
+					<p>原来我的意中人，是个盖世英雄。</p>
+				</span>
+			</div>
+			<div id="loveHeart">
+				<canvas id="garden"></canvas>
+				<div id="words">
+					<div id="messages">
+						Liuyi, I have fallen in love with you for
+						<div id="elapseClock"></div>
+					</div>
+					<div id="love-u">
+						Love U forever and ever.<br/>
+						<div class="signature">- Lirui</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="copyright">
+			Inspired by <a href="http://www.openrise.com/lab/FlowerPower/">FlowerPower</a> project.<br />
+            Copyright © 2017 <a href='http://artaris.cn/bubble'>Our Story</a>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var offsetX = $("#loveHeart").width() / 2;
+		var offsetY = $("#loveHeart").height() / 2 - 55;
+		var together = new Date();
+		together.setFullYear(2018, 0, 2);
+		together.setHours(0);
+		together.setMinutes(12);
+		together.setSeconds(0);
+		together.setMilliseconds(0);
+
+		if (!document.createElement('canvas').getContext) {
+			var msg = document.createElement("div");
+			msg.id = "errorMsg";
+			msg.innerHTML = "Your browser doesn't support HTML5!<br/>Recommend use Chrome 14+/IE 9+/Firefox 7+/Safari 4+";
+			document.body.appendChild(msg);
+			$("#note").css("display", "none")
+		    document.execCommand("stop");
+		} else {
+            $("#note").typewriter();
+            if ($(window).width() < 767) {
+                setTimeout(function(){
+                    $("#note").fadeOut(12000, function () {
+                        showHeart();
+                    })
+                }, 45000);
+            }
+            else {
+                setTimeout(function () {
+                    startHeartAnimation();
+                }, 2000);
+            }
+			timeElapse(together);
+			setInterval(function () {
+				timeElapse(together);
+			}, 200);
+
+			//adjustCodePosition();
+		}
+
+		function showHeart() {
+            $("#loveHeart").fadeIn(1000, function () {
+                startHeartAnimation();
+            });
+        }
+
+	</script>
+</body>
+</html>
