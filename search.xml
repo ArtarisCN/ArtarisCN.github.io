@@ -1,6 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Activity 的加载模式</title>
+    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
+<span id="more"></span>
+
+<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
+<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+
+<p>新开的页面继续重复其生命周期</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
+<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
+<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
+<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
+<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
+<li>不同程序之间</li>
+</ul>
+<ol>
+<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
+<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
+<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
+</ol>
+<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
+<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ADB 使用指南</title>
     <url>/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
     <content><![CDATA[<p>ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能</p>
@@ -1069,124 +1114,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Activity 的加载模式</title>
-    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
-<span id="more"></span>
-
-<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
-<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
-<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-
-<p>新开的页面继续重复其生命周期</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
-<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
-<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
-<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
-<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
-<li>不同程序之间</li>
-</ul>
-<ol>
-<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
-<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
-<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
-</ol>
-<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
-<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Android  7.1 新特性——Shortcuts</title>
-    <url>/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
-    <content><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
-<p><a href="http://img.artaris.cn/shortcuts/ShortcutsDemo.apk">吐泡泡 Shortcuts Demo 下载</a></p>
-<span id="more"></span>
-
-<p>如下图所示：</p>
-<p><img src="http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p"></p>
-<h4 id="分类及作用"><a href="#分类及作用" class="headerlink" title="分类及作用"></a>分类及作用</h4><p>Shortcuts 也可以通过静态和动态方式添加。静态的方式可以作为 APP 的一个快捷入口来使用，动态的方式可以作为可变换的选项来使用。</p>
-<ul>
-<li><p><strong>Static shortcuts</strong>：静态shortcuts是在资源文件中定义的，所以你只能通过升级你的app来更新静态shortcuts的相关信息。</p>
-</li>
-<li><p><strong>Dynamic shortcuts</strong>：动态shortcuts是通过ShortcutManager相关的API来实现运行时新增、修改、移除shortcuts的。</p>
-</li>
-</ul>
-<h4 id="静态-Shorcuts-Static-shortcuts"><a href="#静态-Shorcuts-Static-shortcuts" class="headerlink" title="静态 Shorcuts(Static shortcuts)"></a>静态 Shorcuts(Static shortcuts)</h4><p>静态 ShortcutsStatic Shortcuts通过在 Manifest 中声明添加。缺点是不可以修改，只能通过应用升级来添加新的静态 Shortcuts。添加主要分为两步：</p>
-<p>1 . AndroidManifest.xml 的 Main Launcher 对应的 Activity 内添加 <code>meta-data meta-data name</code> 为<code>android.app.shortcuts</code>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.MainActivity&quot;&gt;</span><br><span class="line">	&lt;intent-filter&gt;</span><br><span class="line">		&lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br><span class="line">		&lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br><span class="line">	&lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">	&lt;meta-data</span><br><span class="line">		android:name=&quot;android.app.shortcuts&quot;</span><br><span class="line">		android:resource=&quot;@xml/shortcuts&quot;/&gt;   </span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
-<p>必须在启动界面对应的 Activity 定义 shortcuts ，<code>android:resource</code>指向了 shortcuts 的资源文件。</p>
-<ol start="2">
-<li>资源文件中定义具体的 shortcuts<br>res 目录下新建 xml 文件夹，并新建 shortcuts.xml 文件，内容如下：</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;shortcuts xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    &lt;shortcut</span><br><span class="line">        android:shortcutId=&quot;settings&quot;</span><br><span class="line">        android:enabled=&quot;true&quot;</span><br><span class="line">        android:icon=&quot;@mipmap/ic_star_border_black_24dp&quot;</span><br><span class="line">        android:shortcutShortLabel=&quot;@string/settings_short_name&quot;</span><br><span class="line">        android:shortcutLongLabel=&quot;@string/settings_long_name&quot;</span><br><span class="line">        android:shortcutDisabledMessage=&quot;@string/settings_disable_msg&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;intent</span><br><span class="line">            android:action=&quot;android.intent.action.VIEW&quot;</span><br><span class="line">            android:targetPackage=&quot;cn.artaris.shortcutsdemo&quot;</span><br><span class="line">            android:targetClass=&quot;cn.artaris.shortcutsdemo.MainActivity&quot; /&gt;</span><br><span class="line">        &lt;categories android:name=&quot;android.shortcut.conversation&quot;/&gt;</span><br><span class="line">    &lt;/shortcut&gt;</span><br><span class="line">&lt;/shortcuts&gt;</span><br></pre></td></tr></table></figure>
-<p>以 <code>&lt;shortcuts&gt;</code>元素为根，可以包含多个 shortcut 元素，每个 shortcut 元素表示一个 shortcut。其中不同字段的含义为：</p>
-<ul>
-<li>shortcutId表示 shortcut 唯一标识符，相同的 shortcutId 会被覆盖。必须字段。</li>
-<li>shortcutShortLabel为将 shortcut 拖动到桌面时显示的名字，官方建议不超过 10 个字符，必须字段。</li>
-<li>shortcutLongLabel为 shortcut 列表中每个 shortcut 的名字，不宜过长，如果过长或未设置默认会显示 ShortLabel，官方建议不超过 25 个字符。可选字段。</li>
-<li>icon为 shortcut 的 icon，在列表展示和拖动到桌面时显示需要，可选字段。</li>
-<li>enabled表示 shortcut 是否可用，false 表示禁用。xml 中这个属性几乎没有被设置为 false 的实际场景，具体原因可见<strong>6.7 如何更好的删除(废弃)老的 Shortcut</strong>中介绍。</li>
-<li>shortcutDisabledMessage为已固定在桌面的 shortcut 被 Disabled 后点击时的 Toast 提示内容。可选字段。</li>
-<li>intent为点击 shortcut 时响应的 Intent，必须字段。这里可以添加多个 Intent，成为一个 Intent 栈，点击会启动最后一个 Intent，在这个 Intent 回退时会启动它前面一个 Intent，相当于自动将所有 Intent 添加到了堆栈。对于先跳转到某个页面，Back 键希望退回主页而不是结束 App 这类场景，多个 Intents 挺实用的。</li>
-</ul>
-<blockquote>
-<p><strong>intent可设置属性包括：</strong><br><code>android:action</code>、<code>android:data</code>、<code>android:mimeType</code>、<code>android:targetClass</code>、<code>android:targetPackage</code>。其中<code>android:action</code>为必须属性。</p>
-</blockquote>
-<h4 id="动态-Shorcuts-Dynamic-shortcuts"><a href="#动态-Shorcuts-Dynamic-shortcuts" class="headerlink" title="动态 Shorcuts(Dynamic shortcuts)"></a>动态 Shorcuts(Dynamic shortcuts)</h4><p>动态 ShortcutsDynamic Shortcuts 通过 ShortcutManager API 进行操作。可以动态添加、修改、删除。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N_MR1) &#123;</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 管理 shortcuts</span><br><span class="line">    */</span><br><span class="line">    mShortcutManager = getSystemService(ShortcutManager.class);</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 支持的最多 shortcuts 个数</span><br><span class="line">    */</span><br><span class="line">    mMaxShortcutCount = mShortcutManager.getMaxShortcutCountPerActivity();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    new AlertDialog.Builder(mContext)</span><br><span class="line">            .setTitle(getString(R.string.main_dialog_simple_title))</span><br><span class="line">            .setMessage(getString(R.string.main_dialog_simple_message))</span><br><span class="line">            .setNeutralButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void onClick(DialogInterface dialog, int which) &#123;</span><br><span class="line">                    finish();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            .show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>创建新的 shortcut 的方法为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Icon icon = Icon.createWithResource(mContext, R.mipmap.ic_favorite_black_24dp);   Intent intent = new Intent(mContext, ShowShortcutsActivity.class); intent.setAction(Intent.ACTION_VIEW); intent.putExtra(&quot;msg&quot;, singleChoiceItems[itemSelected]);</span><br><span class="line"></span><br><span class="line">ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, String.valueOf(itemSelected))</span><br><span class="line">        .setShortLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setLongLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setIcon(icon)</span><br><span class="line">        .setIntent(intent)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
-<p>添加的方法有：</p>
-<ul>
-<li><code>setDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以替换并添加所有 shortcut 列表；</li>
-<li><code>addDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以添加新的 shortcut 到列表，超过最大个数会报异常；</li>
-<li><code>updateShortcuts(List&lt;ShortcutInfo&gt;)</code>可以更新一组 shortcuts；</li>
-<li><code>removeDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>和removeAllDynamicShortcuts() 可以删除部分或所有 shortcuts。</li>
-</ul>
-<p>ShortcutInfo 的属性与 xml 中定义字段含义一致，shortcutId shortcutShortLabel intent 是必须设置的字段，并且intent必须设置Action。</p>
-<h4 id="固定的-Shortcuts-Pinned-Shortcuts"><a href="#固定的-Shortcuts-Pinned-Shortcuts" class="headerlink" title="固定的 Shortcuts(Pinned Shortcuts)"></a>固定的 Shortcuts(Pinned Shortcuts)</h4><p>Pinned Shortcuts 是指将 Shortcut 固定到桌面的功能，如下图所示：<br><img src="http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p"><br>由于固定到了桌面，APP 不能再添加、修改、删除这些这些 Shortcut ，只能禁用这些 Shortcut 。即便 App 内删除了某个 Shorcut，对应的已固定到桌面的 Shortcuts 也不会被删除。</p>
-<p>可以通过：</p>
-<ol>
-<li><code>getPinnedShortcuts()</code>得到所有固定的 Shortcuts 的信息。</li>
-<li><code>disableShortcuts(List)</code>或<code>disableShortcuts(List, CharSequence)</code>禁用动态的 Shortcuts。</li>
-</ol>
-<p>对于静态的 Shortcuts 需要在资源文件中设置<code>android:enabled=&quot;false&quot;</code>进行禁用，不过静态 Shortcuts 可直接通过删除达到禁用的效果.</p>
-<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ul>
-<li>动态 Shortcuts 与静态 Shortcuts 区别</li>
-</ul>
-<ol>
-<li>静态 Shortcuts 只能通过升级应用修改，动态 Shortcuts 随时可以修改；</li>
-<li>静态 Shortcuts 的 Intent 无法设置 Flag，默认为<code>FLAG_ACTIVITY_NEW_TASK</code>和<code>FLAG_ACTIVITY_CLEAR_TASK Flag</code>，即若应用运行中会清除所有已存在的 Activity。动态 Shortcuts 的 Intent 可以设置 Flag；</li>
-<li>静态 Shortcuts 的rank系统默认根据声明顺序设置，动态 Shortcuts 的rank可以通过setRank(int rank)接口主动设置，rank 不能小于 0，值越大表示在 shortcut 列表展示时离 App Icon 越远。静态 Shortcuts 默认比动态 Shortcuts 离 App Icon 更近。</li>
-<li>静态 Shortcuts 删除可以直接删除，动态 Shortcuts 建议通过禁用删除；</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android 线程池的使用</title>
     <url>/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
@@ -1540,6 +1467,79 @@
       </tags>
   </entry>
   <entry>
+    <title>Android  7.1 新特性——Shortcuts</title>
+    <url>/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
+    <content><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
+<p><a href="http://img.artaris.cn/shortcuts/ShortcutsDemo.apk">吐泡泡 Shortcuts Demo 下载</a></p>
+<span id="more"></span>
+
+<p>如下图所示：</p>
+<p><img src="http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p"></p>
+<h4 id="分类及作用"><a href="#分类及作用" class="headerlink" title="分类及作用"></a>分类及作用</h4><p>Shortcuts 也可以通过静态和动态方式添加。静态的方式可以作为 APP 的一个快捷入口来使用，动态的方式可以作为可变换的选项来使用。</p>
+<ul>
+<li><p><strong>Static shortcuts</strong>：静态shortcuts是在资源文件中定义的，所以你只能通过升级你的app来更新静态shortcuts的相关信息。</p>
+</li>
+<li><p><strong>Dynamic shortcuts</strong>：动态shortcuts是通过ShortcutManager相关的API来实现运行时新增、修改、移除shortcuts的。</p>
+</li>
+</ul>
+<h4 id="静态-Shorcuts-Static-shortcuts"><a href="#静态-Shorcuts-Static-shortcuts" class="headerlink" title="静态 Shorcuts(Static shortcuts)"></a>静态 Shorcuts(Static shortcuts)</h4><p>静态 ShortcutsStatic Shortcuts通过在 Manifest 中声明添加。缺点是不可以修改，只能通过应用升级来添加新的静态 Shortcuts。添加主要分为两步：</p>
+<p>1 . AndroidManifest.xml 的 Main Launcher 对应的 Activity 内添加 <code>meta-data meta-data name</code> 为<code>android.app.shortcuts</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.MainActivity&quot;&gt;</span><br><span class="line">	&lt;intent-filter&gt;</span><br><span class="line">		&lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br><span class="line">		&lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br><span class="line">	&lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">	&lt;meta-data</span><br><span class="line">		android:name=&quot;android.app.shortcuts&quot;</span><br><span class="line">		android:resource=&quot;@xml/shortcuts&quot;/&gt;   </span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
+<p>必须在启动界面对应的 Activity 定义 shortcuts ，<code>android:resource</code>指向了 shortcuts 的资源文件。</p>
+<ol start="2">
+<li>资源文件中定义具体的 shortcuts<br>res 目录下新建 xml 文件夹，并新建 shortcuts.xml 文件，内容如下：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;shortcuts xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    &lt;shortcut</span><br><span class="line">        android:shortcutId=&quot;settings&quot;</span><br><span class="line">        android:enabled=&quot;true&quot;</span><br><span class="line">        android:icon=&quot;@mipmap/ic_star_border_black_24dp&quot;</span><br><span class="line">        android:shortcutShortLabel=&quot;@string/settings_short_name&quot;</span><br><span class="line">        android:shortcutLongLabel=&quot;@string/settings_long_name&quot;</span><br><span class="line">        android:shortcutDisabledMessage=&quot;@string/settings_disable_msg&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;intent</span><br><span class="line">            android:action=&quot;android.intent.action.VIEW&quot;</span><br><span class="line">            android:targetPackage=&quot;cn.artaris.shortcutsdemo&quot;</span><br><span class="line">            android:targetClass=&quot;cn.artaris.shortcutsdemo.MainActivity&quot; /&gt;</span><br><span class="line">        &lt;categories android:name=&quot;android.shortcut.conversation&quot;/&gt;</span><br><span class="line">    &lt;/shortcut&gt;</span><br><span class="line">&lt;/shortcuts&gt;</span><br></pre></td></tr></table></figure>
+<p>以 <code>&lt;shortcuts&gt;</code>元素为根，可以包含多个 shortcut 元素，每个 shortcut 元素表示一个 shortcut。其中不同字段的含义为：</p>
+<ul>
+<li>shortcutId表示 shortcut 唯一标识符，相同的 shortcutId 会被覆盖。必须字段。</li>
+<li>shortcutShortLabel为将 shortcut 拖动到桌面时显示的名字，官方建议不超过 10 个字符，必须字段。</li>
+<li>shortcutLongLabel为 shortcut 列表中每个 shortcut 的名字，不宜过长，如果过长或未设置默认会显示 ShortLabel，官方建议不超过 25 个字符。可选字段。</li>
+<li>icon为 shortcut 的 icon，在列表展示和拖动到桌面时显示需要，可选字段。</li>
+<li>enabled表示 shortcut 是否可用，false 表示禁用。xml 中这个属性几乎没有被设置为 false 的实际场景，具体原因可见<strong>6.7 如何更好的删除(废弃)老的 Shortcut</strong>中介绍。</li>
+<li>shortcutDisabledMessage为已固定在桌面的 shortcut 被 Disabled 后点击时的 Toast 提示内容。可选字段。</li>
+<li>intent为点击 shortcut 时响应的 Intent，必须字段。这里可以添加多个 Intent，成为一个 Intent 栈，点击会启动最后一个 Intent，在这个 Intent 回退时会启动它前面一个 Intent，相当于自动将所有 Intent 添加到了堆栈。对于先跳转到某个页面，Back 键希望退回主页而不是结束 App 这类场景，多个 Intents 挺实用的。</li>
+</ul>
+<blockquote>
+<p><strong>intent可设置属性包括：</strong><br><code>android:action</code>、<code>android:data</code>、<code>android:mimeType</code>、<code>android:targetClass</code>、<code>android:targetPackage</code>。其中<code>android:action</code>为必须属性。</p>
+</blockquote>
+<h4 id="动态-Shorcuts-Dynamic-shortcuts"><a href="#动态-Shorcuts-Dynamic-shortcuts" class="headerlink" title="动态 Shorcuts(Dynamic shortcuts)"></a>动态 Shorcuts(Dynamic shortcuts)</h4><p>动态 ShortcutsDynamic Shortcuts 通过 ShortcutManager API 进行操作。可以动态添加、修改、删除。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N_MR1) &#123;</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 管理 shortcuts</span><br><span class="line">    */</span><br><span class="line">    mShortcutManager = getSystemService(ShortcutManager.class);</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 支持的最多 shortcuts 个数</span><br><span class="line">    */</span><br><span class="line">    mMaxShortcutCount = mShortcutManager.getMaxShortcutCountPerActivity();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    new AlertDialog.Builder(mContext)</span><br><span class="line">            .setTitle(getString(R.string.main_dialog_simple_title))</span><br><span class="line">            .setMessage(getString(R.string.main_dialog_simple_message))</span><br><span class="line">            .setNeutralButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void onClick(DialogInterface dialog, int which) &#123;</span><br><span class="line">                    finish();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            .show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建新的 shortcut 的方法为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Icon icon = Icon.createWithResource(mContext, R.mipmap.ic_favorite_black_24dp);   Intent intent = new Intent(mContext, ShowShortcutsActivity.class); intent.setAction(Intent.ACTION_VIEW); intent.putExtra(&quot;msg&quot;, singleChoiceItems[itemSelected]);</span><br><span class="line"></span><br><span class="line">ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, String.valueOf(itemSelected))</span><br><span class="line">        .setShortLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setLongLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setIcon(icon)</span><br><span class="line">        .setIntent(intent)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+<p>添加的方法有：</p>
+<ul>
+<li><code>setDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以替换并添加所有 shortcut 列表；</li>
+<li><code>addDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以添加新的 shortcut 到列表，超过最大个数会报异常；</li>
+<li><code>updateShortcuts(List&lt;ShortcutInfo&gt;)</code>可以更新一组 shortcuts；</li>
+<li><code>removeDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>和removeAllDynamicShortcuts() 可以删除部分或所有 shortcuts。</li>
+</ul>
+<p>ShortcutInfo 的属性与 xml 中定义字段含义一致，shortcutId shortcutShortLabel intent 是必须设置的字段，并且intent必须设置Action。</p>
+<h4 id="固定的-Shortcuts-Pinned-Shortcuts"><a href="#固定的-Shortcuts-Pinned-Shortcuts" class="headerlink" title="固定的 Shortcuts(Pinned Shortcuts)"></a>固定的 Shortcuts(Pinned Shortcuts)</h4><p>Pinned Shortcuts 是指将 Shortcut 固定到桌面的功能，如下图所示：<br><img src="http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p"><br>由于固定到了桌面，APP 不能再添加、修改、删除这些这些 Shortcut ，只能禁用这些 Shortcut 。即便 App 内删除了某个 Shorcut，对应的已固定到桌面的 Shortcuts 也不会被删除。</p>
+<p>可以通过：</p>
+<ol>
+<li><code>getPinnedShortcuts()</code>得到所有固定的 Shortcuts 的信息。</li>
+<li><code>disableShortcuts(List)</code>或<code>disableShortcuts(List, CharSequence)</code>禁用动态的 Shortcuts。</li>
+</ol>
+<p>对于静态的 Shortcuts 需要在资源文件中设置<code>android:enabled=&quot;false&quot;</code>进行禁用，不过静态 Shortcuts 可直接通过删除达到禁用的效果.</p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ul>
+<li>动态 Shortcuts 与静态 Shortcuts 区别</li>
+</ul>
+<ol>
+<li>静态 Shortcuts 只能通过升级应用修改，动态 Shortcuts 随时可以修改；</li>
+<li>静态 Shortcuts 的 Intent 无法设置 Flag，默认为<code>FLAG_ACTIVITY_NEW_TASK</code>和<code>FLAG_ACTIVITY_CLEAR_TASK Flag</code>，即若应用运行中会清除所有已存在的 Activity。动态 Shortcuts 的 Intent 可以设置 Flag；</li>
+<li>静态 Shortcuts 的rank系统默认根据声明顺序设置，动态 Shortcuts 的rank可以通过setRank(int rank)接口主动设置，rank 不能小于 0，值越大表示在 shortcut 列表展示时离 App Icon 越远。静态 Shortcuts 默认比动态 Shortcuts 离 App Icon 更近。</li>
+<li>静态 Shortcuts 删除可以直接删除，动态 Shortcuts 建议通过禁用删除；</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>BroadcastReceiver 与 LocalBroadcastReceiver 的比较</title>
     <url>/Android/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
     <content><![CDATA[<p>LocalBroadcastReceiver 和 BroadcastReceiver 均为常用的广播方法。这里比较一下他们之间的区别与使用。</p>
@@ -1597,18 +1597,6 @@
       </categories>
       <tags>
         <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hello World</title>
-    <url>/MicroBlog/Hello%20World/</url>
-    <content><![CDATA[<p><code>sudo apt-get install GirlFriend</code><br>正在读取软件包列表… <br>完成正在分析软件包的依赖关系树… <br>完成有一些软件包无法被安装。<br>下列的信息可能会对解决问题有所帮助：<br>下列的软件包有不能满足的依赖关系：<br><code>GirlFriend</code>: 依赖: <code>House</code> 但是它将不会被安装<br><code>GirlFriend</code>: 依赖: <code>Car</code> 但是它将不会被安装<br><code>House</code> ,<code>Car</code> : 依赖: <code>Money</code> 但是它将不会被安装<br><code>Error</code>: 无法安装的软件包</p>
-]]></content>
-      <categories>
-        <category>MicroBlog</category>
-      </categories>
-      <tags>
-        <tag>戏说</tag>
       </tags>
   </entry>
   <entry>
@@ -1695,74 +1683,55 @@
       </tags>
   </entry>
   <entry>
+    <title>Hello World</title>
+    <url>/MicroBlog/Hello%20World/</url>
+    <content><![CDATA[<p><code>sudo apt-get install GirlFriend</code><br>正在读取软件包列表… <br>完成正在分析软件包的依赖关系树… <br>完成有一些软件包无法被安装。<br>下列的信息可能会对解决问题有所帮助：<br>下列的软件包有不能满足的依赖关系：<br><code>GirlFriend</code>: 依赖: <code>House</code> 但是它将不会被安装<br><code>GirlFriend</code>: 依赖: <code>Car</code> 但是它将不会被安装<br><code>House</code> ,<code>Car</code> : 依赖: <code>Money</code> 但是它将不会被安装<br><code>Error</code>: 无法安装的软件包</p>
+]]></content>
+      <categories>
+        <category>MicroBlog</category>
+      </categories>
+      <tags>
+        <tag>戏说</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo 建站笔记</title>
+    <url>/Hexo/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h3 id="建站流程"><a href="#建站流程" class="headerlink" title="建站流程"></a>建站流程</h3><span id="more"></span>
+
+<p><code>//todo</code></p>
+<h3 id="站点配置"><a href="#站点配置" class="headerlink" title="站点配置"></a>站点配置</h3><ul>
+<li>Permalink</li>
+<li>GitHub</li>
+<li>多说</li>
+<li>GitHub 挂饰</li>
+</ul>
+<p><code>//todo</code></p>
+<h3 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h3><h4 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h4><ul>
+<li>多说</li>
+<li>不蒜子</li>
+<li>Avatar</li>
+<li>Menu</li>
+<li>Social</li>
+<li>Sidebar</li>
+</ul>
+<p><code>//todo</code></p>
+<h3 id="写文章"><a href="#写文章" class="headerlink" title="写文章"></a>写文章</h3><ul>
+<li>Atom</li>
+<li>七牛</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Hexo</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>容器-HashMap 实现原理</title>
     <url>/uncategorized/Java%20%E5%AE%B9%E5%99%A8%20HashMap%20%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title>Java 中单例的实现与线程安全</title>
-    <url>/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
-    <content><![CDATA[<h1 id="Java-中单例的实现与线程安全"><a href="#Java-中单例的实现与线程安全" class="headerlink" title="Java 中单例的实现与线程安全"></a>Java 中单例的实现与线程安全</h1><p>单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：</p>
-<ol>
-<li>单例功能：基本功能</li>
-<li>延迟加载：避免不必要的资源消耗</li>
-<li>线程安全：多个线程同时创建对象时为同一个对象</li>
-<li>没有性能问题：创建函数不能影响效率</li>
-<li>防止序列化产生新对象：安全</li>
-<li>防止反射攻击：安全</li>
-</ol>
-<span id="more"></span>
-
-<h2 id="饿汉式（类加载时就完成初始化）"><a href="#饿汉式（类加载时就完成初始化）" class="headerlink" title="饿汉式（类加载时就完成初始化）"></a>饿汉式（类加载时就完成初始化）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：简单粗暴，加载类的时候就初始化完成了，线程安全。<br>缺点：消耗资源，如果使用时机较晚或不使用，浪费内存。</p>
-<h2 id="懒汉式-线程不安全"><a href="#懒汉式-线程不安全" class="headerlink" title="懒汉式(线程不安全)"></a>懒汉式(线程不安全)</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：延迟初始化，避免了不必要的内存开销；<br>缺点：线程不安全。</p>
-<h2 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h2><p>使用<code>synchronized</code>修饰获取方法。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：延迟初始化，避免了不必要的内存开销；线程安全；<br>缺点：每次获取实例都需要同步，其实只需要第一次同步就可以了。</p>
-<h2 id="懒汉式（线程安全，同步代码块-DCL-double-check-lock）"><a href="#懒汉式（线程安全，同步代码块-DCL-double-check-lock）" class="headerlink" title="懒汉式（线程安全，同步代码块 DCL:double check lock）"></a>懒汉式（线程安全，同步代码块 DCL:double check lock）</h2><p>使用<code>synchronized</code>同步 new 方法，内外加双重判断，volatile 修饰实例。<br>synchronized 能保证每次只有一个线程访问代码块，volatile 保证了 instance 创建的原子性。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static volatile Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if (instance == null) &#123;</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 如果实现了Serializable, 必须重写这个方法</span><br><span class="line">     */</span><br><span class="line">    private Object readResolve() throws ObjectStreamException &#123;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line">    /**</span><br><span class="line">     * 私有化构造方法</span><br><span class="line">     */</span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        return SingletonHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 类级的内部类，也就是静态的成员式内部类，该内部类的实例与外部类的实例没有绑定关系，</span><br><span class="line">     * 而且只有被调用到才会装载，从而实现了延迟加载</span><br><span class="line">     */</span><br><span class="line">    private static class SingletonHolder &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 静态初始化器，由JVM来保证线程安全</span><br><span class="line">         */</span><br><span class="line">        private static final Singleton INSTANCE = new Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public enum Singleton &#123;</span><br><span class="line"></span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优点：简单粗暴，线程安全，高效，自动避免序列化&#x2F;反序列化攻击、反射攻击(枚举类不能通过反射生成)<br>缺点：可读性差</p>
-<p>关联阅读</p>
-<blockquote>
-<h2 id="synchronized-关键字"><a href="#synchronized-关键字" class="headerlink" title="synchronized 关键字"></a>synchronized 关键字</h2><p>synchronized 是 Java 中的关键字，是利用锁的机制来控制多线程同步的关键字.<br>锁的性质：</p>
-<ol>
-<li>互斥性&#x2F;原子性：同一时间只允许一个线程持有某个对象锁，通过对锁的持有来保证同一时间只有一个线程对需同步的代码块(复合操作)进行访问；</li>
-<li>可见性：当一个线程释放锁之后，对共享变量所做的更改对之后获取该锁的另一个线程可见；<br>锁的分类:</li>
-<li>对象锁: 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”。类的对象可以有多个，所以每个对象有其独立的对象锁，互不干扰。</li>
-<li>类锁:在 Java 中，针对每个类也有一个锁，可以称为“类锁”，类锁实际上是通过对象锁实现的，即类的 Class 对象锁。每个类只有一个 Class 对象，所以每个类只有一个类锁。</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th align="center"></th>
-<th align="center">修饰代码块</th>
-<th align="center">修饰代码块</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">获取对象锁</td>
-<td align="center">synchronized(this|object) {}</td>
-<td align="center">修饰非静态方法</td>
-</tr>
-<tr>
-<td align="center">获取类锁</td>
-<td align="center">synchronized(类.class) {}</td>
-<td align="center">修饰静态方法</td>
-</tr>
-</tbody></table>
-<p><strong>对于同一种锁的访问是同步的</strong></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
   </entry>
   <entry>
     <title>Java 容器篇：容器总结</title>
@@ -1976,6 +1945,71 @@
       </tags>
   </entry>
   <entry>
+    <title>Java 中单例的实现与线程安全</title>
+    <url>/Java/Java-%E4%B8%AD%E5%8D%95%E4%BE%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</url>
+    <content><![CDATA[<h1 id="Java-中单例的实现与线程安全"><a href="#Java-中单例的实现与线程安全" class="headerlink" title="Java 中单例的实现与线程安全"></a>Java 中单例的实现与线程安全</h1><p>单例模式事一种常用的设计模式，其目的是为了该类只拥有一个实例，避免具有相同功能的多个对象消耗过多的资源，创建一个单例需要注意以下问题：</p>
+<ol>
+<li>单例功能：基本功能</li>
+<li>延迟加载：避免不必要的资源消耗</li>
+<li>线程安全：多个线程同时创建对象时为同一个对象</li>
+<li>没有性能问题：创建函数不能影响效率</li>
+<li>防止序列化产生新对象：安全</li>
+<li>防止反射攻击：安全</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="饿汉式（类加载时就完成初始化）"><a href="#饿汉式（类加载时就完成初始化）" class="headerlink" title="饿汉式（类加载时就完成初始化）"></a>饿汉式（类加载时就完成初始化）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，加载类的时候就初始化完成了，线程安全。<br>缺点：消耗资源，如果使用时机较晚或不使用，浪费内存。</p>
+<h2 id="懒汉式-线程不安全"><a href="#懒汉式-线程不安全" class="headerlink" title="懒汉式(线程不安全)"></a>懒汉式(线程不安全)</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：延迟初始化，避免了不必要的内存开销；<br>缺点：线程不安全。</p>
+<h2 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h2><p>使用<code>synchronized</code>修饰获取方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：延迟初始化，避免了不必要的内存开销；线程安全；<br>缺点：每次获取实例都需要同步，其实只需要第一次同步就可以了。</p>
+<h2 id="懒汉式（线程安全，同步代码块-DCL-double-check-lock）"><a href="#懒汉式（线程安全，同步代码块-DCL-double-check-lock）" class="headerlink" title="懒汉式（线程安全，同步代码块 DCL:double check lock）"></a>懒汉式（线程安全，同步代码块 DCL:double check lock）</h2><p>使用<code>synchronized</code>同步 new 方法，内外加双重判断，volatile 修饰实例。<br>synchronized 能保证每次只有一个线程访问代码块，volatile 保证了 instance 创建的原子性。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static volatile Singleton instance;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if (instance == null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if (instance == null) &#123;</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 如果实现了Serializable, 必须重写这个方法</span><br><span class="line">     */</span><br><span class="line">    private Object readResolve() throws ObjectStreamException &#123;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    private static Singleton instance;</span><br><span class="line">    /**</span><br><span class="line">     * 私有化构造方法</span><br><span class="line">     */</span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        return SingletonHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 类级的内部类，也就是静态的成员式内部类，该内部类的实例与外部类的实例没有绑定关系，</span><br><span class="line">     * 而且只有被调用到才会装载，从而实现了延迟加载</span><br><span class="line">     */</span><br><span class="line">    private static class SingletonHolder &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 静态初始化器，由JVM来保证线程安全</span><br><span class="line">         */</span><br><span class="line">        private static final Singleton INSTANCE = new Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public enum Singleton &#123;</span><br><span class="line"></span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优点：简单粗暴，线程安全，高效，自动避免序列化&#x2F;反序列化攻击、反射攻击(枚举类不能通过反射生成)<br>缺点：可读性差</p>
+<p>关联阅读</p>
+<blockquote>
+<h2 id="synchronized-关键字"><a href="#synchronized-关键字" class="headerlink" title="synchronized 关键字"></a>synchronized 关键字</h2><p>synchronized 是 Java 中的关键字，是利用锁的机制来控制多线程同步的关键字.<br>锁的性质：</p>
+<ol>
+<li>互斥性&#x2F;原子性：同一时间只允许一个线程持有某个对象锁，通过对锁的持有来保证同一时间只有一个线程对需同步的代码块(复合操作)进行访问；</li>
+<li>可见性：当一个线程释放锁之后，对共享变量所做的更改对之后获取该锁的另一个线程可见；<br>锁的分类:</li>
+<li>对象锁: 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”。类的对象可以有多个，所以每个对象有其独立的对象锁，互不干扰。</li>
+<li>类锁:在 Java 中，针对每个类也有一个锁，可以称为“类锁”，类锁实际上是通过对象锁实现的，即类的 Class 对象锁。每个类只有一个 Class 对象，所以每个类只有一个类锁。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">修饰代码块</th>
+<th align="center">修饰代码块</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">获取对象锁</td>
+<td align="center">synchronized(this|object) {}</td>
+<td align="center">修饰非静态方法</td>
+</tr>
+<tr>
+<td align="center">获取类锁</td>
+<td align="center">synchronized(类.class) {}</td>
+<td align="center">修饰静态方法</td>
+</tr>
+</tbody></table>
+<p><strong>对于同一种锁的访问是同步的</strong></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>LeetCode解题笔记</title>
     <url>/uncategorized/LeetCode%E8%A7%A3%E9%A2%98%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h1 id="LeetCode-解题笔记"><a href="#LeetCode-解题笔记" class="headerlink" title="LeetCode 解题笔记"></a>LeetCode 解题笔记</h1><p><a href="https://github.com/ArtarisCN/LeetCode">Artaris 的 LeetCode</a></p>
@@ -2154,40 +2188,6 @@
 ]]></content>
       <tags>
         <tag>OMAndroid</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo 建站笔记</title>
-    <url>/Hexo/Hexo-%E5%BB%BA%E7%AB%99%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h3 id="建站流程"><a href="#建站流程" class="headerlink" title="建站流程"></a>建站流程</h3><span id="more"></span>
-
-<p><code>//todo</code></p>
-<h3 id="站点配置"><a href="#站点配置" class="headerlink" title="站点配置"></a>站点配置</h3><ul>
-<li>Permalink</li>
-<li>GitHub</li>
-<li>多说</li>
-<li>GitHub 挂饰</li>
-</ul>
-<p><code>//todo</code></p>
-<h3 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h3><h4 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h4><ul>
-<li>多说</li>
-<li>不蒜子</li>
-<li>Avatar</li>
-<li>Menu</li>
-<li>Social</li>
-<li>Sidebar</li>
-</ul>
-<p><code>//todo</code></p>
-<h3 id="写文章"><a href="#写文章" class="headerlink" title="写文章"></a>写文章</h3><ul>
-<li>Atom</li>
-<li>七牛</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Hexo</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
