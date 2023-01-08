@@ -1,79 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Android  7.1 新特性——Shortcuts</title>
-    <url>/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
-    <content><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
-<p><a href="http://img.artaris.cn/shortcuts/ShortcutsDemo.apk">吐泡泡 Shortcuts Demo 下载</a></p>
-<span id="more"></span>
-
-<p>如下图所示：</p>
-<p><img src="http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p"></p>
-<h4 id="分类及作用"><a href="#分类及作用" class="headerlink" title="分类及作用"></a>分类及作用</h4><p>Shortcuts 也可以通过静态和动态方式添加。静态的方式可以作为 APP 的一个快捷入口来使用，动态的方式可以作为可变换的选项来使用。</p>
-<ul>
-<li><p><strong>Static shortcuts</strong>：静态shortcuts是在资源文件中定义的，所以你只能通过升级你的app来更新静态shortcuts的相关信息。</p>
-</li>
-<li><p><strong>Dynamic shortcuts</strong>：动态shortcuts是通过ShortcutManager相关的API来实现运行时新增、修改、移除shortcuts的。</p>
-</li>
-</ul>
-<h4 id="静态-Shorcuts-Static-shortcuts"><a href="#静态-Shorcuts-Static-shortcuts" class="headerlink" title="静态 Shorcuts(Static shortcuts)"></a>静态 Shorcuts(Static shortcuts)</h4><p>静态 ShortcutsStatic Shortcuts通过在 Manifest 中声明添加。缺点是不可以修改，只能通过应用升级来添加新的静态 Shortcuts。添加主要分为两步：</p>
-<p>1 . AndroidManifest.xml 的 Main Launcher 对应的 Activity 内添加 <code>meta-data meta-data name</code> 为<code>android.app.shortcuts</code>，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.MainActivity&quot;&gt;</span><br><span class="line">	&lt;intent-filter&gt;</span><br><span class="line">		&lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br><span class="line">		&lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br><span class="line">	&lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">	&lt;meta-data</span><br><span class="line">		android:name=&quot;android.app.shortcuts&quot;</span><br><span class="line">		android:resource=&quot;@xml/shortcuts&quot;/&gt;   </span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
-<p>必须在启动界面对应的 Activity 定义 shortcuts ，<code>android:resource</code>指向了 shortcuts 的资源文件。</p>
-<ol start="2">
-<li>资源文件中定义具体的 shortcuts<br>res 目录下新建 xml 文件夹，并新建 shortcuts.xml 文件，内容如下：</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;shortcuts xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    &lt;shortcut</span><br><span class="line">        android:shortcutId=&quot;settings&quot;</span><br><span class="line">        android:enabled=&quot;true&quot;</span><br><span class="line">        android:icon=&quot;@mipmap/ic_star_border_black_24dp&quot;</span><br><span class="line">        android:shortcutShortLabel=&quot;@string/settings_short_name&quot;</span><br><span class="line">        android:shortcutLongLabel=&quot;@string/settings_long_name&quot;</span><br><span class="line">        android:shortcutDisabledMessage=&quot;@string/settings_disable_msg&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;intent</span><br><span class="line">            android:action=&quot;android.intent.action.VIEW&quot;</span><br><span class="line">            android:targetPackage=&quot;cn.artaris.shortcutsdemo&quot;</span><br><span class="line">            android:targetClass=&quot;cn.artaris.shortcutsdemo.MainActivity&quot; /&gt;</span><br><span class="line">        &lt;categories android:name=&quot;android.shortcut.conversation&quot;/&gt;</span><br><span class="line">    &lt;/shortcut&gt;</span><br><span class="line">&lt;/shortcuts&gt;</span><br></pre></td></tr></table></figure>
-<p>以 <code>&lt;shortcuts&gt;</code>元素为根，可以包含多个 shortcut 元素，每个 shortcut 元素表示一个 shortcut。其中不同字段的含义为：</p>
-<ul>
-<li>shortcutId表示 shortcut 唯一标识符，相同的 shortcutId 会被覆盖。必须字段。</li>
-<li>shortcutShortLabel为将 shortcut 拖动到桌面时显示的名字，官方建议不超过 10 个字符，必须字段。</li>
-<li>shortcutLongLabel为 shortcut 列表中每个 shortcut 的名字，不宜过长，如果过长或未设置默认会显示 ShortLabel，官方建议不超过 25 个字符。可选字段。</li>
-<li>icon为 shortcut 的 icon，在列表展示和拖动到桌面时显示需要，可选字段。</li>
-<li>enabled表示 shortcut 是否可用，false 表示禁用。xml 中这个属性几乎没有被设置为 false 的实际场景，具体原因可见<strong>6.7 如何更好的删除(废弃)老的 Shortcut</strong>中介绍。</li>
-<li>shortcutDisabledMessage为已固定在桌面的 shortcut 被 Disabled 后点击时的 Toast 提示内容。可选字段。</li>
-<li>intent为点击 shortcut 时响应的 Intent，必须字段。这里可以添加多个 Intent，成为一个 Intent 栈，点击会启动最后一个 Intent，在这个 Intent 回退时会启动它前面一个 Intent，相当于自动将所有 Intent 添加到了堆栈。对于先跳转到某个页面，Back 键希望退回主页而不是结束 App 这类场景，多个 Intents 挺实用的。</li>
-</ul>
-<blockquote>
-<p><strong>intent可设置属性包括：</strong><br><code>android:action</code>、<code>android:data</code>、<code>android:mimeType</code>、<code>android:targetClass</code>、<code>android:targetPackage</code>。其中<code>android:action</code>为必须属性。</p>
-</blockquote>
-<h4 id="动态-Shorcuts-Dynamic-shortcuts"><a href="#动态-Shorcuts-Dynamic-shortcuts" class="headerlink" title="动态 Shorcuts(Dynamic shortcuts)"></a>动态 Shorcuts(Dynamic shortcuts)</h4><p>动态 ShortcutsDynamic Shortcuts 通过 ShortcutManager API 进行操作。可以动态添加、修改、删除。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N_MR1) &#123;</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 管理 shortcuts</span><br><span class="line">    */</span><br><span class="line">    mShortcutManager = getSystemService(ShortcutManager.class);</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 支持的最多 shortcuts 个数</span><br><span class="line">    */</span><br><span class="line">    mMaxShortcutCount = mShortcutManager.getMaxShortcutCountPerActivity();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    new AlertDialog.Builder(mContext)</span><br><span class="line">            .setTitle(getString(R.string.main_dialog_simple_title))</span><br><span class="line">            .setMessage(getString(R.string.main_dialog_simple_message))</span><br><span class="line">            .setNeutralButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void onClick(DialogInterface dialog, int which) &#123;</span><br><span class="line">                    finish();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            .show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>创建新的 shortcut 的方法为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Icon icon = Icon.createWithResource(mContext, R.mipmap.ic_favorite_black_24dp);   Intent intent = new Intent(mContext, ShowShortcutsActivity.class); intent.setAction(Intent.ACTION_VIEW); intent.putExtra(&quot;msg&quot;, singleChoiceItems[itemSelected]);</span><br><span class="line"></span><br><span class="line">ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, String.valueOf(itemSelected))</span><br><span class="line">        .setShortLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setLongLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setIcon(icon)</span><br><span class="line">        .setIntent(intent)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
-<p>添加的方法有：</p>
-<ul>
-<li><code>setDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以替换并添加所有 shortcut 列表；</li>
-<li><code>addDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以添加新的 shortcut 到列表，超过最大个数会报异常；</li>
-<li><code>updateShortcuts(List&lt;ShortcutInfo&gt;)</code>可以更新一组 shortcuts；</li>
-<li><code>removeDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>和removeAllDynamicShortcuts() 可以删除部分或所有 shortcuts。</li>
-</ul>
-<p>ShortcutInfo 的属性与 xml 中定义字段含义一致，shortcutId shortcutShortLabel intent 是必须设置的字段，并且intent必须设置Action。</p>
-<h4 id="固定的-Shortcuts-Pinned-Shortcuts"><a href="#固定的-Shortcuts-Pinned-Shortcuts" class="headerlink" title="固定的 Shortcuts(Pinned Shortcuts)"></a>固定的 Shortcuts(Pinned Shortcuts)</h4><p>Pinned Shortcuts 是指将 Shortcut 固定到桌面的功能，如下图所示：<br><img src="http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p"><br>由于固定到了桌面，APP 不能再添加、修改、删除这些这些 Shortcut ，只能禁用这些 Shortcut 。即便 App 内删除了某个 Shorcut，对应的已固定到桌面的 Shortcuts 也不会被删除。</p>
-<p>可以通过：</p>
-<ol>
-<li><code>getPinnedShortcuts()</code>得到所有固定的 Shortcuts 的信息。</li>
-<li><code>disableShortcuts(List)</code>或<code>disableShortcuts(List, CharSequence)</code>禁用动态的 Shortcuts。</li>
-</ol>
-<p>对于静态的 Shortcuts 需要在资源文件中设置<code>android:enabled=&quot;false&quot;</code>进行禁用，不过静态 Shortcuts 可直接通过删除达到禁用的效果.</p>
-<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ul>
-<li>动态 Shortcuts 与静态 Shortcuts 区别</li>
-</ul>
-<ol>
-<li>静态 Shortcuts 只能通过升级应用修改，动态 Shortcuts 随时可以修改；</li>
-<li>静态 Shortcuts 的 Intent 无法设置 Flag，默认为<code>FLAG_ACTIVITY_NEW_TASK</code>和<code>FLAG_ACTIVITY_CLEAR_TASK Flag</code>，即若应用运行中会清除所有已存在的 Activity。动态 Shortcuts 的 Intent 可以设置 Flag；</li>
-<li>静态 Shortcuts 的rank系统默认根据声明顺序设置，动态 Shortcuts 的rank可以通过setRank(int rank)接口主动设置，rank 不能小于 0，值越大表示在 shortcut 列表展示时离 App Icon 越远。静态 Shortcuts 默认比动态 Shortcuts 离 App Icon 更近。</li>
-<li>静态 Shortcuts 删除可以直接删除，动态 Shortcuts 建议通过禁用删除；</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>ADB 使用指南</title>
     <url>/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
     <content><![CDATA[<p>ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能</p>
@@ -1142,6 +1069,124 @@
       </tags>
   </entry>
   <entry>
+    <title>Activity 的加载模式</title>
+    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
+<span id="more"></span>
+
+<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
+<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+
+<p>新开的页面继续重复其生命周期</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
+<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
+<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
+<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
+<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
+<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
+<li>不同程序之间</li>
+</ul>
+<ol>
+<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
+<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
+<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
+</ol>
+<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
+<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android  7.1 新特性——Shortcuts</title>
+    <url>/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/</url>
+    <content><![CDATA[<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>Android 7.1 （API level25、Build.VERSION_CODES.N_MR1）中加入了新的 API ——Shortcuts，它提供了一种新的快捷访问方式，类似于 iPhone 的 3D Touch （现已加入豪华名称菜单——三维触控），并且这中快捷方式可以被拖拽到桌面上单独放置。</p>
+<p><a href="http://img.artaris.cn/shortcuts/ShortcutsDemo.apk">吐泡泡 Shortcuts Demo 下载</a></p>
+<span id="more"></span>
+
+<p>如下图所示：</p>
+<p><img src="http://img.artaris.cn/shortcuts/img-2.jpg?imageMogr2/thumbnail/!30p"></p>
+<h4 id="分类及作用"><a href="#分类及作用" class="headerlink" title="分类及作用"></a>分类及作用</h4><p>Shortcuts 也可以通过静态和动态方式添加。静态的方式可以作为 APP 的一个快捷入口来使用，动态的方式可以作为可变换的选项来使用。</p>
+<ul>
+<li><p><strong>Static shortcuts</strong>：静态shortcuts是在资源文件中定义的，所以你只能通过升级你的app来更新静态shortcuts的相关信息。</p>
+</li>
+<li><p><strong>Dynamic shortcuts</strong>：动态shortcuts是通过ShortcutManager相关的API来实现运行时新增、修改、移除shortcuts的。</p>
+</li>
+</ul>
+<h4 id="静态-Shorcuts-Static-shortcuts"><a href="#静态-Shorcuts-Static-shortcuts" class="headerlink" title="静态 Shorcuts(Static shortcuts)"></a>静态 Shorcuts(Static shortcuts)</h4><p>静态 ShortcutsStatic Shortcuts通过在 Manifest 中声明添加。缺点是不可以修改，只能通过应用升级来添加新的静态 Shortcuts。添加主要分为两步：</p>
+<p>1 . AndroidManifest.xml 的 Main Launcher 对应的 Activity 内添加 <code>meta-data meta-data name</code> 为<code>android.app.shortcuts</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.MainActivity&quot;&gt;</span><br><span class="line">	&lt;intent-filter&gt;</span><br><span class="line">		&lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br><span class="line">		&lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br><span class="line">	&lt;/intent-filter&gt;</span><br><span class="line"></span><br><span class="line">	&lt;meta-data</span><br><span class="line">		android:name=&quot;android.app.shortcuts&quot;</span><br><span class="line">		android:resource=&quot;@xml/shortcuts&quot;/&gt;   </span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
+<p>必须在启动界面对应的 Activity 定义 shortcuts ，<code>android:resource</code>指向了 shortcuts 的资源文件。</p>
+<ol start="2">
+<li>资源文件中定义具体的 shortcuts<br>res 目录下新建 xml 文件夹，并新建 shortcuts.xml 文件，内容如下：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;shortcuts xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    &lt;shortcut</span><br><span class="line">        android:shortcutId=&quot;settings&quot;</span><br><span class="line">        android:enabled=&quot;true&quot;</span><br><span class="line">        android:icon=&quot;@mipmap/ic_star_border_black_24dp&quot;</span><br><span class="line">        android:shortcutShortLabel=&quot;@string/settings_short_name&quot;</span><br><span class="line">        android:shortcutLongLabel=&quot;@string/settings_long_name&quot;</span><br><span class="line">        android:shortcutDisabledMessage=&quot;@string/settings_disable_msg&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;intent</span><br><span class="line">            android:action=&quot;android.intent.action.VIEW&quot;</span><br><span class="line">            android:targetPackage=&quot;cn.artaris.shortcutsdemo&quot;</span><br><span class="line">            android:targetClass=&quot;cn.artaris.shortcutsdemo.MainActivity&quot; /&gt;</span><br><span class="line">        &lt;categories android:name=&quot;android.shortcut.conversation&quot;/&gt;</span><br><span class="line">    &lt;/shortcut&gt;</span><br><span class="line">&lt;/shortcuts&gt;</span><br></pre></td></tr></table></figure>
+<p>以 <code>&lt;shortcuts&gt;</code>元素为根，可以包含多个 shortcut 元素，每个 shortcut 元素表示一个 shortcut。其中不同字段的含义为：</p>
+<ul>
+<li>shortcutId表示 shortcut 唯一标识符，相同的 shortcutId 会被覆盖。必须字段。</li>
+<li>shortcutShortLabel为将 shortcut 拖动到桌面时显示的名字，官方建议不超过 10 个字符，必须字段。</li>
+<li>shortcutLongLabel为 shortcut 列表中每个 shortcut 的名字，不宜过长，如果过长或未设置默认会显示 ShortLabel，官方建议不超过 25 个字符。可选字段。</li>
+<li>icon为 shortcut 的 icon，在列表展示和拖动到桌面时显示需要，可选字段。</li>
+<li>enabled表示 shortcut 是否可用，false 表示禁用。xml 中这个属性几乎没有被设置为 false 的实际场景，具体原因可见<strong>6.7 如何更好的删除(废弃)老的 Shortcut</strong>中介绍。</li>
+<li>shortcutDisabledMessage为已固定在桌面的 shortcut 被 Disabled 后点击时的 Toast 提示内容。可选字段。</li>
+<li>intent为点击 shortcut 时响应的 Intent，必须字段。这里可以添加多个 Intent，成为一个 Intent 栈，点击会启动最后一个 Intent，在这个 Intent 回退时会启动它前面一个 Intent，相当于自动将所有 Intent 添加到了堆栈。对于先跳转到某个页面，Back 键希望退回主页而不是结束 App 这类场景，多个 Intents 挺实用的。</li>
+</ul>
+<blockquote>
+<p><strong>intent可设置属性包括：</strong><br><code>android:action</code>、<code>android:data</code>、<code>android:mimeType</code>、<code>android:targetClass</code>、<code>android:targetPackage</code>。其中<code>android:action</code>为必须属性。</p>
+</blockquote>
+<h4 id="动态-Shorcuts-Dynamic-shortcuts"><a href="#动态-Shorcuts-Dynamic-shortcuts" class="headerlink" title="动态 Shorcuts(Dynamic shortcuts)"></a>动态 Shorcuts(Dynamic shortcuts)</h4><p>动态 ShortcutsDynamic Shortcuts 通过 ShortcutManager API 进行操作。可以动态添加、修改、删除。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N_MR1) &#123;</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 管理 shortcuts</span><br><span class="line">    */</span><br><span class="line">    mShortcutManager = getSystemService(ShortcutManager.class);</span><br><span class="line">    /*</span><br><span class="line">    * 获取 ShortcutManager 支持的最多 shortcuts 个数</span><br><span class="line">    */</span><br><span class="line">    mMaxShortcutCount = mShortcutManager.getMaxShortcutCountPerActivity();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    new AlertDialog.Builder(mContext)</span><br><span class="line">            .setTitle(getString(R.string.main_dialog_simple_title))</span><br><span class="line">            .setMessage(getString(R.string.main_dialog_simple_message))</span><br><span class="line">            .setNeutralButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public void onClick(DialogInterface dialog, int which) &#123;</span><br><span class="line">                    finish();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            .show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建新的 shortcut 的方法为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Icon icon = Icon.createWithResource(mContext, R.mipmap.ic_favorite_black_24dp);   Intent intent = new Intent(mContext, ShowShortcutsActivity.class); intent.setAction(Intent.ACTION_VIEW); intent.putExtra(&quot;msg&quot;, singleChoiceItems[itemSelected]);</span><br><span class="line"></span><br><span class="line">ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, String.valueOf(itemSelected))</span><br><span class="line">        .setShortLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setLongLabel(singleChoiceItems[itemSelected])</span><br><span class="line">        .setIcon(icon)</span><br><span class="line">        .setIntent(intent)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+<p>添加的方法有：</p>
+<ul>
+<li><code>setDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以替换并添加所有 shortcut 列表；</li>
+<li><code>addDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>可以添加新的 shortcut 到列表，超过最大个数会报异常；</li>
+<li><code>updateShortcuts(List&lt;ShortcutInfo&gt;)</code>可以更新一组 shortcuts；</li>
+<li><code>removeDynamicShortcuts(List&lt;ShortcutInfo&gt;)</code>和removeAllDynamicShortcuts() 可以删除部分或所有 shortcuts。</li>
+</ul>
+<p>ShortcutInfo 的属性与 xml 中定义字段含义一致，shortcutId shortcutShortLabel intent 是必须设置的字段，并且intent必须设置Action。</p>
+<h4 id="固定的-Shortcuts-Pinned-Shortcuts"><a href="#固定的-Shortcuts-Pinned-Shortcuts" class="headerlink" title="固定的 Shortcuts(Pinned Shortcuts)"></a>固定的 Shortcuts(Pinned Shortcuts)</h4><p>Pinned Shortcuts 是指将 Shortcut 固定到桌面的功能，如下图所示：<br><img src="http://img.artaris.cn/shortcuts/img-1.jpg?imageMogr2/thumbnail/!30p"><br>由于固定到了桌面，APP 不能再添加、修改、删除这些这些 Shortcut ，只能禁用这些 Shortcut 。即便 App 内删除了某个 Shorcut，对应的已固定到桌面的 Shortcuts 也不会被删除。</p>
+<p>可以通过：</p>
+<ol>
+<li><code>getPinnedShortcuts()</code>得到所有固定的 Shortcuts 的信息。</li>
+<li><code>disableShortcuts(List)</code>或<code>disableShortcuts(List, CharSequence)</code>禁用动态的 Shortcuts。</li>
+</ol>
+<p>对于静态的 Shortcuts 需要在资源文件中设置<code>android:enabled=&quot;false&quot;</code>进行禁用，不过静态 Shortcuts 可直接通过删除达到禁用的效果.</p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ul>
+<li>动态 Shortcuts 与静态 Shortcuts 区别</li>
+</ul>
+<ol>
+<li>静态 Shortcuts 只能通过升级应用修改，动态 Shortcuts 随时可以修改；</li>
+<li>静态 Shortcuts 的 Intent 无法设置 Flag，默认为<code>FLAG_ACTIVITY_NEW_TASK</code>和<code>FLAG_ACTIVITY_CLEAR_TASK Flag</code>，即若应用运行中会清除所有已存在的 Activity。动态 Shortcuts 的 Intent 可以设置 Flag；</li>
+<li>静态 Shortcuts 的rank系统默认根据声明顺序设置，动态 Shortcuts 的rank可以通过setRank(int rank)接口主动设置，rank 不能小于 0，值越大表示在 shortcut 列表展示时离 App Icon 越远。静态 Shortcuts 默认比动态 Shortcuts 离 App Icon 更近。</li>
+<li>静态 Shortcuts 删除可以直接删除，动态 Shortcuts 建议通过禁用删除；</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android 线程池的使用</title>
     <url>/Android/Android%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<p>当我在 Android Studio 中使用如下方式</p>
@@ -1270,42 +1315,57 @@
       </tags>
   </entry>
   <entry>
-    <title>Activity 的加载模式</title>
-    <url>/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>Activity 的生命周期和加载模式是 Android 开发的基础，有些项目中的需求可以巧妙使用不同的加载模式来解决，之前使用 Android 加载模式时还有一些没有理解透彻的地方，在此做一个总结。此外，当打开已存在栈中的 Activity 时，并不会走<code>onCreate()</code>方法，而是会走<code>onNewIntent()</code>方法，在<code>onCreate()</code>做过的操作也会一并走一遍，在此也对这种情况做一个说明。</p>
+    <title>BroadcastReceiver 与 LocalBroadcastReceiver 的比较</title>
+    <url>/Android/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<p>LocalBroadcastReceiver 和 BroadcastReceiver 均为常用的广播方法。这里比较一下他们之间的区别与使用。</p>
 <span id="more"></span>
 
-<p>项目地址：<a href="https://github.com/ArtarisCN/ActivityLaunchModeDemo">ActivityLaunchModeDemo</a></p>
-<p>Activity 的加载模式是在<code>AndroidManifest.xml</code>中设置的，具体如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;activity android:name=&quot;.ui.activity.MainActivity&quot;</span><br><span class="line">  	  android:launchMode=&quot;singleTask&quot;/&gt;</span><br></pre></td></tr></table></figure>
-<h4 id="Standard（默认）"><a href="#Standard（默认）" class="headerlink" title="Standard（默认）"></a>Standard（默认）</h4><p>如果不指定<code>launchMode</code>，则默认为<code>standard</code>。<br>当启动模式设置成<code>standard</code>时，每次生成新的 Activity ，就会在当前任务栈中生成新的页面。当打开一个新的页面时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_1.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当再次开启一个新的<code>standard</code>页面时，前一个Activity 的生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_2.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-
-<p>新开的页面继续重复其生命周期</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Create</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当关闭屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_6.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line"></span><br><span class="line">On Stop</span><br></pre></td></tr></table></figure>
-<p>重新开启屏幕时，其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_3.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-<p>当前任务栈如下<br><img src="http://img.artaris.cn/activity_launch_model/stander_4.jpg?imageMogr2/thumbnail/!30p"></p>
-<h4 id="SingleTop"><a href="#SingleTop" class="headerlink" title="SingleTop"></a>SingleTop</h4><p><code>singleTop</code>其实和<code>standard</code>几乎一样，使用<code>singleTop</code>的 Activity 也可以创建很多个实例。唯一不同的就是，如果调用的目标 Activity 已经位于调用者的Task的栈顶，则不创建新实例，而是使用当前的这个 Activity 实例，并调用这个实例的 <code>onNewIntent()</code>方法。如果是外部程序跨应用启动singleTop的Activity，在Android 5.0之前新创建的Activity会位于调用者的Task中，5.0及以后会放入新的Task中。</p>
-<p>当当前栈顶页面不是<code>singleTop</code>时，其效果与<code>standard</code>一样的，在此不再赘述。当前页面已经是<code>singleTop</code>，会使用当前实例，点击新开<code>singleTop</code>其生命周期如下<br><img src="http://img.artaris.cn/activity_launch_model/single_top_5.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On Pause</span><br><span class="line">On New Intent</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，新开的页面并没有重新创建，而是调用了顶端 Activity 的<code>onNewIntent()</code>方法。</p>
-<h4 id="SingleTask"><a href="#SingleTask" class="headerlink" title="SingleTask"></a>SingleTask</h4><ul>
-<li>在同一程序时<br><code>singleTask</code>简单来说，就是当前栈中只有一个该页面的实例。使用<code>singleTask</code>创建新的 Activity 时会先检查当前栈中是否有此实例，如果有这个实例，则会将此实例之上所有的 Activity 统统出栈，使此Activity实例成为栈顶对象，显示到幕前，然后调用 <code>onNewIntent()</code>方法。<br>调用前栈内信息如下：<br><img src="http://img.artaris.cn/activity_launch_model/single_task_1.jpg?imageMogr2/thumbnail/!30p"><br>可以看到当前<code>singleTask</code>页面为第三个页面（其上还有两个<code>standard</code>页面），这时我们点击生成<code>singleTask</code>页面，任务栈变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_2.jpg?imageMogr2/thumbnail/!30p"><br>在栈中的<code>singleTask</code>的生命周期变化如下<br><img src="http://img.artaris.cn/activity_launch_model/single_task_3.png"><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">On New Intent</span><br><span class="line">On Restart</span><br><span class="line">On Start</span><br><span class="line">On Resume</span><br></pre></td></tr></table></figure></li>
-<li>不同程序之间</li>
-</ul>
+<h2 id="LocalBroadcastReceiver"><a href="#LocalBroadcastReceiver" class="headerlink" title="LocalBroadcastReceiver"></a>LocalBroadcastReceiver</h2><p>LocalBroadcastReceiver 是本地广播，只能在应用使用和接收。</p>
 <ol>
-<li>在跨应用Intent传递时，如果系统中不存在singleTask Activity的实例，那么将创建一个新Task，然后创建SingleTask Activity实例，将其放入新的Task中。</li>
-<li>如果singleTask Activity所在的应用进程存在，但是singleTask Activity实例不存在，那么从别的应用启动这个Activity，新的Activity实例会被创建，并放入到所属进程所在的Task中，并位于栈顶位置。</li>
-<li>更复杂的一种情况，如果singleTask Activity实例存在，从其他程序被启动，那么这个Activity所在的Task会被移到顶部，并且在这个Task中，位于singleTask Activity实例之上的所有Activity将会被正常销毁掉。如果我们按返回键，那么我们首先会回退到这个Task中的其他Activity，直到当前Task的Activity回退栈为空时，才会返回到调用者的Task。</li>
+<li>获取一个localBroadcastManager实例</li>
+<li>使用localBroadcastManager.sendBroadcast(intent)方法发送广播</li>
+<li>写好广播接收器</li>
+<li>注册好广播接收器的要接收的广播地址，然后使用localBroadcastManager.registerReceiver(mBroadcastReceiver,intentFilter);方法进行注册</li>
+<li>记得在onDestroy()中取消注册</li>
 </ol>
-<h4 id="SingleInstance"><a href="#SingleInstance" class="headerlink" title="SingleInstance"></a>SingleInstance</h4><p><code>singleInstance</code>模式下无论在任何任务栈启动，全局都只会有一个 <code>singleInstance</code> 实例。如果在<code>singleInstance</code> 启动其他模式的页面，那么这个其他页面的实例会放入其他任务栈中。就是说<code>singleInstance</code>会在一个单独的全新的任务栈中。</p>
-<p>当从其他页面跳到<code>singleInstance</code>时重新启用了一个新的栈结构，来放置<code>singleInstance</code>实例，然后按下后退键，再次回到原始栈结构；<br>如果在<code>singleInstance</code>页面新开一个<code>standard</code> 页面，则会在原栈中生成一个页面，<code>singleInstance</code>依然存在，当在原栈中点击返回两次，则会关闭原栈，页面会切到<code>singleInstance</code>页面。</p>
+<h2 id="BroadcastReceiver"><a href="#BroadcastReceiver" class="headerlink" title="BroadcastReceiver"></a>BroadcastReceiver</h2><p>BroadcastReceiver 是针对应用间、应用与系统间、应用内部进行通信的一种方式<br>LocalBroadcastReceiver 仅在自己的应用内发送接收广播，也就是只有自己的应用能收到，数据更加安全广播只在这个程序里，而且效率更高。<br><strong>BroadcastReceiver 使用</strong></p>
+<ol>
+<li><p>制作intent（可以携带参数）</p>
+</li>
+<li><p>使用sendBroadcast()传入intent;</p>
+</li>
+<li><p>制作广播接收器类继承BroadcastReceiver重写onReceive方法（或者可以匿名内部类啥的）</p>
+</li>
+<li><p>在java中（动态注册）或者直接在Manifest中注册广播接收器（静态注册）使用registerReceiver()传入接收器和intentFilter</p>
+</li>
+<li><p>取消注册可以在OnDestroy()函数中，unregisterReceiver()传入接收器<br>LocalBroadcastReceiver 使用</p>
+</li>
+<li><p>LocalBroadcastReceiver不能静态注册，只能采用动态注册的方式。<br>在发送和注册的时候采用，LocalBroadcastManager的sendBroadcast方法和registerReceiver方法</p>
+</li>
+<li><p>可以明确的知道正在发送的广播不会离开我们的程序，因此不用担心机密数据泄露问题</p>
+</li>
+<li><p>其他程序无法将广播发送到我们程序的内部，因此不需要担心会有安全漏洞的隐患</p>
+</li>
+<li><p>发送本地广播要比全局广播更加高效</p>
+</li>
+</ol>
+<ul>
+<li>BroadcastReceiver 是跨应用广播，利用Binder机制实现，支持动态和静态两种方式注册方式。</li>
+<li>LocalBroadcastReceiver 是应用内广播，利用Handler实现，利用了IntentFilter的match功能，提供消息的发布与接收功能，实现应用内通信，效率和安全性比较高，仅支持动态注册。</li>
+</ul>
+<p><strong>广播细分为三种:</strong></p>
+<ul>
+<li>普通广播</li>
+<li>有序广播</li>
+<li>本地广播</li>
+</ul>
+<p><strong>普通广播是什么？</strong><br>调用sendBroadcast()发送</p>
+<p><strong>有序广播是什么？</strong><br>调用sendOrderedBroadcast()发送<br>广播接收者会按照priority优先级从大到小进行排序<br>优先级相同的广播，动态注册的广播优先处理<br>广播接收者还能对广播进行截断和修改</p>
+<p><strong>本地广播的优点?</strong><br>效率更高。<br>发送的广播不会离开我们的应用，不会泄露关键数据。<br>其他程序无法将广播发送到我们程序内部，不会有安全漏洞。</p>
+<p>现在BroadcastReceiver也不推荐使用静态注册了，8.0之后限制了绝大部分广播只能使用动态注册</p>
+<blockquote>
+<p>应用内广播现在还有人用吗？已经被EventBus类似的事件替换了吧？<br>emmmm……</p>
+</blockquote>
 ]]></content>
       <categories>
         <category>Android</category>
@@ -1843,38 +1903,46 @@
       </tags>
   </entry>
   <entry>
-    <title>LeetCode解题笔记</title>
-    <url>/uncategorized/LeetCode%E8%A7%A3%E9%A2%98%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="LeetCode-解题笔记"><a href="#LeetCode-解题笔记" class="headerlink" title="LeetCode 解题笔记"></a>LeetCode 解题笔记</h1><p><a href="https://github.com/ArtarisCN/LeetCode">Artaris 的 LeetCode</a></p>
+    <title>Java 的内存模型与 volatile 关键字</title>
+    <url>/Java/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/</url>
+    <content><![CDATA[<h2 id="Java-的内存模型"><a href="#Java-的内存模型" class="headerlink" title="Java 的内存模型"></a>Java 的内存模型</h2><p>Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。</p>
 <span id="more"></span>
 
-<h3 id="827-Making-A-Large-Island"><a href="#827-Making-A-Large-Island" class="headerlink" title="827. Making A Large Island"></a>827. Making A Large Island</h3><p>这道题使用了并查集的知识，将所有岛先进行一次并查集操作，转化成只有两级的以代表元为根的树形结构，记录每个岛的父节点，在另一个数组中存储这个“合并岛”的大小。然后遍历为0的岛，判断是否有相邻为1的岛并去查找其父节点，找到父节点之后去查找该父节点的“合并岛”的大小（注意去重，有可能相邻的岛查到了形同的父节点），找到四个相邻岛加起来就是该为0的岛的结果，找到最大的结果即可。</p>
-<h3 id="513-Find-Bottom-Left-Tree-Value"><a href="#513-Find-Bottom-Left-Tree-Value" class="headerlink" title="513. Find Bottom Left Tree Value"></a>513. Find Bottom Left Tree Value</h3><p>这道题要求找到二叉树最下面一排的第一个元素，思路就是每次遍历一层二叉树，并在遍历的时候记录第一个元素，全部遍历完，记录的那个元素就是结果。这里使用队列来进行二叉树的遍历，我使用 Java 中的 LinkedList 当作队列来使用，遇到的一个坑就是向队列队尾添加元素应该使用 offer 而不是使用 push ，<strong>push 在队列里是向队首添加元素的意思！</strong>,</p>
+<p>Java内存模型规定所有的变量都是存在主存当中，每个线程都有自己的工作内存。线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作。并且每个线程不能访问其他线程的工作内存。<br>Java 内存模型为程序的原子性、可见性以及有序性的保证：</p>
 <ul>
-<li>poll 队首弹出</li>
-<li>offer 添加队尾</li>
-<li>element 预览</li>
-</ul>
-<h3 id="79-Word-Search"><a href="#79-Word-Search" class="headerlink" title="79. Word Search"></a>79. Word Search</h3><p>这道题是使用递归，同时传入所需子串和当前搜索位置，搜索完字符串则成功。需要注意的每一个位置只能使用一次，所以需要一个数组记录访问过的位置。</p>
-<h3 id="48-Rotate-Image"><a href="#48-Rotate-Image" class="headerlink" title="48. Rotate Image"></a>48. Rotate Image</h3><p>这道题是旋转一个数组，观察之后发现旋转是一环一环进行的，外圈怎么旋转也不会到内圈去（有点像玩魔方，角块怎么转也不会去边上），故使用递归一圈一圈旋转。</p>
-<p>对于一圈一圈转的时候，是四条边互相交换位置，所以遍历一条边上的数，对于一条边上的某个值，作四次对换就OK了，就是确定四个值的位置时需要小心一些，算好就可以了。</p>
-<h3 id="803-Bricks-Falling-When-Hit"><a href="#803-Bricks-Falling-When-Hit" class="headerlink" title="803. Bricks Falling When Hit"></a>803. Bricks Falling When Hit</h3><p>打砖块，如果没有和顶部相连的砖块就算作掉下来，此题通过逆向思维，先将所有的砖块打落，然后通过深度优先计算与顶部相连的砖块，是击落最后一块砖之后的结果，然后倒着加砖块，每加一块砖，重新计算一次与顶部相连的砖块，计算完成之后的数量减去上一只与顶部相连的砖块的值即是本次击落的砖块。</p>
-<h3 id="147-Insertion-Sort-List"><a href="#147-Insertion-Sort-List" class="headerlink" title="147. Insertion Sort List"></a>147. Insertion Sort List</h3><p>通过两次遍历来插入链表，</p>
+<li><p>原子性<br>  对基本数据类型的变量的读取和赋值操作是原子性操作，即这些操作是不可被中断的，要么执行，要么不执行。<br>  只有简单的读取、赋值（而且必须是将数字赋值给某个变量，变量之间的相互赋值不是原子操作）才是原子操作。</p>
+<p>  <em>x++和 x &#x3D; x+1包括3个操作：读取x的值，进行加1操作，写入新的值。</em></p>
+<p>  大范围的原子性操作通过 synchronized 和 Lock 来实现</p>
+</li>
+<li><p>可见性：<br>  Java提供了volatile关键字来保证可见性。当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去内存中读取新值。<br>  而普通的共享变量不能保证可见性，因为普通共享变量被修改之后，什么时候被写入主存是不确定的，当其他线程去读取时，此时内存中可能还是原来的旧值，因此无法保证可见性。<br>  synchronized和Lock也能够保证可见性，</p>
+</li>
+<li><p>有序性<br>  在Java内存模型中，允许编译器和处理器对指令进行重排序，但是重排序过程不会影响到单线程程序的执行，却会影响到多线程并发执行的正确性。<br>  在Java里面，可以通过volatile关键字来保证一定的“有序性”<br>  Java 还具有一些先天的有序性，也称为 happens-before 原则，如果两个操作的执行次序无法从happens-before原则推导出来，那么它们就不能保证它们的有序性，虚拟机可以随意地对它们进行重排序。</p>
 <ul>
-<li>第一层遍历：遍历需要比较的节点，每次记录当前比较的节点、已排好序的链表的头节点、还未比较链表的头节点。</li>
-<li>第二层遍历：将当前比较的节点一次与已排好序的链表进行比较，找到合适位置插入，注意如果是最大🔥最小的情况处理。<br>注意将每次当前比较的节点的后驱置为 null ，不然会造成链表循环。</li>
+<li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
+<li>锁定规则：一个unLock操作先行发生于后面对同一个锁额lock操作</li>
+<li>volatile变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作</li>
+<li>传递规则：如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C</li>
 </ul>
-<h3 id="164-Maximum-Gap"><a href="#164-Maximum-Gap" class="headerlink" title="164. Maximum Gap"></a>164. Maximum Gap</h3><p>要求找到排序之后的相差最大的两个值，这个题要求空间时间复杂度都是线性的，其实是考排序算法的。<br><del>偷鸡法：Arrays.sort(nums)</del><br>要求时间空间复杂度是线形的，这里使用基数排序来实现。</p>
-<h3 id="523-Continuous-Subarray-Sum"><a href="#523-Continuous-Subarray-Sum" class="headerlink" title="523. Continuous Subarray Sum"></a>523. Continuous Subarray Sum</h3><p>这道题是要求找出是否有相邻的几个数的和正好是给定数据的倍数，思路是线形相加，每次对给定倍数取余数，并放到字典里，下次相加是如果字典里有这个余数，说明存在这样的数，用到了下面的原理：</p>
+</li>
+</ul>
+<h2 id="volatole-关键字"><a href="#volatole-关键字" class="headerlink" title="volatole 关键字"></a>volatole 关键字</h2><p>被 volatole 修饰的共享变量会具有两层含义：<br>　　1. 保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。即<strong>它会保证修改的值会立即被更新到主存</strong><br>　　2. 禁止进行指令重排序。保证被 volatile 修饰变量与其他指令的绝对顺序。</p>
+<h4 id="volatole-的实现原理"><a href="#volatole-的实现原理" class="headerlink" title="volatole 的实现原理"></a>volatole 的实现原理</h4><p>volatole 是通过内存屏障来实现加锁操作的</p>
 <blockquote>
-<p>如果给定 …i…j…k… 的数据的序列，如果 sum(0,j) % divisor &#x3D; m 且 sum(0,k) % divisor &#x3D; m ,那么 [sum(j, k) - m] % divisor &#x3D; 0;</p>
+<p>“观察加入volatile关键字和没有加入volatile关键字时所生成的汇编代码发现，加入volatile关键字时，会多出一个lock前缀指令”</p>
 </blockquote>
-<p>想法很好，但是做起来有很多坑，如</p>
+<p>lock前缀指令实际上相当于一个内存屏障（也成内存栅栏），内存屏障会提供3个功能：</p>
 <ul>
-<li>连续相邻的两个 0 是所有数的倍数</li>
-<li>只有一个除数不算，要多于一个数才行</li>
+<li>它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面；即在执行到内存屏障这句指令时，在它前面的操作已经全部完成；</li>
+<li>它会强制将对缓存的修改操作立即写入主存；</li>
+<li>如果是写操作，它会导致其他CPU中对应的缓存行无效。</li>
 </ul>
 ]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
   </entry>
   <entry>
     <title>Java 中单例的实现与线程安全</title>
@@ -1942,46 +2010,38 @@
       </tags>
   </entry>
   <entry>
-    <title>Java 的内存模型与 volatile 关键字</title>
-    <url>/Java/Java-%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E-volatile-%E5%85%B3%E9%94%AE%E5%AD%97/</url>
-    <content><![CDATA[<h2 id="Java-的内存模型"><a href="#Java-的内存模型" class="headerlink" title="Java 的内存模型"></a>Java 的内存模型</h2><p>Java 的内存模型（Java Memory Model，JMM）定义了程序中变量的访问规则，即程序的执行次序。</p>
+    <title>LeetCode解题笔记</title>
+    <url>/uncategorized/LeetCode%E8%A7%A3%E9%A2%98%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="LeetCode-解题笔记"><a href="#LeetCode-解题笔记" class="headerlink" title="LeetCode 解题笔记"></a>LeetCode 解题笔记</h1><p><a href="https://github.com/ArtarisCN/LeetCode">Artaris 的 LeetCode</a></p>
 <span id="more"></span>
 
-<p>Java内存模型规定所有的变量都是存在主存当中，每个线程都有自己的工作内存。线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作。并且每个线程不能访问其他线程的工作内存。<br>Java 内存模型为程序的原子性、可见性以及有序性的保证：</p>
+<h3 id="827-Making-A-Large-Island"><a href="#827-Making-A-Large-Island" class="headerlink" title="827. Making A Large Island"></a>827. Making A Large Island</h3><p>这道题使用了并查集的知识，将所有岛先进行一次并查集操作，转化成只有两级的以代表元为根的树形结构，记录每个岛的父节点，在另一个数组中存储这个“合并岛”的大小。然后遍历为0的岛，判断是否有相邻为1的岛并去查找其父节点，找到父节点之后去查找该父节点的“合并岛”的大小（注意去重，有可能相邻的岛查到了形同的父节点），找到四个相邻岛加起来就是该为0的岛的结果，找到最大的结果即可。</p>
+<h3 id="513-Find-Bottom-Left-Tree-Value"><a href="#513-Find-Bottom-Left-Tree-Value" class="headerlink" title="513. Find Bottom Left Tree Value"></a>513. Find Bottom Left Tree Value</h3><p>这道题要求找到二叉树最下面一排的第一个元素，思路就是每次遍历一层二叉树，并在遍历的时候记录第一个元素，全部遍历完，记录的那个元素就是结果。这里使用队列来进行二叉树的遍历，我使用 Java 中的 LinkedList 当作队列来使用，遇到的一个坑就是向队列队尾添加元素应该使用 offer 而不是使用 push ，<strong>push 在队列里是向队首添加元素的意思！</strong>,</p>
 <ul>
-<li><p>原子性<br>  对基本数据类型的变量的读取和赋值操作是原子性操作，即这些操作是不可被中断的，要么执行，要么不执行。<br>  只有简单的读取、赋值（而且必须是将数字赋值给某个变量，变量之间的相互赋值不是原子操作）才是原子操作。</p>
-<p>  <em>x++和 x &#x3D; x+1包括3个操作：读取x的值，进行加1操作，写入新的值。</em></p>
-<p>  大范围的原子性操作通过 synchronized 和 Lock 来实现</p>
-</li>
-<li><p>可见性：<br>  Java提供了volatile关键字来保证可见性。当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去内存中读取新值。<br>  而普通的共享变量不能保证可见性，因为普通共享变量被修改之后，什么时候被写入主存是不确定的，当其他线程去读取时，此时内存中可能还是原来的旧值，因此无法保证可见性。<br>  synchronized和Lock也能够保证可见性，</p>
-</li>
-<li><p>有序性<br>  在Java内存模型中，允许编译器和处理器对指令进行重排序，但是重排序过程不会影响到单线程程序的执行，却会影响到多线程并发执行的正确性。<br>  在Java里面，可以通过volatile关键字来保证一定的“有序性”<br>  Java 还具有一些先天的有序性，也称为 happens-before 原则，如果两个操作的执行次序无法从happens-before原则推导出来，那么它们就不能保证它们的有序性，虚拟机可以随意地对它们进行重排序。</p>
+<li>poll 队首弹出</li>
+<li>offer 添加队尾</li>
+<li>element 预览</li>
+</ul>
+<h3 id="79-Word-Search"><a href="#79-Word-Search" class="headerlink" title="79. Word Search"></a>79. Word Search</h3><p>这道题是使用递归，同时传入所需子串和当前搜索位置，搜索完字符串则成功。需要注意的每一个位置只能使用一次，所以需要一个数组记录访问过的位置。</p>
+<h3 id="48-Rotate-Image"><a href="#48-Rotate-Image" class="headerlink" title="48. Rotate Image"></a>48. Rotate Image</h3><p>这道题是旋转一个数组，观察之后发现旋转是一环一环进行的，外圈怎么旋转也不会到内圈去（有点像玩魔方，角块怎么转也不会去边上），故使用递归一圈一圈旋转。</p>
+<p>对于一圈一圈转的时候，是四条边互相交换位置，所以遍历一条边上的数，对于一条边上的某个值，作四次对换就OK了，就是确定四个值的位置时需要小心一些，算好就可以了。</p>
+<h3 id="803-Bricks-Falling-When-Hit"><a href="#803-Bricks-Falling-When-Hit" class="headerlink" title="803. Bricks Falling When Hit"></a>803. Bricks Falling When Hit</h3><p>打砖块，如果没有和顶部相连的砖块就算作掉下来，此题通过逆向思维，先将所有的砖块打落，然后通过深度优先计算与顶部相连的砖块，是击落最后一块砖之后的结果，然后倒着加砖块，每加一块砖，重新计算一次与顶部相连的砖块，计算完成之后的数量减去上一只与顶部相连的砖块的值即是本次击落的砖块。</p>
+<h3 id="147-Insertion-Sort-List"><a href="#147-Insertion-Sort-List" class="headerlink" title="147. Insertion Sort List"></a>147. Insertion Sort List</h3><p>通过两次遍历来插入链表，</p>
 <ul>
-<li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
-<li>锁定规则：一个unLock操作先行发生于后面对同一个锁额lock操作</li>
-<li>volatile变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作</li>
-<li>传递规则：如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C</li>
+<li>第一层遍历：遍历需要比较的节点，每次记录当前比较的节点、已排好序的链表的头节点、还未比较链表的头节点。</li>
+<li>第二层遍历：将当前比较的节点一次与已排好序的链表进行比较，找到合适位置插入，注意如果是最大🔥最小的情况处理。<br>注意将每次当前比较的节点的后驱置为 null ，不然会造成链表循环。</li>
 </ul>
-</li>
-</ul>
-<h2 id="volatole-关键字"><a href="#volatole-关键字" class="headerlink" title="volatole 关键字"></a>volatole 关键字</h2><p>被 volatole 修饰的共享变量会具有两层含义：<br>　　1. 保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。即<strong>它会保证修改的值会立即被更新到主存</strong><br>　　2. 禁止进行指令重排序。保证被 volatile 修饰变量与其他指令的绝对顺序。</p>
-<h4 id="volatole-的实现原理"><a href="#volatole-的实现原理" class="headerlink" title="volatole 的实现原理"></a>volatole 的实现原理</h4><p>volatole 是通过内存屏障来实现加锁操作的</p>
+<h3 id="164-Maximum-Gap"><a href="#164-Maximum-Gap" class="headerlink" title="164. Maximum Gap"></a>164. Maximum Gap</h3><p>要求找到排序之后的相差最大的两个值，这个题要求空间时间复杂度都是线性的，其实是考排序算法的。<br><del>偷鸡法：Arrays.sort(nums)</del><br>要求时间空间复杂度是线形的，这里使用基数排序来实现。</p>
+<h3 id="523-Continuous-Subarray-Sum"><a href="#523-Continuous-Subarray-Sum" class="headerlink" title="523. Continuous Subarray Sum"></a>523. Continuous Subarray Sum</h3><p>这道题是要求找出是否有相邻的几个数的和正好是给定数据的倍数，思路是线形相加，每次对给定倍数取余数，并放到字典里，下次相加是如果字典里有这个余数，说明存在这样的数，用到了下面的原理：</p>
 <blockquote>
-<p>“观察加入volatile关键字和没有加入volatile关键字时所生成的汇编代码发现，加入volatile关键字时，会多出一个lock前缀指令”</p>
+<p>如果给定 …i…j…k… 的数据的序列，如果 sum(0,j) % divisor &#x3D; m 且 sum(0,k) % divisor &#x3D; m ,那么 [sum(j, k) - m] % divisor &#x3D; 0;</p>
 </blockquote>
-<p>lock前缀指令实际上相当于一个内存屏障（也成内存栅栏），内存屏障会提供3个功能：</p>
+<p>想法很好，但是做起来有很多坑，如</p>
 <ul>
-<li>它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面；即在执行到内存屏障这句指令时，在它前面的操作已经全部完成；</li>
-<li>它会强制将对缓存的修改操作立即写入主存；</li>
-<li>如果是写操作，它会导致其他CPU中对应的缓存行无效。</li>
+<li>连续相邻的两个 0 是所有数的倍数</li>
+<li>只有一个除数不算，要多于一个数才行</li>
 </ul>
 ]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
   </entry>
   <entry>
     <title>MarkDown 语法学习笔记</title>
@@ -2182,66 +2242,6 @@
       </tags>
   </entry>
   <entry>
-    <title>BroadcastReceiver 与 LocalBroadcastReceiver 的比较</title>
-    <url>/Android/BroadcastReceiver-%E4%B8%8E-LocalBroadcastReceiver-%E7%9A%84%E6%AF%94%E8%BE%83/</url>
-    <content><![CDATA[<p>LocalBroadcastReceiver 和 BroadcastReceiver 均为常用的广播方法。这里比较一下他们之间的区别与使用。</p>
-<span id="more"></span>
-
-<h2 id="LocalBroadcastReceiver"><a href="#LocalBroadcastReceiver" class="headerlink" title="LocalBroadcastReceiver"></a>LocalBroadcastReceiver</h2><p>LocalBroadcastReceiver 是本地广播，只能在应用使用和接收。</p>
-<ol>
-<li>获取一个localBroadcastManager实例</li>
-<li>使用localBroadcastManager.sendBroadcast(intent)方法发送广播</li>
-<li>写好广播接收器</li>
-<li>注册好广播接收器的要接收的广播地址，然后使用localBroadcastManager.registerReceiver(mBroadcastReceiver,intentFilter);方法进行注册</li>
-<li>记得在onDestroy()中取消注册</li>
-</ol>
-<h2 id="BroadcastReceiver"><a href="#BroadcastReceiver" class="headerlink" title="BroadcastReceiver"></a>BroadcastReceiver</h2><p>BroadcastReceiver 是针对应用间、应用与系统间、应用内部进行通信的一种方式<br>LocalBroadcastReceiver 仅在自己的应用内发送接收广播，也就是只有自己的应用能收到，数据更加安全广播只在这个程序里，而且效率更高。<br><strong>BroadcastReceiver 使用</strong></p>
-<ol>
-<li><p>制作intent（可以携带参数）</p>
-</li>
-<li><p>使用sendBroadcast()传入intent;</p>
-</li>
-<li><p>制作广播接收器类继承BroadcastReceiver重写onReceive方法（或者可以匿名内部类啥的）</p>
-</li>
-<li><p>在java中（动态注册）或者直接在Manifest中注册广播接收器（静态注册）使用registerReceiver()传入接收器和intentFilter</p>
-</li>
-<li><p>取消注册可以在OnDestroy()函数中，unregisterReceiver()传入接收器<br>LocalBroadcastReceiver 使用</p>
-</li>
-<li><p>LocalBroadcastReceiver不能静态注册，只能采用动态注册的方式。<br>在发送和注册的时候采用，LocalBroadcastManager的sendBroadcast方法和registerReceiver方法</p>
-</li>
-<li><p>可以明确的知道正在发送的广播不会离开我们的程序，因此不用担心机密数据泄露问题</p>
-</li>
-<li><p>其他程序无法将广播发送到我们程序的内部，因此不需要担心会有安全漏洞的隐患</p>
-</li>
-<li><p>发送本地广播要比全局广播更加高效</p>
-</li>
-</ol>
-<ul>
-<li>BroadcastReceiver 是跨应用广播，利用Binder机制实现，支持动态和静态两种方式注册方式。</li>
-<li>LocalBroadcastReceiver 是应用内广播，利用Handler实现，利用了IntentFilter的match功能，提供消息的发布与接收功能，实现应用内通信，效率和安全性比较高，仅支持动态注册。</li>
-</ul>
-<p><strong>广播细分为三种:</strong></p>
-<ul>
-<li>普通广播</li>
-<li>有序广播</li>
-<li>本地广播</li>
-</ul>
-<p><strong>普通广播是什么？</strong><br>调用sendBroadcast()发送</p>
-<p><strong>有序广播是什么？</strong><br>调用sendOrderedBroadcast()发送<br>广播接收者会按照priority优先级从大到小进行排序<br>优先级相同的广播，动态注册的广播优先处理<br>广播接收者还能对广播进行截断和修改</p>
-<p><strong>本地广播的优点?</strong><br>效率更高。<br>发送的广播不会离开我们的应用，不会泄露关键数据。<br>其他程序无法将广播发送到我们程序内部，不会有安全漏洞。</p>
-<p>现在BroadcastReceiver也不推荐使用静态注册了，8.0之后限制了绝大部分广播只能使用动态注册</p>
-<blockquote>
-<p>应用内广播现在还有人用吗？已经被EventBus类似的事件替换了吧？<br>emmmm……</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>try、catch、finally、throw和throws</title>
     <url>/Java/try%E3%80%81catch%E3%80%81finally%E3%80%81throw%E5%92%8Cthrows/</url>
     <content><![CDATA[<p>try、catch、finally 是 Java 中处理异常的一套机制。</p>
@@ -2430,6 +2430,94 @@
       </tags>
   </entry>
   <entry>
+    <title>数据结构——栈和队列</title>
+    <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/</url>
+    <content><![CDATA[<p>栈和队列是线性表的一种，只是它们是操作受限的线性表。</p>
+<span id="more"></span>
+
+<h1 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h1><p>栈是只能在表尾进行插入或删除操作的线性表，通常我们称表尾端为栈顶，表头端为栈底，它是一种先进后出的线性表，既只能在表尾端插入元素，称为入栈，也只能在表尾端删除元素，称为出栈。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java.lang.Object</span><br><span class="line">↳     java.util.AbstractCollection&lt;E&gt;</span><br><span class="line">   ↳     java.util.AbstractList&lt;E&gt;</span><br><span class="line">       ↳     java.util.Vector&lt;E&gt;</span><br><span class="line">           ↳     java.util.Stack&lt;E&gt;</span><br><span class="line"></span><br><span class="line">public class Stack&lt;E&gt; extends Vector&lt;E&gt; &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Stack的API"><a href="#Stack的API" class="headerlink" title="Stack的API"></a>Stack的API</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">             boolean       empty()              // 栈是否为空</span><br><span class="line">synchronized E             peek()               // 返回栈顶元素，不执行删除操作</span><br><span class="line">synchronized E             pop()                // 返回栈顶元素，并将其从栈中删除</span><br><span class="line">             E             push(E object)       // 将元素存入栈顶</span><br><span class="line">synchronized int           search(Object o)     // 查找“元素o”在栈中的位置：由栈底向栈顶方向数</span><br></pre></td></tr></table></figure>
+
+<h1 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h1><p>队列刚好和栈相反，它是一种先进先出（FIFO）的线性表，只能在一端插入元素，在另一端删除元素，如下图所示，允许插入元素的一端称为队尾，允许删除元素的一端称为队头。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java.lang.Iterable&lt;E&gt;</span><br><span class="line">↳     java.util.Collection&lt;E&gt;</span><br><span class="line">   ↳     java.util.Stack&lt;E&gt;</span><br><span class="line"></span><br><span class="line">public interface Queue&lt;E&gt; extends Collection&lt;E&gt;  &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="队列的实现"><a href="#队列的实现" class="headerlink" title="队列的实现"></a>队列的实现</h2><ul>
+<li>没有实现的阻塞接口 LinkedList</li>
+<li>实现阻塞接口的<ul>
+<li>ArrayBlockingQueue ：一个由数组支持的有界队列。</li>
+<li>LinkedBlockingQueue ：一个由链接节点支持的可选有界队列。</li>
+<li>PriorityBlockingQueue ：一个由优先级堆支持的无界优先级队列。</li>
+<li>DelayQueue ：一个由优先级堆支持的、基于时间的调度队列。</li>
+<li>SynchronousQueue ：一个利用 BlockingQueue 接口的简单聚集（rendezvous）机制。</li>
+</ul>
+</li>
+</ul>
+<h3 id="Queue-的-API"><a href="#Queue-的-API" class="headerlink" title="Queue 的 API"></a>Queue 的 API</h3><table>
+<thead>
+<tr>
+<th align="left">func</th>
+<th align="left">return</th>
+<th align="left">explain</th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>add(E e)</strong></td>
+<td align="left">boolean</td>
+<td align="left">增加一个元索</td>
+<td align="left">如果队列已满，则抛出一个 IIIegaISlabEepeplian 异常</td>
+</tr>
+<tr>
+<td align="left"><strong>remove()</strong></td>
+<td align="left">E</td>
+<td align="left">移除并返回队列头部的元素</td>
+<td align="left">如果队列为空，则抛出一个 NoSuchElementException 异常</td>
+</tr>
+<tr>
+<td align="left"><strong>element()</strong></td>
+<td align="left">E</td>
+<td align="left">返回队列头部的元素</td>
+<td align="left">如果队列为空，则抛出一个 NoSuchElementException 异常</td>
+</tr>
+<tr>
+<td align="left"><strong>offer(E e)</strong></td>
+<td align="left">boolean</td>
+<td align="left">添加一个元素并返回true</td>
+<td align="left">如果队列已满，则返回false</td>
+</tr>
+<tr>
+<td align="left"><strong>poll()</strong></td>
+<td align="left">E</td>
+<td align="left">移除并返问队列头部的元素</td>
+<td align="left">如果队列为空，则返回null</td>
+</tr>
+<tr>
+<td align="left"><strong>peek()</strong></td>
+<td align="left">E</td>
+<td align="left">返回队列头部的元素</td>
+<td align="left">如果队列为空，则返回null</td>
+</tr>
+<tr>
+<td align="left">put(E e)</td>
+<td align="left">void</td>
+<td align="left">添加一个元素</td>
+<td align="left">如果队列满，则阻塞</td>
+</tr>
+<tr>
+<td align="left">take()</td>
+<td align="left">E e</td>
+<td align="left">移除并返回队列头部的元素</td>
+<td align="left">如果队列为空，则阻塞</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>数据结构</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据结构——排序</title>
     <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%8E%92%E5%BA%8F/</url>
     <content><![CDATA[<table>
@@ -2524,94 +2612,6 @@
 
 <h3 id="桶排序"><a href="#桶排序" class="headerlink" title="桶排序"></a>桶排序</h3><p>桶排序是一种以空间换时间的排序方法，事先要知道待排序数组的范围，申请一个空间为待排序数组最大值减去最小值的记录数组，然后依次遍历数组，出现某个数则标记相应位置+1，全部遍历完成再从小到大遍历记录数组，输出出现次数即可。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">bucketSort</span><span class="params">(<span class="type">int</span>[] num)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (num == <span class="literal">null</span> || num.length &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> <span class="variable">max</span> <span class="operator">=</span> Integer.MIN_VALUE, min = Integer.MAX_VALUE;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i : num) &#123;</span><br><span class="line">        max = Math.max(max, i);</span><br><span class="line">        min = Math.min(min, i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span>[] bucket = <span class="keyword">new</span> <span class="title class_">int</span>[max - min + <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i : num) &#123;</span><br><span class="line">        bucket[i - min]++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; bucket.length; i++) &#123;</span><br><span class="line">        <span class="keyword">while</span> (bucket[i]-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            num[index++] = i + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>数据结构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据结构——栈和队列</title>
-    <url>/uncategorized/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E2%80%94%E2%80%94%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/</url>
-    <content><![CDATA[<p>栈和队列是线性表的一种，只是它们是操作受限的线性表。</p>
-<span id="more"></span>
-
-<h1 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h1><p>栈是只能在表尾进行插入或删除操作的线性表，通常我们称表尾端为栈顶，表头端为栈底，它是一种先进后出的线性表，既只能在表尾端插入元素，称为入栈，也只能在表尾端删除元素，称为出栈。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java.lang.Object</span><br><span class="line">↳     java.util.AbstractCollection&lt;E&gt;</span><br><span class="line">   ↳     java.util.AbstractList&lt;E&gt;</span><br><span class="line">       ↳     java.util.Vector&lt;E&gt;</span><br><span class="line">           ↳     java.util.Stack&lt;E&gt;</span><br><span class="line"></span><br><span class="line">public class Stack&lt;E&gt; extends Vector&lt;E&gt; &#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Stack的API"><a href="#Stack的API" class="headerlink" title="Stack的API"></a>Stack的API</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">             boolean       empty()              // 栈是否为空</span><br><span class="line">synchronized E             peek()               // 返回栈顶元素，不执行删除操作</span><br><span class="line">synchronized E             pop()                // 返回栈顶元素，并将其从栈中删除</span><br><span class="line">             E             push(E object)       // 将元素存入栈顶</span><br><span class="line">synchronized int           search(Object o)     // 查找“元素o”在栈中的位置：由栈底向栈顶方向数</span><br></pre></td></tr></table></figure>
-
-<h1 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h1><p>队列刚好和栈相反，它是一种先进先出（FIFO）的线性表，只能在一端插入元素，在另一端删除元素，如下图所示，允许插入元素的一端称为队尾，允许删除元素的一端称为队头。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java.lang.Iterable&lt;E&gt;</span><br><span class="line">↳     java.util.Collection&lt;E&gt;</span><br><span class="line">   ↳     java.util.Stack&lt;E&gt;</span><br><span class="line"></span><br><span class="line">public interface Queue&lt;E&gt; extends Collection&lt;E&gt;  &#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="队列的实现"><a href="#队列的实现" class="headerlink" title="队列的实现"></a>队列的实现</h2><ul>
-<li>没有实现的阻塞接口 LinkedList</li>
-<li>实现阻塞接口的<ul>
-<li>ArrayBlockingQueue ：一个由数组支持的有界队列。</li>
-<li>LinkedBlockingQueue ：一个由链接节点支持的可选有界队列。</li>
-<li>PriorityBlockingQueue ：一个由优先级堆支持的无界优先级队列。</li>
-<li>DelayQueue ：一个由优先级堆支持的、基于时间的调度队列。</li>
-<li>SynchronousQueue ：一个利用 BlockingQueue 接口的简单聚集（rendezvous）机制。</li>
-</ul>
-</li>
-</ul>
-<h3 id="Queue-的-API"><a href="#Queue-的-API" class="headerlink" title="Queue 的 API"></a>Queue 的 API</h3><table>
-<thead>
-<tr>
-<th align="left">func</th>
-<th align="left">return</th>
-<th align="left">explain</th>
-<th align="left"></th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><strong>add(E e)</strong></td>
-<td align="left">boolean</td>
-<td align="left">增加一个元索</td>
-<td align="left">如果队列已满，则抛出一个 IIIegaISlabEepeplian 异常</td>
-</tr>
-<tr>
-<td align="left"><strong>remove()</strong></td>
-<td align="left">E</td>
-<td align="left">移除并返回队列头部的元素</td>
-<td align="left">如果队列为空，则抛出一个 NoSuchElementException 异常</td>
-</tr>
-<tr>
-<td align="left"><strong>element()</strong></td>
-<td align="left">E</td>
-<td align="left">返回队列头部的元素</td>
-<td align="left">如果队列为空，则抛出一个 NoSuchElementException 异常</td>
-</tr>
-<tr>
-<td align="left"><strong>offer(E e)</strong></td>
-<td align="left">boolean</td>
-<td align="left">添加一个元素并返回true</td>
-<td align="left">如果队列已满，则返回false</td>
-</tr>
-<tr>
-<td align="left"><strong>poll()</strong></td>
-<td align="left">E</td>
-<td align="left">移除并返问队列头部的元素</td>
-<td align="left">如果队列为空，则返回null</td>
-</tr>
-<tr>
-<td align="left"><strong>peek()</strong></td>
-<td align="left">E</td>
-<td align="left">返回队列头部的元素</td>
-<td align="left">如果队列为空，则返回null</td>
-</tr>
-<tr>
-<td align="left">put(E e)</td>
-<td align="left">void</td>
-<td align="left">添加一个元素</td>
-<td align="left">如果队列满，则阻塞</td>
-</tr>
-<tr>
-<td align="left">take()</td>
-<td align="left">E e</td>
-<td align="left">移除并返回队列头部的元素</td>
-<td align="left">如果队列为空，则阻塞</td>
-</tr>
-</tbody></table>
 ]]></content>
       <tags>
         <tag>数据结构</tag>
