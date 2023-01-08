@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"artaris.cn","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.14.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":true,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Java 中使用的容器从大的方面上来粉可以分为两种：Collection和Map,区别也很简单，Collection存储的是单个值，Map存储的是键值对。  Collection 的划分分为 List，Set，Queue  List:常见接口有ArrayList，LinkedList，AbstractList， CopyOnWriteArrayList， Vector，Stack； Set：常见接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 容器篇：容器总结">
+<meta property="og:url" content="http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="Artaris&#39;s Blog">
+<meta property="og:description" content="Java 中使用的容器从大的方面上来粉可以分为两种：Collection和Map,区别也很简单，Collection存储的是单个值，Map存储的是键值对。  Collection 的划分分为 List，Set，Queue  List:常见接口有ArrayList，LinkedList，AbstractList， CopyOnWriteArrayList， Vector，Stack； Set：常见接">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-01-06T05:38:30.000Z">
+<meta property="article:modified_time" content="2023-01-08T05:40:59.931Z">
+<meta property="article:author" content="Artaris">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/","path":"Java/Java 容器篇：容器总结/","title":"Java 容器篇：容器总结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Java 容器篇：容器总结 | Artaris's Blog</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Artaris's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签<span class="badge">9</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="th fa-fw"></i>分类<span class="badge">7</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档<span class="badge">26</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81Collection%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.</span> <span class="nav-text">一、Collection接口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81List%E6%8E%A5%E5%8F%A3"><span class="nav-number">2.</span> <span class="nav-text">二、List接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1%E3%80%81ArrayList"><span class="nav-number">2.0.1.</span> <span class="nav-text">2.1、ArrayList</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2%E3%80%81LinkedList"><span class="nav-number">2.0.2.</span> <span class="nav-text">2.2、LinkedList</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3%E3%80%81Vector%EF%BC%88%E5%B7%B2%E8%BF%87%E6%97%B6%EF%BC%89"><span class="nav-number">2.0.3.</span> <span class="nav-text">2.3、Vector（已过时）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4%E3%80%81Stack%EF%BC%88%E5%B7%B2%E8%BF%87%E6%97%B6%EF%BC%89"><span class="nav-number">2.0.4.</span> <span class="nav-text">2.4、Stack（已过时）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vector%E5%92%8CArrayList%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">2.0.5.</span> <span class="nav-text">Vector和ArrayList的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Aarraylist%E5%92%8CLinkedlist%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">2.0.6.</span> <span class="nav-text">Aarraylist和Linkedlist的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">2.0.7.</span> <span class="nav-text">分类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81Set%E6%8E%A5%E5%8F%A3"><span class="nav-number">3.</span> <span class="nav-text">三、Set接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1%E3%80%81AbstractSet"><span class="nav-number">3.0.1.</span> <span class="nav-text">3.1、AbstractSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2%E3%80%81EnumSet"><span class="nav-number">3.0.2.</span> <span class="nav-text">3.2、EnumSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3%E3%80%81HashSet"><span class="nav-number">3.0.3.</span> <span class="nav-text">3.3、HashSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4%E3%80%81LinkedHashSet"><span class="nav-number">3.0.4.</span> <span class="nav-text">3.4、LinkedHashSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5%E3%80%81TreeSet"><span class="nav-number">3.0.5.</span> <span class="nav-text">3.5、TreeSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB-1"><span class="nav-number">3.0.6.</span> <span class="nav-text">分类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Map%E6%8E%A5%E5%8F%A3"><span class="nav-number">4.</span> <span class="nav-text">四、Map接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1%E3%80%81AbstractMap"><span class="nav-number">4.0.1.</span> <span class="nav-text">4.1、AbstractMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2%E3%80%81HashMap"><span class="nav-number">4.0.2.</span> <span class="nav-text">4.2、HashMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3%E3%80%81LinkedHashMap"><span class="nav-number">4.0.3.</span> <span class="nav-text">4.3、LinkedHashMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4%E3%80%81HashTable"><span class="nav-number">4.0.4.</span> <span class="nav-text">4.4、HashTable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5%E3%80%81TreeMap"><span class="nav-number">4.0.5.</span> <span class="nav-text">4.5、TreeMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-6%E3%80%81WeakHashMap"><span class="nav-number">4.0.6.</span> <span class="nav-text">4.6、WeakHashMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HashMap%E4%B8%8ETreeMap%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">4.0.7.</span> <span class="nav-text">HashMap与TreeMap的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hashtable%E4%B8%8EHashmap%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">4.0.8.</span> <span class="nav-text">Hashtable与Hashmap的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB-2"><span class="nav-number">4.0.9.</span> <span class="nav-text">分类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81Queue"><span class="nav-number">5.</span> <span class="nav-text">五、Queue</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E9%9B%86%E5%90%88%E5%B7%A5%E5%85%B7"><span class="nav-number">6.</span> <span class="nav-text">六、集合工具</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%AF%B9%E9%9B%86%E5%90%88%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">7.</span> <span class="nav-text">七、对集合的选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1%E3%80%81%E5%AF%B9List%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">7.0.1.</span> <span class="nav-text">7.1、对List的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2%E3%80%81%E5%AF%B9Set%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">7.0.2.</span> <span class="nav-text">7.2、对Set的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3%E3%80%81%E5%AF%B9Map%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">7.0.3.</span> <span class="nav-text">7.3、对Map的选择</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Artaris</p>
+  <div class="site-description" itemprop="description">一失足成千古风流人物</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ArtarisCN" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ArtarisCN" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:i@artaris.cn" title="E-Mail → mailto:i@artaris.cn" rel="noopener me"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/5815357470" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;5815357470" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ArtarisCN" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;ArtarisCN" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://artaris.cn/Java/Java%20%E5%AE%B9%E5%99%A8%E7%AF%87%EF%BC%9A%E5%AE%B9%E5%99%A8%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Artaris">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Artaris's Blog">
+      <meta itemprop="description" content="一失足成千古风流人物">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Java 容器篇：容器总结 | Artaris's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 容器篇：容器总结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-01-06 13:38:30" itemprop="dateCreated datePublished" datetime="2018-01-06T13:38:30+08:00">2018-01-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-01-08 13:40:59" itemprop="dateModified" datetime="2023-01-08T13:40:59+08:00">2023-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>13 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Java 中使用的容器从大的方面上来粉可以分为两种：<strong>Collection</strong>和<strong>Map</strong>,区别也很简单，Collection存储的是单个值，Map存储的是键值对。</p>
+<ul>
+<li><p>Collection 的划分分为 List，Set，Queue</p>
+<ul>
+<li>List:常见接口有ArrayList，LinkedList，AbstractList， CopyOnWriteArrayList， Vector，Stack；</li>
+<li>Set：常见接口有HashSet，TreeSet，LinkedHashSet，AbstractSet，CopyOnWriteArraySet，EnumSet；</li>
+<li>Queue：常见接口有（阻塞队列）ArrayBlockQueue、PriorityBlockingQueue、LinkedBlockingQueue（双端队列）ArrayDeque、LinkedBlockingDeque、LinkedList</li>
+</ul>
+</li>
+<li><p>Map 的常见接口有<strong>Hashmap</strong>、Treemap、Hashtable、AbstractMap、ConcurrentHashMap、 LinkedHashMap、WeakHashMap</p>
+</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="一、Collection接口"><a href="#一、Collection接口" class="headerlink" title="一、Collection接口"></a><strong>一、Collection接口</strong></h1><p>　　Collection接口是最基本的集合接口，它不提供直接的实现，Java SDK提供的类都是继承自Collection的“子接口”如List和Set。Collection所代表的是一种规则，它所包含的元素都必须遵循一条或者多条规则。如有些允许重复而有些则不能重复、有些必须要按照顺序插入而有些则是散列，有些支持排序但是有些则不支持。他包含了最基础的一些接口，如 <code>isEmpty()</code>,<code>add(Object o)</code>,<code>remove(Object o)</code>.<code>clear()</code>等<br>　　<strong>在Java中所有实现了Collection接口的类都必须提供两套标准的构造函数</strong>，一个是无参，用于创建一个空的Collection，一个是带有Collection参数的有参构造函数，用于创建一个新的Collection，这个新的Collection与传入进来的Collection具备相同的元素。</p>
+<h1 id="二、List接口"><a href="#二、List接口" class="headerlink" title="二、List接口"></a><strong>二、List接口</strong></h1><p>　　 List接口为Collection直接接口。List所代表的是有序的Collection，即它用某种特定的插入顺序来维护元素顺序。用户可以对列表中每个元素的插入位置进行精确地控制，同时可以根据元素的整数索引（在列表中的位置）访问元素，并搜索列表中的元素。实现List接口的集合主要有：ArrayList、LinkedList、Vector、Stack。</p>
+<h3 id="2-1、ArrayList"><a href="#2-1、ArrayList" class="headerlink" title="2.1、ArrayList"></a><strong>2.1、ArrayList</strong></h3><p>　　ArrayList是一个动态数组，也是我们最常用的集合。它允许任何符合规则的元素插入甚至包括null。每一个ArrayList都有一个初始容量（10），该容量代表了数组的大小。随着容器中的元素不断增加，容器的大小也会随着增加。在每次向容器中增加元素的同时都会进行容量检查，当快溢出时，就会进行扩容操作。所以如果我们明确所插入元素的多少，最好指定一个初始容量值，避免过多的进行扩容操作而浪费时间、效率。<br>　　size、isEmpty、get、set、iterator 和 listIterator 操作都以固定时间运行。add 操作以分摊的固定时间运行，也就是说，添加 n 个元素需要 O(n) 时间（由于要考虑到扩容，所以这不只是添加元素会带来分摊固定时间开销那样简单）。<br><strong>ArrayList擅长于随机访问</strong>。同时ArrayList是非同步的。</p>
+<h3 id="2-2、LinkedList"><a href="#2-2、LinkedList" class="headerlink" title="2.2、LinkedList"></a><strong>2.2、LinkedList</strong></h3><p>　　同样实现List接口的LinkedList与ArrayList不同，ArrayList是一个动态数组，而LinkedList是一个双向链表。所以它除了有ArrayList的基本操作方法外还额外提供了get，remove，insert方法在LinkedList的首部或尾部。<br>　　由于实现的方式不同，LinkedList不能随机访问，它所有的操作都是要按照双重链表的需要执行。在列表中索引的操作将从开头或结尾遍历列表（从靠近指定索引的一端）。这样做的好处就是可以通过较低的代价在List中进行插入和删除操作。</p>
+<p>　　与ArrayList一样，LinkedList也是非同步的。如果多个线程同时访问一个List，则必须自己实现访问同步。一种解决方法是在创建List时构造一个同步的List：</p>
+<blockquote>
+<p>List list &#x3D; Collections.synchronizedList(new LinkedList(…));</p>
+</blockquote>
+<h3 id="2-3、Vector（已过时）"><a href="#2-3、Vector（已过时）" class="headerlink" title="2.3、Vector（已过时）"></a><strong>2.3、Vector（已过时）</strong></h3><p>　　与ArrayList相似，但是Vector是同步的。所以说Vector是线程安全的动态数组。它的操作与ArrayList几乎一样。</p>
+<h3 id="2-4、Stack（已过时）"><a href="#2-4、Stack（已过时）" class="headerlink" title="2.4、Stack（已过时）"></a><strong>2.4、Stack（已过时）</strong></h3><p>　　Stack继承自Vector，实现一个后进先出的堆栈。Stack提供5个额外的方法使得Vector得以被当作堆栈使用。基本的push和pop 方法，还有peek方法得到栈顶的元素，empty方法测试堆栈是否为空，search方法检测一个元素在堆栈中的位置。Stack刚创建后是空栈。<br>　　详细：<a target="_blank" rel="noopener" href="http://www.cnblogs.com/chenpi/p/5258450.html">Vector和Stack(已过时，不建议使用)</a></p>
+<h3 id="Vector和ArrayList的比较"><a href="#Vector和ArrayList的比较" class="headerlink" title="Vector和ArrayList的比较"></a><strong>Vector和ArrayList的比较</strong></h3><p>　　1，vector是线程同步的，所以它也是线程安全的，而arraylist是线程异步的，是不安全的。如果不考虑到线程的安全因素，一般用arraylist效率比较高。<br>　　2，如果集合中的元素的数目大于目前集合数组的长度时，vector增长率为目前数组长度的100%,而arraylist增长率为目前数组长度的50%.如过在集合中使用数据量比较大的数据，用vector有一定的优势。<br>　　3，如果查找一个指定位置的数据，vector和arraylist使用的时间是相同的，都是0(1),这个时候使用vector和arraylist都可以。而如果移动一个指定位置的数据花费的时间为0(n-i)n为总长度，这个时候就应该考虑到使用linklist,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。<br>　　ArrayList 和Vector是采用数组方式存储数据，此数组元素数大于实际存储的数据以便增加和插入元素，都允许直接序号索引元素，但是插入数据要设计到数组元素移动等内存操作，所以索引数据快插入数据慢，Vector由于使用了synchronized方法（线程安全）所以性能上比ArrayList要差，LinkedList使用双向链表实现存储，按序号索引数据需要进行向前或向后遍历，但是插入数据时只需要记录本项的前后项即可，所以插入数度较快！</p>
+<h3 id="Aarraylist和Linkedlist的比较"><a href="#Aarraylist和Linkedlist的比较" class="headerlink" title="Aarraylist和Linkedlist的比较"></a><strong>Aarraylist和Linkedlist的比较</strong></h3><p>　　1.ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。<br>　　2.对于随机访问get和set，ArrayList绝对优于LinkedList，因为LinkedList要移动指针。<br>　　3.对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。<br>　　这一点要看实际情况的。若只对单条数据插入或删除，ArrayList的速度反而优于LinkedList。但若是批量随机的插入删除数据，LinkedList的速度大大优于ArrayList. 因为ArrayList每插入一条数据，要移动插入点及之后的所有数据。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a><strong>分类</strong></h3><table>
+<thead>
+<tr>
+<th>类</th>
+<th align="center">是否线程安全</th>
+<th align="right">是否有序</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ArrayList</td>
+<td align="center">否</td>
+<td align="right">是</td>
+</tr>
+<tr>
+<td>LinkedList</td>
+<td align="center">否</td>
+<td align="right">是</td>
+</tr>
+<tr>
+<td>Vector</td>
+<td align="center">是</td>
+<td align="right">是</td>
+</tr>
+<tr>
+<td>Stack</td>
+<td align="center">是</td>
+<td align="right">是</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>可以通过Collections.synchronizedList包装成线程安全的List</strong></p>
+</blockquote>
+<h1 id="三、Set接口"><a href="#三、Set接口" class="headerlink" title="三、Set接口"></a><strong>三、Set接口</strong></h1><p>　　Set是一种不包括重复元素的Collection。它维持它自己的内部排序，所以随机访问没有任何意义。与List一样，它同样运行null的存在但是仅有一个。由于Set接口的特殊性，所有传入Set集合中的元素都必须不同，同时要注意任何可变对象，如果在对集合中元素进行操作时，导致e1.equals(e2)&#x3D;&#x3D;true，则必定会产生某些问题。实现了Set接口的集合有：EnumSet、HashSet、TreeSet。</p>
+<h3 id="3-1、AbstractSet"><a href="#3-1、AbstractSet" class="headerlink" title="3.1、AbstractSet"></a><strong>3.1、AbstractSet</strong></h3><p>　　EnumSet、HashSet、TreeSet的父类</p>
+<h3 id="3-2、EnumSet"><a href="#3-2、EnumSet" class="headerlink" title="3.2、EnumSet"></a><strong>3.2、EnumSet</strong></h3><p>　　是枚举的专用Set。所有的元素都是枚举类型。</p>
+<h3 id="3-3、HashSet"><a href="#3-3、HashSet" class="headerlink" title="3.3、HashSet"></a><strong>3.3、HashSet</strong></h3><p>　　HashSet堪称查询速度最快的集合，因为其内部是以HashMap来实现的。<strong>它内部元素的顺序是由哈希码来决定的</strong>，所以它不保证set 的迭代顺序；特别是它不保证该顺序恒久不变。</p>
+<h3 id="3-4、LinkedHashSet"><a href="#3-4、LinkedHashSet" class="headerlink" title="3.4、LinkedHashSet"></a><strong>3.4、LinkedHashSet</strong></h3><p>　　LinkedHashSet是HashSet的子类，此实现与 HashSet 的不同之外在于，后者维护着一个运行于所有条目的<strong>双链表</strong>。此链接列表定义了迭代顺序，即按照将元素插入到 set 中的顺序（插入顺序）进行迭代。注意，插入顺序不 受在 set 中重新插入的 元素的影响。<br>　　<strong>也就是说，LinkedHashSet是迭代有序的HashSet</strong></p>
+<h3 id="3-5、TreeSet"><a href="#3-5、TreeSet" class="headerlink" title="3.5、TreeSet"></a><strong>3.5、TreeSet</strong></h3><p>　　基于TreeMap，生成一个总是处于排序状态的set，内部以TreeMap来实现。它是使用元素的<strong>自然顺序</strong>（例如1,2,3）对元素进行排序，或者根据创建Set 时提供的 Comparator 进行排序，具体取决于使用的构造方法。<strong>（实现了SortSet）</strong></p>
+<h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a><strong>分类</strong></h3><table>
+<thead>
+<tr>
+<th>类</th>
+<th align="center">是否线程安全</th>
+<th align="right">是否有序</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AbstractSet</td>
+<td align="center">否</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>EnumSet</td>
+<td align="center">否</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>HashSet</td>
+<td align="center">否</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>LinkedHashSet</td>
+<td align="center">否</td>
+<td align="right">是</td>
+</tr>
+<tr>
+<td>TreeSet</td>
+<td align="center">否</td>
+<td align="right">是</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>可以通过Collections.synchronizedSet来包装线程安全的Set</strong></p>
+</blockquote>
+<h1 id="四、Map接口"><a href="#四、Map接口" class="headerlink" title="四、Map接口"></a><strong>四、Map接口</strong></h1><p>　　Map与List、Set接口不同，它是由一系列键值对组成的集合，提供了key到Value的映射。同时它也没有继承Collection。在Map中它保证了key与value之间的一一对应关系。也就是说一个key对应一个value，所以它不能存在相同的key值，当然value值可以相同。实现map的有：HashMap、TreeMap、HashTable、Properties、EnumMap。</p>
+<h3 id="4-1、AbstractMap"><a href="#4-1、AbstractMap" class="headerlink" title="4.1、AbstractMap"></a><strong>4.1、AbstractMap</strong></h3><p>　　HashMap， TreeMap，WeakHashMap ，ConcurrentHash的父类</p>
+<h3 id="4-2、HashMap"><a href="#4-2、HashMap" class="headerlink" title="4.2、HashMap"></a><strong>4.2、HashMap</strong></h3><p>　　以哈希表数据结构实现，查找对象时通过哈希函数计算其位置，它是为快速查询而设计的，其内部定义了一个hash表数组（Entry[] table），元素会通过哈希转换函数将元素的哈希地址转换成数组中存放的索引，如果有冲突，则使用散列链表的形式将所有相同哈希地址的元素串起来，可能通过查看HashMap.Entry的源码它是一个单链表结构。<br>　　<strong>HashMap可以用null作为key和value</strong></p>
+<h3 id="4-3、LinkedHashMap"><a href="#4-3、LinkedHashMap" class="headerlink" title="4.3、LinkedHashMap"></a><strong>4.3、LinkedHashMap</strong></h3><p>　　此实现与 HashMap 的不同之处在于，后者维护着一个运行于所有条目的双重链接列表。此链接列表定义了迭代顺序，该迭代顺序通常就是将键插入到映射中的顺序（插入顺序）。注意，如果在映射中重新插入 键，则插入顺序不受影响<br>　　<strong>也就是说，LinkedHashMap是迭代有序的HashMap</strong></p>
+<h3 id="4-4、HashTable"><a href="#4-4、HashTable" class="headerlink" title="4.4、HashTable"></a><strong>4.4、HashTable</strong></h3><p>　　也是以哈希表数据结构实现的，解决冲突时与HashMap也一样也是采用了散列链表的形式，不过性能比HashMap要低<br>　　<strong>HashTable不支持用null作为key或者value</strong></p>
+<h3 id="4-5、TreeMap"><a href="#4-5、TreeMap" class="headerlink" title="4.5、TreeMap"></a><strong>4.5、TreeMap</strong></h3><p>　　键以某种排序规则排序，内部以red-black（红-黑）树数据结构实现，实现了SortedMap接口，所以是有序的</p>
+<h3 id="4-6、WeakHashMap"><a href="#4-6、WeakHashMap" class="headerlink" title="4.6、WeakHashMap"></a><strong>4.6、WeakHashMap</strong></h3><p>　　以弱键 实现的基于哈希表的 Map。在 WeakHashMap 中，当某个键不再正常使用时，将自动移除其条目。更精确地说，对于一个给定的键，其映射的存在并不阻止垃圾回收器对该键的丢弃，这就使该键成为可终止的，被终止，然后被回收。丢弃某个键时，其条目从映射中有效地移除，因此，该类的行为与其他的 Map 实现有所不同<br>　　<strong>该map的键类似于弱引用</strong></p>
+<h3 id="HashMap与TreeMap的比较"><a href="#HashMap与TreeMap的比较" class="headerlink" title="HashMap与TreeMap的比较"></a><strong>HashMap与TreeMap的比较</strong></h3><p>　　1、HashMap通过hashcode对其内容进行快速查找，而TreeMap中所有的元素都保持着某种固定的顺序，如果你需要得到一个有序的结果你就应该使用TreeMap（HashMap中元素的排列顺序是不固定的）。HashMap中元素的排列顺序是不固定的）。<br>　　2、在Map 中插入、删除和定位元素，HashMap 是最好的选择。但如果您要按自然顺序或自定义顺序遍历键，那么TreeMap会更好。使用HashMap要求添加的键类明确定义了hashCode()和 equals()的实现。 这个TreeMap没有调优选项，因为该树总处于平衡状态。</p>
+<h3 id="Hashtable与Hashmap的比较"><a href="#Hashtable与Hashmap的比较" class="headerlink" title="Hashtable与Hashmap的比较"></a><strong>Hashtable与Hashmap的比较</strong></h3><p>　　1、历史原因:Hashtable是基于陈旧的Dictionary类的，HashMap是Java 1.2引进的Map接口的一个实现 。<br>　　2、同步性:Hashtable是线程安全的，也就是说是同步的，而HashMap是线程不安全的，不是同步的 。<br>　　3、值：只有HashMap可以让你将空值作为一个表的条目的key或value 。</p>
+<h3 id="分类-2"><a href="#分类-2" class="headerlink" title="分类"></a><strong>分类</strong></h3><table>
+<thead>
+<tr>
+<th>类</th>
+<th align="center">是否线程安全</th>
+<th>是否有序</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AbstractMap</td>
+<td align="center">否</td>
+<td>否</td>
+</tr>
+<tr>
+<td>HashMap</td>
+<td align="center">否</td>
+<td>否</td>
+</tr>
+<tr>
+<td>LinkedHashMap</td>
+<td align="center">否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>HashTable</td>
+<td align="center">是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>TreeMap</td>
+<td align="center">否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>WeakHashMap</td>
+<td align="center">否</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>可以通过 Collections.synchronizedMap包装成线程安全的map</strong></p>
+</blockquote>
+<h1 id="五、Queue"><a href="#五、Queue" class="headerlink" title="五、Queue"></a><strong>五、Queue</strong></h1><p>　　队列，它主要分为两大类，一类是阻塞式队列，队列满了以后再插入元素则会抛出异常，主要包括ArrayBlockQueue、PriorityBlockingQueue、LinkedBlockingQueue。另一种队列则是双端队列，支持在头、尾两端插入和移除元素，主要包括：ArrayDeque、LinkedBlockingDeque、LinkedList。</p>
+<h1 id="六、集合工具"><a href="#六、集合工具" class="headerlink" title="六、集合工具"></a><strong>六、集合工具</strong></h1><p>集合工具包括Arrays 和 Collection，其中Arrays用于操作数组，Collection用于操作Collection的子类集合</p>
+<h1 id="七、对集合的选择"><a href="#七、对集合的选择" class="headerlink" title="七、对集合的选择"></a><strong>七、对集合的选择</strong></h1><h3 id="7-1、对List的选择"><a href="#7-1、对List的选择" class="headerlink" title="7.1、对List的选择"></a><strong>7.1、对List的选择</strong></h3><p>　　1、对于随机查询与迭代遍历操作，数组比所有的容器都要快。所以在随机访问中一般使用ArrayList<br>　　2、LinkedList使用双向链表对元素的增加和删除提供了非常好的支持，而ArrayList执行增加和删除元素需要进行元素位移。<br>　　3、对于Vector而已，我们一般都是避免使用。<br>　　4、将ArrayList当做首选，毕竟对于集合元素而已我们都是进行遍历，只有当程序的性能因为List的频繁插入和删除而降低时，再考虑LinkedList。</p>
+<h3 id="7-2、对Set的选择"><a href="#7-2、对Set的选择" class="headerlink" title="7.2、对Set的选择"></a><strong>7.2、对Set的选择</strong></h3><p>　　1、HashSet由于使用HashCode实现，所以在某种程度上来说它的性能永远比TreeSet要好，尤其是进行增加和查找操作。<br>　　２、虽然TreeSet没有HashSet性能好，但是由于它可以维持元素的排序，所以它还是存在用武之地的。</p>
+<h3 id="7-3、对Map的选择"><a href="#7-3、对Map的选择" class="headerlink" title="7.3、对Map的选择"></a><strong>7.3、对Map的选择</strong></h3><p>　　1、HashMap与HashSet同样，支持快速查询。虽然HashTable速度的速度也不慢，但是在HashMap面前还是稍微慢了些，所以HashMap在查询方面可以取代HashTable。<br>　　2、由于TreeMap需要维持内部元素的顺序，所以它通常要比HashMap和HashTable慢。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/uncategorized/Java%20%E5%AE%B9%E5%99%A8%20HashMap%20%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" rel="prev" title="容器-HashMap 实现原理">
+                  <i class="fa fa-chevron-left"></i> 容器-HashMap 实现原理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/Android/Android%20%207.1%20%E6%96%B0%E7%89%B9%E6%80%A7%E2%80%94%E2%80%94Shortcuts/" rel="next" title="Android  7.1 新特性——Shortcuts">
+                  Android  7.1 新特性——Shortcuts <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Artaris</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div><script color="0,0,255" opacity="0.5" zIndex="-1" count="99" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@1/dist/canvas-nest.js"></script>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/ArtarisCN" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+  
+
+
+
+
+
+</body>
+</html>

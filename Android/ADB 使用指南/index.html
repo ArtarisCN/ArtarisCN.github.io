@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"artaris.cn","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.14.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":true,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ADB 使用指南">
+<meta property="og:url" content="http://artaris.cn/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="Artaris&#39;s Blog">
+<meta property="og:description" content="ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-12-03T13:49:22.000Z">
+<meta property="article:modified_time" content="2023-01-08T05:40:59.931Z">
+<meta property="article:author" content="Artaris">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://artaris.cn/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://artaris.cn/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/","path":"Android/ADB 使用指南/","title":"ADB 使用指南"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ADB 使用指南 | Artaris's Blog</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Artaris's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签<span class="badge">9</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="th fa-fw"></i>分类<span class="badge">7</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档<span class="badge">26</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E5%8F%8A%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.</span> <span class="nav-text">语法及连接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.2.</span> <span class="nav-text">连接</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#USB-%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.2.1.</span> <span class="nav-text">USB 连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.2.2.</span> <span class="nav-text">无线连接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF"><span class="nav-number">2.</span> <span class="nav-text">获取设备信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9E%8B%E5%8F%B7"><span class="nav-number">2.1.</span> <span class="nav-text">型号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E5%88%86%E8%BE%A8%E7%8E%87"><span class="nav-number">2.2.</span> <span class="nav-text">屏幕分辨率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E5%AF%86%E5%BA%A6"><span class="nav-number">2.3.</span> <span class="nav-text">屏幕密度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IP-%E5%9C%B0%E5%9D%80"><span class="nav-number">2.4.</span> <span class="nav-text">IP 地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IMEI"><span class="nav-number">2.5.</span> <span class="nav-text">IMEI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC"><span class="nav-number">2.6.</span> <span class="nav-text">Android 系统版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU-%E4%BF%A1%E6%81%AF"><span class="nav-number">2.7.</span> <span class="nav-text">CPU 信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">文件管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%89%E5%8F%96"><span class="nav-number">3.1.</span> <span class="nav-text">拉取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E9%80%81"><span class="nav-number">3.2.</span> <span class="nav-text">推送</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%AE%A1%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">应用管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%AE%BE%E5%A4%87%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8"><span class="nav-number">4.1.</span> <span class="nav-text">查看设备安装应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%80%E7%94%A8%E5%BA%94%E7%94%A8"><span class="nav-number">4.1.1.</span> <span class="nav-text">所用应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%BA%A7%E5%BA%94%E7%94%A8"><span class="nav-number">4.1.2.</span> <span class="nav-text">系统级应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8"><span class="nav-number">4.1.3.</span> <span class="nav-text">用户安装应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E6%98%BE%E7%A4%BA"><span class="nav-number">4.1.4.</span> <span class="nav-text">过滤显示</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%AE%89%E8%A3%85"><span class="nav-number">4.2.</span> <span class="nav-text">应用安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%8D%B8%E8%BD%BD"><span class="nav-number">4.3.</span> <span class="nav-text">应用卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E9%99%A4%E5%BA%94%E7%94%A8%E6%95%B0%E6%8D%AE%E4%B8%8E%E7%BC%93%E5%AD%98"><span class="nav-number">4.4.</span> <span class="nav-text">清除应用数据与缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%89%8D%E5%8F%B0-Activity"><span class="nav-number">4.5.</span> <span class="nav-text">查看前台 Activity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84-Services"><span class="nav-number">4.6.</span> <span class="nav-text">查看正在运行的 Services</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BA%94%E7%94%A8%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF"><span class="nav-number">4.7.</span> <span class="nav-text">查看应用详细信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E6%A8%A1%E6%8B%9F"><span class="nav-number">5.</span> <span class="nav-text">操作模拟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E9%94%AE%E6%A8%A1%E6%8B%9F"><span class="nav-number">5.1.</span> <span class="nav-text">按键模拟</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E5%B1%8F%E5%B9%95%E6%BB%91%E5%8A%A8%EF%BC%9A"><span class="nav-number">5.1.1.</span> <span class="nav-text">模拟屏幕滑动：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E6%96%87%E6%9C%AC%EF%BC%9A"><span class="nav-number">5.1.2.</span> <span class="nav-text">输入文本：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E4%BA%A4%E4%BA%92"><span class="nav-number">5.2.</span> <span class="nav-text">应用交互</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E8%B5%B7-Activity"><span class="nav-number">5.2.1.</span> <span class="nav-text">调起 Activity</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E8%B5%B7-Service"><span class="nav-number">5.2.2.</span> <span class="nav-text">调起 Service</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E5%B9%BF%E6%92%AD"><span class="nav-number">5.2.3.</span> <span class="nav-text">发送广播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%BA%E5%88%B6%E5%81%9C%E6%AD%A2%E5%BA%94%E7%94%A8"><span class="nav-number">5.2.4.</span> <span class="nav-text">强制停止应用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E6%93%8D%E4%BD%9C"><span class="nav-number">5.3.</span> <span class="nav-text">设备操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%AA%E5%B1%8F"><span class="nav-number">5.3.1.</span> <span class="nav-text">截屏</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BD%95%E5%B1%8F"><span class="nav-number">5.3.2.</span> <span class="nav-text">录屏</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%90%AF"><span class="nav-number">5.3.3.</span> <span class="nav-text">重启</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95-Monkey"><span class="nav-number">5.3.4.</span> <span class="nav-text">压力测试 Monkey</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E5%88%86%E8%BE%A8%E7%8E%87"><span class="nav-number">5.3.5.</span> <span class="nav-text">修改分辨率</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Log%E6%97%A5%E5%BF%97%E6%9F%A5%E7%9C%8B"><span class="nav-number">6.</span> <span class="nav-text">Log日志查看</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E6%97%A5%E5%BF%97%E8%BE%93%E5%87%BA"><span class="nav-number">6.1.</span> <span class="nav-text">过滤日志输出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%BA%A7%E5%88%AB%E8%BF%87%E6%BB%A4%E6%97%A5%E5%BF%97"><span class="nav-number">6.2.</span> <span class="nav-text">按级别过滤日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89Tag%E8%BF%87%E6%BB%A4%E6%97%A5%E5%BF%97"><span class="nav-number">6.3.</span> <span class="nav-text">按Tag过滤日志</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ADB-Shell-%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4"><span class="nav-number">7.</span> <span class="nav-text">ADB Shell 相关命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%BF%9B%E7%A8%8B"><span class="nav-number">7.1.</span> <span class="nav-text">查看进程</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Artaris</p>
+  <div class="site-description" itemprop="description">一失足成千古风流人物</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ArtarisCN" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ArtarisCN" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:i@artaris.cn" title="E-Mail → mailto:i@artaris.cn" rel="noopener me"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/5815357470" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;5815357470" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ArtarisCN" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;ArtarisCN" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://artaris.cn/Android/ADB%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Artaris">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Artaris's Blog">
+      <meta itemprop="description" content="一失足成千古风流人物">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ADB 使用指南 | Artaris's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ADB 使用指南
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-03 21:49:22" itemprop="dateCreated datePublished" datetime="2017-12-03T21:49:22+08:00">2017-12-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-01-08 13:40:59" itemprop="dateModified" datetime="2023-01-08T13:40:59+08:00">2023-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>19 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>ADB 的全称是 Android Debug Bridge,在以前仅仅是用它来安装应用、存取文件等简单操作。细细学习了解之后才发现 ADB 还能实现很多强大的功能。在此总结一下 ADB 的一些常用功能</p>
+<span id="more"></span>
+
+<ul>
+<li><a href="#%E8%AF%AD%E6%B3%95%E5%8F%8A%E8%BF%9E%E6%8E%A5">语法及连接</a><ul>
+<li><a href="#%E8%AF%AD%E6%B3%95">语法</a></li>
+<li><a href="#%E8%BF%9E%E6%8E%A5">连接</a><ul>
+<li><a href="#usb-%E8%BF%9E%E6%8E%A5">USB 连接</a></li>
+<li><a href="#%E6%97%A0%E7%BA%BF%E8%BF%9E%E6%8E%A5">无线连接</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E8%8E%B7%E5%8F%96%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF">获取设备信息</a><ul>
+<li><a href="#%E5%9E%8B%E5%8F%B7">型号</a></li>
+<li><a href="#%E5%B1%8F%E5%B9%95%E5%88%86%E8%BE%A8%E7%8E%87">屏幕分辨率</a></li>
+<li><a href="#%E5%B1%8F%E5%B9%95%E5%AF%86%E5%BA%A6">屏幕密度</a></li>
+<li><a href="#ip-%E5%9C%B0%E5%9D%80">IP 地址</a></li>
+<li><a href="#IMEI">IMEI</a></li>
+<li><a href="#android-%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC">Android 系统版本</a></li>
+<li><a href="#cpu-%E4%BF%A1%E6%81%AF">CPU 信息</a></li>
+</ul>
+</li>
+<li><a href="#%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86">文件管理</a><ul>
+<li><a href="#%E6%8B%89%E5%8F%96">拉取</a></li>
+<li><a href="#%E6%8E%A8%E9%80%81">推送</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BA%94%E7%94%A8%E7%AE%A1%E7%90%86">应用管理</a><ul>
+<li><a href="#%E6%9F%A5%E7%9C%8B%E8%AE%BE%E5%A4%87%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8">查看设备安装应用</a><ul>
+<li><a href="#%E6%89%80%E7%94%A8%E5%BA%94%E7%94%A8">所有应用</a></li>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E7%BA%A7%E5%BA%94%E7%94%A8">系统级应用</a></li>
+<li><a href="#%E7%94%A8%E6%88%B7%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8">用户安装应用</a></li>
+<li><a href="#%E8%BF%87%E6%BB%A4%E6%98%BE%E7%A4%BA">过滤显示</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BA%94%E7%94%A8%E5%AE%89%E8%A3%85">应用安装</a></li>
+<li><a href="#%E5%BA%94%E7%94%A8%E5%8D%B8%E8%BD%BD">应用卸载</a></li>
+<li><a href="#%E6%B8%85%E9%99%A4%E5%BA%94%E7%94%A8%E6%95%B0%E6%8D%AE%E4%B8%8E%E7%BC%93%E5%AD%98">清除应用数据与缓存</a></li>
+<li><a href="#%E6%9F%A5%E7%9C%8B%E5%89%8D%E5%8F%B0-activity">查看前台 Activity</a></li>
+<li><a href="#%E6%9F%A5%E7%9C%8B%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84-services">查看正在运行的 Services</a></li>
+<li><a href="#%E6%9F%A5%E7%9C%8B%E5%BA%94%E7%94%A8%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF">查看应用详细信息</a></li>
+</ul>
+</li>
+<li><a href="#%E6%93%8D%E4%BD%9C%E6%A8%A1%E6%8B%9F">操作模拟</a><ul>
+<li><a href="#%E6%8C%89%E9%94%AE%E6%A8%A1%E6%8B%9F">按键模拟</a></li>
+<li><a href="#%E5%BA%94%E7%94%A8%E4%BA%A4%E4%BA%92">应用交互</a><ul>
+<li><a href="#%E8%B0%83%E8%B5%B7-activity">调起 Activity</a></li>
+<li><a href="#%E8%B0%83%E8%B5%B7-service">调起 Service</a></li>
+<li><a href="#%E5%8F%91%E9%80%81%E5%B9%BF%E6%92%AD">发送广播</a></li>
+<li><a href="#%E5%BC%BA%E5%88%B6%E5%81%9C%E6%AD%A2%E5%BA%94%E7%94%A8">强制停止应用</a></li>
+</ul>
+</li>
+<li><a href="#%E8%AE%BE%E5%A4%87%E6%93%8D%E4%BD%9C">设备操作</a><ul>
+<li><a href="#%E6%88%AA%E5%B1%8F">截屏</a></li>
+<li><a href="#%E5%BD%95%E5%B1%8F">录屏</a></li>
+<li><a href="#%E9%87%8D%E5%90%AF">重启</a></li>
+<li><a href="#%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95-monkey">压力测试（Monkey）</a></li>
+<li><a href="#%E4%BF%AE%E6%94%B9%E5%88%86%E8%BE%A8%E7%8E%87">修改分辨率</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#Log-%E6%97%A5%E5%BF%97%E6%9F%A5%E7%9C%8B">Log 日志查看</a><ul>
+<li><a href="#%E8%BF%87%E6%BB%A4%E6%97%A5%E5%BF%97%E8%BE%93%E5%87%BA">过滤日志输出</a><ul>
+<li><a href="#%E6%8C%89%E7%BA%A7%E5%88%AB%E8%BF%87%E6%BB%A4%E6%97%A5%E5%BF%97">按级别过滤日志</a></li>
+<li><a href="#%E6%8C%89-Tag-%E8%BF%87%E6%BB%A4%E6%97%A5%E5%BF%97">按 Tag 过滤日志</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#adb-shell-%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4">ADB Shell 相关命令</a><ul>
+<li><a href="#%E6%9F%A5%E7%9C%8B%E8%BF%9B%E7%A8%8B">查看进程</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="语法及连接"><a href="#语法及连接" class="headerlink" title="语法及连接"></a>语法及连接</h2><h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><p>ADB 的基本命令语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb [-d|-e|-s &lt;serialNumber&gt;] &lt;command&gt;</span><br></pre></td></tr></table></figure>
+<p>同一台电脑可以连接多个 Android 设备，当时用 adb 命令操作设备的时候，可以指定设备下发命令。具体如下</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-d</td>
+<td>指定当前唯一通过 USB 连接的 Android 设备为命令目标</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>指定当前唯一运行的模拟器为命令目标</td>
+</tr>
+<tr>
+<td><code>-s &lt;Serial Number&gt;</code></td>
+<td>指定相应 Serial Number 号的设备&#x2F;模拟器为命令目标</td>
+</tr>
+</tbody></table>
+<p>可以使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb devices</span><br></pre></td></tr></table></figure>
+<p>来查看当前连接的所有设备，如下所示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List of devices attached</span><br><span class="line">emulator-5554   device</span><br><span class="line">e8c63296        device</span><br></pre></td></tr></table></figure>
+<p><code>emulator-5554</code>是一个模拟器，<code>e8c63296</code> 是一台真机，这些均为他们的 Serial Number。可以指定设备发送命令，当只连接一台设备的时候，Serial Number 可以忽略不写。</p>
+<h3 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h3><p>上文中介绍使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb devices</span><br></pre></td></tr></table></figure>
+<p>可以查看所有连接到的设备。</p>
+<h4 id="USB-连接"><a href="#USB-连接" class="headerlink" title="USB 连接"></a>USB 连接</h4><p>使用USB 连接设备时。需要将设备<br>的开发者选项和 USB 调试模式开启。<br>可以到「设置」-「开发者选项」-「Android 调试」查看。<br>如果在设置里找不到开发者选项，那需要通过一个彩蛋来让它显示出来：在「设置」-「关于手机」连续点击「版本号」7 次。</p>
+<h4 id="无线连接"><a href="#无线连接" class="headerlink" title="无线连接"></a>无线连接</h4><p>无线连接可以在提前设置的情况下，免去数据线连接的烦恼，不过每次打包的时候，将 APK 发送到设备上都需要一会，数据传输自然是没有使用数据线快了，受网络干扰因素影响。<br>无线连接必须保证将 Android 设备与要运行 ADB 的电脑连接到同一个局域网，比如连到同一个 WiFi 即可。<br>具体步骤如下：</p>
+<ol>
+<li>将设备与电脑通过 USB 线连接并确保能够连接成功（<code>adb devices</code>指令能够看见设备）；</li>
+<li>让设备在 5555 端口监听 TCP&#x2F;IP 连接；<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb connect &lt;device-ip-address&gt;</span><br></pre></td></tr></table></figure></li>
+<li>拔掉数据线；</li>
+<li>查找设备的 IP 地址，一般能在「设置」-「关于手机」-「状态信息」-「IP地址」找到；</li>
+<li>通过 IP 地址连接设备   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb connect &lt;Device IP Address&gt;</span><br></pre></td></tr></table></figure>
+<code>&lt;Device IP Address&gt;</code>即是刚才获取的 IP 地址<br>此时再使用<code>adb devices</code>命令，如果在下面能看见设备说明连接成功。</li>
+</ol>
+<h2 id="获取设备信息"><a href="#获取设备信息" class="headerlink" title="获取设备信息"></a>获取设备信息</h2><h3 id="型号"><a href="#型号" class="headerlink" title="型号"></a>型号</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell getprop ro.product.model</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ONEPLUS A3010</span><br></pre></td></tr></table></figure>
+<p>我手中的这台是一加 3T，型号为A3010</p>
+<h3 id="屏幕分辨率"><a href="#屏幕分辨率" class="headerlink" title="屏幕分辨率"></a>屏幕分辨率</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm size</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Physical size: 1080x1920</span><br></pre></td></tr></table></figure>
+<p>我手中的这台一加 3T 的分辨率为 1080P</p>
+<h3 id="屏幕密度"><a href="#屏幕密度" class="headerlink" title="屏幕密度"></a>屏幕密度</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm density</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Physical density: 420</span><br></pre></td></tr></table></figure>
+<p>一加 3T 的 DPI 为 420DPI</p>
+<h3 id="IP-地址"><a href="#IP-地址" class="headerlink" title="IP 地址"></a>IP 地址</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell ifconfig</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">lo        Link encap:UNSPEC</span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          inet6 addr: ::1/128 Scope: Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:475045 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:475045 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:692847495 TX bytes:692847495</span><br><span class="line"></span><br><span class="line">dummy0    Link encap:UNSPEC</span><br><span class="line">          inet6 addr: fe80::4c8a:30ff:fec6:13fc/64 Scope: Link</span><br><span class="line">          UP BROADCAST RUNNING NOARP  MTU:1500  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:115 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:0 TX bytes:8050</span><br><span class="line"></span><br><span class="line">wlan0     Link encap:UNSPEC    Driver cnss_wlan_pci</span><br><span class="line">          inet addr:192.168.31.86  Bcast:192.168.31.255  Mask:255.255.255.0</span><br><span class="line">          inet6 addr: fe80::9665:2dff:fe25:12f5/64 Scope: Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:2465828 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:138772 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:3000</span><br><span class="line">          RX bytes:475187452 TX bytes:49284101</span><br><span class="line"></span><br><span class="line">rmnet_ipa0 Link encap:UNSPEC</span><br><span class="line">          UP RUNNING  MTU:2000  Metric:1</span><br><span class="line">          RX packets:1897 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:3233 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:2042241 TX bytes:490601</span><br><span class="line"></span><br><span class="line">p2p0      Link encap:UNSPEC    Driver cnss_wlan_pci</span><br><span class="line">          UP BROADCAST MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:3000</span><br><span class="line">          RX bytes:0 TX bytes:0</span><br></pre></td></tr></table></figure>
+<p>我现在正使用局域网，<code>wlan0 inet addr:192.168.31.86</code>即是我的 IP 地址</p>
+<h3 id="IMEI"><a href="#IMEI" class="headerlink" title="IMEI"></a>IMEI</h3><p>在 Android 4.4 及以下版本可通过如下命令获取 IMEI：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys iphonesubinfo</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Phone Subscriber Info:</span><br><span class="line">  Phone Type = GSM</span><br><span class="line">  Device ID = 860955027785041</span><br></pre></td></tr></table></figure>
+<p> Android 5.0 上需要 ROOT 权限才能看到</p>
+<h3 id="Android-系统版本"><a href="#Android-系统版本" class="headerlink" title="Android 系统版本"></a>Android 系统版本</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell getprop ro.build.version.release</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">8.0.0</span><br></pre></td></tr></table></figure>
+<p>我手中的这台一加 3T 的 Android 版本为奥利奥</p>
+<h3 id="CPU-信息"><a href="#CPU-信息" class="headerlink" title="CPU 信息"></a>CPU 信息</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell cat /proc/cpuinfo</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">processor       : 0</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x201</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">processor       : 1</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x201</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">processor       : 2</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x205</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">processor       : 3</span><br><span class="line">BogoMIPS        : 38.40</span><br><span class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32</span><br><span class="line">CPU implementer : 0x51</span><br><span class="line">CPU architecture: 8</span><br><span class="line">CPU variant     : 0x2</span><br><span class="line">CPU part        : 0x205</span><br><span class="line">CPU revision    : 1</span><br><span class="line"></span><br><span class="line">Hardware        : Qualcomm Technologies, Inc MSM8996pro</span><br></pre></td></tr></table></figure>
+<p>看到使用的硬件是 <code>Qualcomm MSM8996pro</code>，即高通 821，processor 的编号是 0 到 3，所以它是四核的。</p>
+<h2 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h2><h3 id="拉取"><a href="#拉取" class="headerlink" title="拉取"></a>拉取</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb pull &lt;设备里的文件路径&gt; [电脑上的目录]</span><br></pre></td></tr></table></figure>
+<p>如果省略<code>[电脑上的目录]</code>选项，则默认复制在当前目录下；<br>一般使用未 ROOT 的机器均是复制或拉取 <code>/sdcard/</code>目录下的文件。<br>eg.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb pull /sdcard/demo.mp4 ~/Desktop</span><br></pre></td></tr></table></figure>
+<h3 id="推送"><a href="#推送" class="headerlink" title="推送"></a>推送</h3><p>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb push &lt;电脑上的文件路径&gt; &lt;设备里的目录&gt;</span><br></pre></td></tr></table></figure>
+<p>eg.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb push ~/Desktop/demo.mp4 /sdcard/</span><br></pre></td></tr></table></figure>
+<h2 id="应用管理"><a href="#应用管理" class="headerlink" title="应用管理"></a>应用管理</h2><h3 id="查看设备安装应用"><a href="#查看设备安装应用" class="headerlink" title="查看设备安装应用"></a>查看设备安装应用</h3><p>查看应用列表的基本命令格式是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages [-f]/[-d]/[-e]/[-s]/[-3]/[-i]/[-u]/[--user USER_ID]/[FILTER]</span><br></pre></td></tr></table></figure>
+
+<p>这些参数的含义如下所示</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>显示列表</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>无</td>
+<td>所有应用</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>显示应用关联的 apk 文件</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>只显示 disabled 的应用</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>只显示 enabled 的应用</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>只显示系统应用</td>
+</tr>
+<tr>
+<td>-3</td>
+<td>只显示第三方应用</td>
+</tr>
+<tr>
+<td>-i</td>
+<td>显示应用的 installer</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>包含已卸载应用</td>
+</tr>
+<tr>
+<td><code>&lt;FILTER&gt;</code></td>
+<td>包名包含 <code>&lt;FILTER&gt;</code> 字符串</td>
+</tr>
+</tbody></table>
+<p>下面是具体例子：</p>
+<h4 id="所用应用"><a href="#所用应用" class="headerlink" title="所用应用"></a>所用应用</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package:com.oneplus.calculator</span><br><span class="line">package:net.oneplus.weather</span><br><span class="line">package:com.android.cts.priv.ctsshim</span><br><span class="line">package:com.oneplus.market</span><br><span class="line">package:com.yulore.framework</span><br><span class="line">package:com.android.providers.telephony</span><br><span class="line">package:com.sony.playmemories.mobile</span><br><span class="line">package:com.android.engineeringmode</span><br><span class="line">package:com.android.providers.calendar</span><br><span class="line">package:com.oneplus.opbugreport</span><br><span class="line">package:com.oneplus.card</span><br><span class="line">package:com.oneplus.note</span><br><span class="line">package:com.oneplus.skin</span><br><span class="line">package:com.android.providers.media</span><br><span class="line">package:com.sohu.inputmethod.sogou</span><br><span class="line">package:com.android.wallpapercropper</span><br><span class="line">package:com.oneplus.account</span><br><span class="line">package:com.quicinc.cne.CNEService</span><br><span class="line">package:com.oneplus.soundrecorder</span><br><span class="line">package:com.qualcomm.qti.autoregistration</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h4 id="系统级应用"><a href="#系统级应用" class="headerlink" title="系统级应用"></a>系统级应用</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages -s</span><br></pre></td></tr></table></figure>
+<h4 id="用户安装应用"><a href="#用户安装应用" class="headerlink" title="用户安装应用"></a>用户安装应用</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages -3</span><br></pre></td></tr></table></figure>
+<h4 id="过滤显示"><a href="#过滤显示" class="headerlink" title="过滤显示"></a>过滤显示</h4><p>比如要查看包名包含字符串 <code>tencent</code> 的应用列表，命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm list packages tencent</span><br></pre></td></tr></table></figure>
+<p>则只会输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">package:com.tencent.mm</span><br><span class="line">package:com.tencent.mobileqq</span><br></pre></td></tr></table></figure>
+<h3 id="应用安装"><a href="#应用安装" class="headerlink" title="应用安装"></a>应用安装</h3><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb install [-l]/[-r]/[-t]/[-s]/[-d]/[-g] &lt;path_to_apk&gt;</span><br></pre></td></tr></table></figure>
+<p>这些参数的含义如下所示</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-l</td>
+<td>将应用安装到保护目录 &#x2F;mnt&#x2F;asec</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>允许覆盖安装</td>
+</tr>
+<tr>
+<td>-t</td>
+<td>允许安装 AndroidManifest.xml 里 application 指定 <code>android:testOnly=&quot;true&quot;</code> 的应用</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>将应用安装到 sdcard</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>允许降级覆盖安装</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>授予所有运行时权限</td>
+</tr>
+</tbody></table>
+<p>运行命令后见到输出状态为 <code>Success</code>代表安装成功。<br>如果失败则会输出<code>Failure</code>及错误码，常见错误码含义如下：</p>
+<table>
+<thead>
+<tr>
+<th>输出</th>
+<th>含义</th>
+<th>解决办法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>INSTALL_FAILED_ALREADY_EXISTS</td>
+<td>应用已经存在，或卸载了但没卸载干净</td>
+<td><code>adb install</code> 时使用 <code>-r</code> 参数，或者先 <code>adb uninstall &lt;packagename&gt;</code> 再安装</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INVALID_APK</td>
+<td>无效的 APK 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INVALID_URI</td>
+<td>无效的 APK 文件名</td>
+<td>确保 APK 文件名里无中文</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INSUFFICIENT_STORAGE</td>
+<td>空间不足</td>
+<td>清理空间</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_DUPLICATE_PACKAGE</td>
+<td>已经存在同名程序</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_NO_SHARED_USER</td>
+<td>请求的共享用户不存在</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_UPDATE_INCOMPATIBLE</td>
+<td>以前安装过同名应用，但卸载时数据没有移除；或者已安装该应用，但签名不一致</td>
+<td>先 <code>adb uninstall &lt;packagename&gt;</code> 再安装</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_SHARED_USER_INCOMPATIBLE</td>
+<td>请求的共享用户存在但签名不一致</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_MISSING_SHARED_LIBRARY</td>
+<td>安装包使用了设备上不可用的共享库</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_REPLACE_COULDNT_DELETE</td>
+<td>替换时无法删除</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_DEXOPT</td>
+<td>dex 优化验证失败或空间不足</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_OLDER_SDK</td>
+<td>设备系统版本低于应用要求</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_CONFLICTING_PROVIDER</td>
+<td>设备里已经存在与应用里同名的 content provider</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_NEWER_SDK</td>
+<td>设备系统版本高于应用要求</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_TEST_ONLY</td>
+<td>应用是 test-only 的，但安装时没有指定 <code>-t</code> 参数</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_CPU_ABI_INCOMPATIBLE</td>
+<td>包含不兼容设备 CPU 应用程序二进制接口的 native code</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_MISSING_FEATURE</td>
+<td>应用使用了设备不可用的功能</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_CONTAINER_ERROR</td>
+<td>1. sdcard 访问失败;<br />2. 应用签名与 ROM 签名一致，被当作内置应用。</td>
+<td>1. 确认 sdcard 可用，或者安装到内置存储;<br />2. 打包时不与 ROM 使用相同签名。</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INVALID_INSTALL_LOCATION</td>
+<td>1. 不能安装到指定位置;<br />2. 应用签名与 ROM 签名一致，被当作内置应用。</td>
+<td>1. 切换安装位置，添加或删除 <code>-s</code> 参数;<br />2. 打包时不与 ROM 使用相同签名。</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_MEDIA_UNAVAILABLE</td>
+<td>安装位置不可用</td>
+<td>一般为 sdcard，确认 sdcard 可用或安装到内置存储</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_VERIFICATION_TIMEOUT</td>
+<td>验证安装包超时</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_VERIFICATION_FAILURE</td>
+<td>验证安装包失败</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_PACKAGE_CHANGED</td>
+<td>应用与调用程序期望的不一致</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_UID_CHANGED</td>
+<td>以前安装过该应用，与本次分配的 UID 不一致</td>
+<td>清除以前安装过的残留文件</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_VERSION_DOWNGRADE</td>
+<td>已经安装了该应用更高版本</td>
+<td>使用 <code>-d</code> 参数</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_PERMISSION_MODEL_DOWNGRADE</td>
+<td>已安装 target SDK 支持运行时权限的同名应用，要安装的版本不支持运行时权限</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_NOT_APK</td>
+<td>指定路径不是文件，或不是以 <code>.apk</code> 结尾</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_BAD_MANIFEST</td>
+<td>无法解析的 AndroidManifest.xml 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION</td>
+<td>解析器遇到异常</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_NO_CERTIFICATES</td>
+<td>安装包没有签名</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES</td>
+<td>已安装该应用，且签名与 APK 文件不一致</td>
+<td>先卸载设备上的该应用，再安装</td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING</td>
+<td>解析 APK 文件时遇到 <code>CertificateEncodingException</code></td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME</td>
+<td>manifest 文件里没有或者使用了无效的包名</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID</td>
+<td>manifest 文件里指定了无效的共享用户 ID</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_MANIFEST_MALFORMED</td>
+<td>解析 manifest 文件时遇到结构性错误</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_PARSE_FAILED_MANIFEST_EMPTY</td>
+<td>在 manifest 文件里找不到找可操作标签（instrumentation 或 application）</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_INTERNAL_ERROR</td>
+<td>因系统问题安装失败</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_USER_RESTRICTED</td>
+<td>用户被限制安装应用</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_DUPLICATE_PERMISSION</td>
+<td>应用尝试定义一个已经存在的权限名称</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_NO_MATCHING_ABIS</td>
+<td>应用包含设备的应用程序二进制接口不支持的 native code</td>
+<td></td>
+</tr>
+<tr>
+<td>INSTALL_CANCELED_BY_USER</td>
+<td>应用安装需要在设备上确认，但未操作设备或点了取消</td>
+<td>在设备上同意安装</td>
+</tr>
+<tr>
+<td>INSTALL_FAILED_ACWF_INCOMPATIBLE</td>
+<td>应用程序与设备不兼容</td>
+<td></td>
+</tr>
+<tr>
+<td>does not contain AndroidManifest.xml</td>
+<td>无效的 APK 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>is not a valid zip file</td>
+<td>无效的 APK 文件</td>
+<td></td>
+</tr>
+<tr>
+<td>Offline</td>
+<td>设备未连接成功</td>
+<td>先将设备与 adb 连接成功</td>
+</tr>
+<tr>
+<td>unauthorized</td>
+<td>设备未授权允许调试</td>
+<td></td>
+</tr>
+<tr>
+<td>error: device not found</td>
+<td>没有连接成功的设备</td>
+<td>先将设备与 adb 连接成功</td>
+</tr>
+<tr>
+<td>protocol failure</td>
+<td>设备已断开连接</td>
+<td>先将设备与 adb 连接成功</td>
+</tr>
+<tr>
+<td>Unknown option: -s</td>
+<td>Android 2.2 以下不支持安装到 sdcard</td>
+<td>不使用 <code>-s</code> 参数</td>
+</tr>
+<tr>
+<td>No space left on device</td>
+<td>空间不足</td>
+<td>清理空间</td>
+</tr>
+<tr>
+<td>Permission denied … sdcard …</td>
+<td>sdcard 不可用</td>
+<td></td>
+</tr>
+<tr>
+<td>signatures do not match the previously installed version; ignoring!</td>
+<td>已安装该应用且签名不一致</td>
+<td>先卸载设备上的该应用，再安装</td>
+</tr>
+</tbody></table>
+<p><strong><code>adb install</code> 内部原理简介</strong></p>
+<p><code>adb install</code> 实际是分三步完成：</p>
+<ol>
+<li><p>push apk 文件到 &#x2F;data&#x2F;local&#x2F;tmp。</p>
+</li>
+<li><p>调用 pm install 安装。</p>
+</li>
+<li><p>删除 &#x2F;data&#x2F;local&#x2F;tmp 下的对应 apk 文件。</p>
+</li>
+</ol>
+<p>所以，如果有需要也可以根据这个步骤，手动分步执行安装过程。</p>
+<h3 id="应用卸载"><a href="#应用卸载" class="headerlink" title="应用卸载"></a>应用卸载</h3><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb uninstall [-k] &lt;packagename&gt;</span><br></pre></td></tr></table></figure>
+<p><code>&lt;packagename&gt;</code> 表示应用的包名，<code>-k</code> 参数可选，表示卸载应用但保留数据和缓存目录。</p>
+<p>命令示例：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb uninstall com.tencent.mobileqq</span><br></pre></td></tr></table></figure>
+<p>即卸载 QQ</p>
+<h3 id="清除应用数据与缓存"><a href="#清除应用数据与缓存" class="headerlink" title="清除应用数据与缓存"></a>清除应用数据与缓存</h3><p>这条命令的效果相当于在设置里的应用信息界面点击了「清除缓存」和「清除数据」。<br>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm clear &lt;packagename&gt;</span><br></pre></td></tr></table></figure>
+
+<p>命令示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm clear com.tencent.mobileqq</span><br></pre></td></tr></table></figure>
+<p>即清除 QQ 的缓存和数据</p>
+<h3 id="查看前台-Activity"><a href="#查看前台-Activity" class="headerlink" title="查看前台 Activity"></a>查看前台 Activity</h3><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys activity activities | grep mFocusedActivity</span><br></pre></td></tr></table></figure>
+
+<p>输出示例：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mFocusedActivity: ActivityRecord&#123;8079d7e u0 com.cyanogenmod.trebuchet/com.android.launcher3.Launcher t42&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的 <code>com.cyanogenmod.trebuchet/com.android.launcher3.Launcher</code> 就是当前处于前台的 Activity。</p>
+<p>当然，输入以下命令就可以查看所有 Activity 栈了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys activity activities</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看正在运行的-Services"><a href="#查看正在运行的-Services" class="headerlink" title="查看正在运行的 Services"></a>查看正在运行的 Services</h3><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys activity services [&lt;packagename&gt;]</span><br></pre></td></tr></table></figure>
+
+<p><code>&lt;packagename&gt;</code> 参数不是必须的，指定 <code>&lt;packagename&gt;</code> 表示查看与某个包名相关的 Services，不指定表示查看所有 Services。</p>
+<p><code>&lt;packagename&gt;</code> 不一定要给出完整的包名，比如运行 <code>adb shell dumpsys activity services cn.artaris</code>，那么包名 <code>cn.artaris.demo1</code>、<code>cn.artaris.demo2</code> 和 <code>cn.artaris123</code> 等相关的 Services 都会列出来。</p>
+<h3 id="查看应用详细信息"><a href="#查看应用详细信息" class="headerlink" title="查看应用详细信息"></a>查看应用详细信息</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys package &lt;packagename&gt;</span><br></pre></td></tr></table></figure>
+
+<p>输出中包含很多信息，包括 Activity Resolver Table、Registered ContentProviders、包名、userId、安装后的文件资源代码等路径、版本信息、权限信息和授予状态、签名版本信息等。</p>
+<p><code>&lt;packagename&gt;</code> 表示应用包名。</p>
+<h2 id="操作模拟"><a href="#操作模拟" class="headerlink" title="操作模拟"></a>操作模拟</h2><h3 id="按键模拟"><a href="#按键模拟" class="headerlink" title="按键模拟"></a>按键模拟</h3><p>按键模拟主要是通过<code>adb shell input</code>来实现的，在 Android 开发的时候我们可以拦截按键事件，接受按键的函数如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean onKeyDown(int keyCode, KeyEvent event) &#123;</span><br><span class="line">    return super.onKeyDown(keyCode, event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中<code>KeyEvent</code>类中定义了一系列常量，例如返回键的值为<code>KeyEvent.KEYCODE_BACK</code>，其常量值为4。按键模拟操作的值与此一致。<br>下表为常用按键值：</p>
+<table>
+<thead>
+<tr>
+<th>keycode</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3</td>
+<td>HOME 键</td>
+</tr>
+<tr>
+<td>4</td>
+<td>返回键</td>
+</tr>
+<tr>
+<td>5</td>
+<td>打开拨号应用</td>
+</tr>
+<tr>
+<td>6</td>
+<td>挂断电话</td>
+</tr>
+<tr>
+<td>24</td>
+<td>增加音量</td>
+</tr>
+<tr>
+<td>25</td>
+<td>降低音量</td>
+</tr>
+<tr>
+<td>26</td>
+<td>电源键</td>
+</tr>
+<tr>
+<td>27</td>
+<td>拍照（需要在相机应用里）</td>
+</tr>
+<tr>
+<td>64</td>
+<td>打开浏览器</td>
+</tr>
+<tr>
+<td>82</td>
+<td>菜单键</td>
+</tr>
+<tr>
+<td>85</td>
+<td>播放&#x2F;暂停</td>
+</tr>
+<tr>
+<td>86</td>
+<td>停止播放</td>
+</tr>
+<tr>
+<td>87</td>
+<td>播放下一首</td>
+</tr>
+<tr>
+<td>88</td>
+<td>播放上一首</td>
+</tr>
+<tr>
+<td>122</td>
+<td>移动光标到行首或列表顶部</td>
+</tr>
+<tr>
+<td>123</td>
+<td>移动光标到行末或列表底部</td>
+</tr>
+<tr>
+<td>126</td>
+<td>恢复播放</td>
+</tr>
+<tr>
+<td>127</td>
+<td>暂停播放</td>
+</tr>
+<tr>
+<td>164</td>
+<td>静音</td>
+</tr>
+<tr>
+<td>176</td>
+<td>打开系统设置</td>
+</tr>
+<tr>
+<td>187</td>
+<td>切换应用</td>
+</tr>
+<tr>
+<td>207</td>
+<td>打开联系人</td>
+</tr>
+<tr>
+<td>208</td>
+<td>打开日历</td>
+</tr>
+<tr>
+<td>209</td>
+<td>打开音乐</td>
+</tr>
+<tr>
+<td>210</td>
+<td>打开计算器</td>
+</tr>
+<tr>
+<td>220</td>
+<td>降低屏幕亮度</td>
+</tr>
+<tr>
+<td>221</td>
+<td>提高屏幕亮度</td>
+</tr>
+<tr>
+<td>223</td>
+<td>系统休眠</td>
+</tr>
+<tr>
+<td>224</td>
+<td>点亮屏幕</td>
+</tr>
+<tr>
+<td>231</td>
+<td>打开语音助手</td>
+</tr>
+<tr>
+<td>276</td>
+<td>如果没有 wakelock 则让系统休眠</td>
+</tr>
+</tbody></table>
+<p>使用方法如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell input keyevent &lt;KeyCode&gt;</span><br></pre></td></tr></table></figure>
+<p>只要输入对应按键的按键号，则能实现对应功能。</p>
+<p>有两个操作需要特别说明一下：</p>
+<h4 id="模拟屏幕滑动："><a href="#模拟屏幕滑动：" class="headerlink" title="模拟屏幕滑动："></a>模拟屏幕滑动：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell input swipe 300 1000 300 500</span><br></pre></td></tr></table></figure>
+<p>参数 <code>300 1000 300 500</code> 分别表示<code>起始点x坐标 起始点y坐标 结束点x坐标 结束点y坐标</code>。</p>
+<h4 id="输入文本："><a href="#输入文本：" class="headerlink" title="输入文本："></a>输入文本：</h4><p>在焦点处于某文本框时，可以通过 <code>input</code> 命令来输入文本。</p>
+<p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell input text artaris</span><br></pre></td></tr></table></figure>
+
+<p>现在 <code>artaris</code> 出现在文本框了。</p>
+<h3 id="应用交互"><a href="#应用交互" class="headerlink" title="应用交互"></a>应用交互</h3><p>应用交互主要是通过<code>adb shell am &lt;command&gt;</code>来实现的,常用的<code>&lt;command&gt;</code>指令有以下几种：</p>
+<table>
+<thead>
+<tr>
+<th>command</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>start [options] &lt;INTENT&gt;</code></td>
+<td>启动 <code>&lt;INTENT&gt;</code> 指定的 Activity</td>
+</tr>
+<tr>
+<td><code>startservice [options] &lt;INTENT&gt;</code></td>
+<td>启动 <code>&lt;INTENT&gt;</code> 指定的 Service</td>
+</tr>
+<tr>
+<td><code>broadcast [options] &lt;INTENT&gt;</code></td>
+<td>发送 <code>&lt;INTENT&gt;</code> 指定的广播</td>
+</tr>
+<tr>
+<td><code>force-stop &lt;packagename&gt;</code></td>
+<td>停止 <code>&lt;packagename&gt;</code> 相关的进程</td>
+</tr>
+</tbody></table>
+<p><code>&lt;INTENT&gt;</code> 即与 Android 程序时代码里的 Intent 相对应。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-a &lt;ACTION&gt;</code></td>
+<td>指定 action，比如 <code>android.intent.action.VIEW</code></td>
+</tr>
+<tr>
+<td><code>-c &lt;CATEGORY&gt;</code></td>
+<td>指定 category，比如 <code>android.intent.category.APP_CONTACTS</code></td>
+</tr>
+<tr>
+<td><code>-n &lt;COMPONENT&gt;</code></td>
+<td>指定完整 component 名，用于明确指定启动哪个 Activity，如 <code>cn.artaris.demo/.MainActivity</code></td>
+</tr>
+</tbody></table>
+<p><code>&lt;INTENT&gt;</code> 里还能带参数，与程序中的 Bundle 含义一致：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--esn &lt;EXTRA_KEY&gt;</code></td>
+<td>null 值（只有 key 名）</td>
+</tr>
+<tr>
+<td><code>-e/--es &lt;EXTRA_KEY&gt; &lt;EXTRA_STRING_VALUE&gt;</code></td>
+<td>string 值</td>
+</tr>
+<tr>
+<td><code>--ez &lt;EXTRA_KEY&gt; &lt;EXTRA_BOOLEAN_VALUE&gt;</code></td>
+<td>boolean 值</td>
+</tr>
+<tr>
+<td><code>--ei &lt;EXTRA_KEY&gt; &lt;EXTRA_INT_VALUE&gt;</code></td>
+<td>integer 值</td>
+</tr>
+<tr>
+<td><code>--el &lt;EXTRA_KEY&gt; &lt;EXTRA_LONG_VALUE&gt;</code></td>
+<td>long 值</td>
+</tr>
+<tr>
+<td><code>--ef &lt;EXTRA_KEY&gt; &lt;EXTRA_FLOAT_VALUE&gt;</code></td>
+<td>float 值</td>
+</tr>
+<tr>
+<td><code>--eu &lt;EXTRA_KEY&gt; &lt;EXTRA_URI_VALUE&gt;</code></td>
+<td>URI</td>
+</tr>
+<tr>
+<td><code>--ecn &lt;EXTRA_KEY&gt; &lt;EXTRA_COMPONENT_NAME_VALUE&gt;</code></td>
+<td>component name</td>
+</tr>
+<tr>
+<td><code>--eia &lt;EXTRA_KEY&gt; &lt;EXTRA_INT_VALUE&gt;[,&lt;EXTRA_INT_VALUE...]</code></td>
+<td>integer 数组</td>
+</tr>
+<tr>
+<td><code>--ela &lt;EXTRA_KEY&gt; &lt;EXTRA_LONG_VALUE&gt;[,&lt;EXTRA_LONG_VALUE...]</code></td>
+<td>long 数组</td>
+</tr>
+</tbody></table>
+<h4 id="调起-Activity"><a href="#调起-Activity" class="headerlink" title="调起 Activity"></a>调起 Activity</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am start [options] &lt;INTENT&gt;</span><br></pre></td></tr></table></figure>
+<p>eg.：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am start -n com.tencent.mm/.ui.LauncherUI</span><br></pre></td></tr></table></figure>
+<p>即掉起微信主界面；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am start -n cn.artaris.demo/.MainActivity --es &quot;toast&quot; &quot;hello, world&quot;</span><br></pre></td></tr></table></figure>
+<p>表示调起 <code>cn.artaris.demo/.MainActivity</code> 并传给它 String 数据键值对 <code>toast - hello, world</code>。</p>
+<h4 id="调起-Service"><a href="#调起-Service" class="headerlink" title="调起 Service"></a>调起 Service</h4><p>命令格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am startservice [options] &lt;INTENT&gt;</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am startservice -n com.tencent.mm/.plugin.accountsync.model.AccountAuthenticatorService</span><br></pre></td></tr></table></figure>
+
+<p>表示调起微信的 AccountAuthenticatorService。</p>
+<h4 id="发送广播"><a href="#发送广播" class="headerlink" title="发送广播"></a>发送广播</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am broadcast [options] &lt;INTENT&gt;</span><br></pre></td></tr></table></figure>
+<p>使用该命令可以向所有组件广播，也可以只向指定组件广播；<br>eg.:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am broadcast -a android.intent.action.BOOT_COMPLETED</span><br></pre></td></tr></table></figure>
+<p>向所有应用发送开机广播。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am broadcast -a android.intent.action.BOOT_COMPLETED -n cn.artaris.demo/.BootReceiver</span><br></pre></td></tr></table></figure>
+<p>只向<code>cn.artaris.demo/.BootReceiver</code>发送开机广播；<br>以下是常用系统广播，可以模拟一些特殊场景：</p>
+<table>
+<thead>
+<tr>
+<th>action</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>android.net.conn.CONNECTIVITY_CHANGE</td>
+<td>网络连接发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.SCREEN_ON</td>
+<td>屏幕点亮</td>
+</tr>
+<tr>
+<td>android.intent.action.SCREEN_OFF</td>
+<td>屏幕熄灭</td>
+</tr>
+<tr>
+<td>android.intent.action.BATTERY_LOW</td>
+<td>电量低，会弹出电量低提示框</td>
+</tr>
+<tr>
+<td>android.intent.action.BATTERY_OKAY</td>
+<td>电量恢复了</td>
+</tr>
+<tr>
+<td>android.intent.action.BOOT_COMPLETED</td>
+<td>设备启动完毕</td>
+</tr>
+<tr>
+<td>android.intent.action.DEVICE_STORAGE_LOW</td>
+<td>存储空间过低</td>
+</tr>
+<tr>
+<td>android.intent.action.DEVICE_STORAGE_OK</td>
+<td>存储空间恢复</td>
+</tr>
+<tr>
+<td>android.intent.action.PACKAGE_ADDED</td>
+<td>安装了新的应用</td>
+</tr>
+<tr>
+<td>android.net.wifi.STATE_CHANGE</td>
+<td>WiFi 连接状态发生变化</td>
+</tr>
+<tr>
+<td>android.net.wifi.WIFI_STATE_CHANGED</td>
+<td>WiFi 状态变为启用&#x2F;关闭&#x2F;正在启动&#x2F;正在关闭&#x2F;未知</td>
+</tr>
+<tr>
+<td>android.intent.action.BATTERY_CHANGED</td>
+<td>电池电量发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.INPUT_METHOD_CHANGED</td>
+<td>系统输入法发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.ACTION_POWER_CONNECTED</td>
+<td>外部电源连接</td>
+</tr>
+<tr>
+<td>android.intent.action.ACTION_POWER_DISCONNECTED</td>
+<td>外部电源断开连接</td>
+</tr>
+<tr>
+<td>android.intent.action.DREAMING_STARTED</td>
+<td>系统开始休眠</td>
+</tr>
+<tr>
+<td>android.intent.action.DREAMING_STOPPED</td>
+<td>系统停止休眠</td>
+</tr>
+<tr>
+<td>android.intent.action.WALLPAPER_CHANGED</td>
+<td>壁纸发生变化</td>
+</tr>
+<tr>
+<td>android.intent.action.HEADSET_PLUG</td>
+<td>插入耳机</td>
+</tr>
+<tr>
+<td>android.intent.action.MEDIA_UNMOUNTED</td>
+<td>卸载外部介质</td>
+</tr>
+<tr>
+<td>android.intent.action.MEDIA_MOUNTED</td>
+<td>挂载外部介质</td>
+</tr>
+<tr>
+<td>android.os.action.POWER_SAVE_MODE_CHANGED</td>
+<td>省电模式开启</td>
+</tr>
+</tbody></table>
+<h4 id="强制停止应用"><a href="#强制停止应用" class="headerlink" title="强制停止应用"></a>强制停止应用</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am force-stop &lt;packagename&gt;</span><br></pre></td></tr></table></figure>
+
+<p>命令示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am force-stop cn.artaris.demo</span><br></pre></td></tr></table></figure>
+<p>表示停止 Demo 的一切进程与服务。</p>
+<h3 id="设备操作"><a href="#设备操作" class="headerlink" title="设备操作"></a>设备操作</h3><h4 id="截屏"><a href="#截屏" class="headerlink" title="截屏"></a>截屏</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb exec-out screencap -p &gt; sc.png</span><br></pre></td></tr></table></figure>
+<p>如果该命令不奏效，可分两步，先使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell screencap -p /sdcard/screenshoot.png</span><br></pre></td></tr></table></figure>
+<p>命令将截图保存到设备中，再使用<code>adb pull</code>导出到电脑。</p>
+<h4 id="录屏"><a href="#录屏" class="headerlink" title="录屏"></a>录屏</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell screenrecord /sdcard/screenrecord.mp4</span><br></pre></td></tr></table></figure>
+<p>需要停止时按 <kbd>Ctrl+C</kbd>，默认录制时间和最长录制时间都是 180 秒。<br>再使用<code>adb pull</code>导出到电脑。<br>可以附加以下参数，确定录屏的参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–size WIDTHxHEIGHT</td>
+<td>视频的尺寸，比如 <code>1280x720</code>，默认是屏幕分辨率。</td>
+</tr>
+<tr>
+<td>–bit-rate RATE</td>
+<td>视频的比特率，默认是 4Mbps。</td>
+</tr>
+<tr>
+<td>–time-limit TIME</td>
+<td>录制时长，单位秒。</td>
+</tr>
+<tr>
+<td>–verbose</td>
+<td>输出更多信息。</td>
+</tr>
+</tbody></table>
+<h4 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb reboot</span><br></pre></td></tr></table></figure>
+<h4 id="压力测试-Monkey"><a href="#压力测试-Monkey" class="headerlink" title="压力测试 Monkey"></a>压力测试 Monkey</h4><p>Monkey 可以生成伪随机用户事件来模拟单击、触摸、手势等操作，可以对正在开发中的程序进行随机压力测试。</p>
+<p>简单用法：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell monkey -p &lt;packagename&gt; -v 500</span><br></pre></td></tr></table></figure>
+
+<p>表示向 <code>&lt;packagename&gt;</code> 指定的应用程序发送 500 个伪随机事件。</p>
+<p>Monkey 的详细用法参考 <a target="_blank" rel="noopener" href="https://developer.android.com/studio/test/monkey.html">Monkey</a>。</p>
+<h4 id="修改分辨率"><a href="#修改分辨率" class="headerlink" title="修改分辨率"></a>修改分辨率</h4><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm size 960x540</span><br></pre></td></tr></table></figure>
+
+<p>表示将分辨率修改为 960px * 540px。</p>
+<p>恢复原分辨率命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell wm size reset</span><br></pre></td></tr></table></figure>
+
+<h2 id="Log日志查看"><a href="#Log日志查看" class="headerlink" title="Log日志查看"></a>Log日志查看</h2><p>Android 的日志输出到 &#x2F;dev&#x2F;log。查看命令为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb logcat [&lt;option&gt;] ... [&lt;filter-spec&gt;] ...</span><br></pre></td></tr></table></figure>
+<p>具体用法如下：</p>
+<h3 id="过滤日志输出"><a href="#过滤日志输出" class="headerlink" title="过滤日志输出"></a>过滤日志输出</h3><h3 id="按级别过滤日志"><a href="#按级别过滤日志" class="headerlink" title="按级别过滤日志"></a>按级别过滤日志</h3><p>Android 的日志分为如下几个优先级，我们在 Android Studio 的Logcat 选项卡中也可以过滤查看，含义如下</p>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>V</td>
+<td>Verbose</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Debug</td>
+</tr>
+<tr>
+<td>I</td>
+<td>Info</td>
+</tr>
+<tr>
+<td>W</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Error</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Fatal</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Silent（啥也不输出）</td>
+</tr>
+</tbody></table>
+<p>按某级别过滤日志则会将该级别及以上的日志全部输出。<br>eg.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb logcat *:W</span><br></pre></td></tr></table></figure>
+<p>会将<code>Warning</code>、<code>Warning</code>、<code>Warning</code>和<code>Silent</code>日志输出。<br>（<strong>注：</strong> 在 macOS 下需要给 <code>*:W</code> 这样以 <code>*</code> 作为 tag 的参数加双引号，如 <code>adb logcat &quot;*:W&quot;</code>，不然会报错 <code>no matches found: *:W</code>。）</p>
+<h3 id="按Tag过滤日志"><a href="#按Tag过滤日志" class="headerlink" title="按Tag过滤日志"></a>按Tag过滤日志</h3><p><code>&lt;filter-spec&gt;</code> 可以由多个 <code>&lt;tag&gt;[:priority]</code> 组成。</p>
+<p>比如，命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb logcat MainActivity:I DemoApp:D *:S</span><br></pre></td></tr></table></figure>
+
+<p>表示输出 tag <code>MainActivity</code> 的 Info 以上级别日志，输出 tag <code>DemoApp</code> 的 Debug 以上级别日志，及其它 tag 的 Silent 级别日志（即屏蔽其它 tag 日志）。</p>
+<h2 id="ADB-Shell-相关命令"><a href="#ADB-Shell-相关命令" class="headerlink" title="ADB Shell 相关命令"></a>ADB Shell 相关命令</h2><h3 id="查看进程"><a href="#查看进程" class="headerlink" title="查看进程"></a>查看进程</h3><p>命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell ps</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">USER     PID   PPID  VSIZE  RSS     WCHAN    PC        NAME</span><br><span class="line">root      1     0     8904   788   ffffffff 00000000 S /init</span><br><span class="line">root      2     0     0      0     ffffffff 00000000 S kthreadd</span><br><span class="line">...</span><br><span class="line">u0_a71    7779  5926  1538748 48896 ffffffff 00000000 S com.sohu.inputmethod.sogou:classic</span><br><span class="line">u0_a58    7963  5926  1561916 59568 ffffffff 00000000 S cn.artaris.demo</span><br><span class="line">...</span><br><span class="line">shell     8750  217   10640  740   00000000 b6f28340 R ps</span><br></pre></td></tr></table></figure>
+<p>各列含义如下：</p>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>USER</td>
+<td>所属用户</td>
+</tr>
+<tr>
+<td>PID</td>
+<td>进程 ID</td>
+</tr>
+<tr>
+<td>PPID</td>
+<td>父进程 ID</td>
+</tr>
+<tr>
+<td>NAME</td>
+<td>进程名</td>
+</tr>
+</tbody></table>
+<p>下载地址<br><a target="_blank" rel="noopener" href="http://gofile.me/3TjWz/EF4mgGZBZ">Platform-Tools</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/uncategorized/LeetCode%E8%A7%A3%E9%A2%98%E7%AC%94%E8%AE%B0/" rel="prev" title="LeetCode解题笔记">
+                  <i class="fa fa-chevron-left"></i> LeetCode解题笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/Android/Activity%20%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F/" rel="next" title="Activity 的加载模式">
+                  Activity 的加载模式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Artaris</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div><script color="0,0,255" opacity="0.5" zIndex="-1" count="99" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@1/dist/canvas-nest.js"></script>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/ArtarisCN" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+  
+
+
+
+
+
+</body>
+</html>
