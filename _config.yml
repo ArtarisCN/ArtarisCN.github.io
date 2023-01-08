@@ -123,6 +123,6 @@ symbols_count_time:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: https://github.com/ArtarisCN/ArtarisCN.github.io
+  repo: git@github.com:ArtarisCN/ArtarisCN.github.io.git
   # example, https://github.com/hexojs/hexojs.github.io
   branch: gh-pages
